@@ -8,7 +8,17 @@ export default new Router({
   routes: [
     {
       path: '/',
+      name: 'root',
+      redirect: '/home'
+    },
+    {
+      path: '/home',
       name: 'home',
+      component: Home
+    },
+    {
+      path: '/home/*',
+      name: 'homechild',
       component: Home
     },
     {
