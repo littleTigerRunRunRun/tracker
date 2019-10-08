@@ -1,6 +1,7 @@
 /* eslint valid-jsdoc: "off" */
 
 'use strict';
+let path = require('path')
 
 /**
  * @param {Egg.EggAppInfo} appInfo app info
@@ -17,6 +18,12 @@ module.exports = appInfo => {
 
   // add your middleware config here
   config.middleware = [];
+
+  // static
+  config.static = {
+    prefix: '/public/',
+    dir: path.join(appInfo.baseDir, '/app/public/')
+  }
 
   // add your user config here
   const userConfig = {

@@ -47,6 +47,9 @@ class CategoryController extends Controller {
       id
     }
   }
+  async remove() {
+
+  }
 }
 
 module.exports = CategoryController
