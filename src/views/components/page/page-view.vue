@@ -12,7 +12,7 @@
 
 <script>
   export default {
-    name: "Home",
+    name: "PageView",
     methods: {
       jumpTo(name) {
         if (this.$route.name === name) return 

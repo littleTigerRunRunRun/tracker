@@ -1,5 +1,5 @@
 <template>
-  <tracker-view>
+  <page-view>
   {{ childName }}
     <md-app slot="main">
       <md-app-drawer class="navigator" md-permanent="full">
@@ -22,16 +22,16 @@
         </md-list>
       </md-app-drawer>
     </md-app>
-  </tracker-view>
+  </page-view>
 </template>
 
 <script>
-  import trackerView from '@/components/page/tracker-view'
+  import PageView from '../components/page/page-view'
 
   export default {
     name: "Home",
     components: {
-      trackerView
+      PageView
     },
     computed: {
       childName() {

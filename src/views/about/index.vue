@@ -1,5 +1,5 @@
 <template>
-  <tracker-view>
+  <page-view>
     <md-app slot="main">
       <md-app-content>
         <div class="about-main">
@@ -30,16 +30,16 @@
         </div>
       </md-app-content>
     </md-app>
-  </tracker-view>
+  </page-view>
 </template>
 
 <script>
-  import trackerView from '@/components/page/tracker-view'
+  import PageView from '../components/page/page-view'
 
   export default {
     name: "About",
     components: {
-      trackerView
+      PageView
     }
   }
 </script>
