@@ -34,7 +34,7 @@
 </template>
 
 <script>
-  import PageView from '../components/page/page-view'
+  import PageView from '../components/page-view'
 
   export default {
     name: "About",

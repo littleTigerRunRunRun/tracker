@@ -16,9 +16,9 @@ class CategoryController extends Controller {
   async list() {
     const { ctx } = this
     let data = {
-      list: []
+      data: []
     }
-    data.list = this.getCategory()
+    data.data = this.getCategory()
     ctx.body = data
   }
   async add() {

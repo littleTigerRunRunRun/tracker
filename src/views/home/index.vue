@@ -1,6 +1,5 @@
 <template>
   <page-view>
-  {{ childName }}
     <md-app slot="main">
       <md-app-drawer class="navigator" md-permanent="full">
         <md-toolbar class="md-transparent" md-elevation="0">
@@ -8,17 +7,8 @@
         </md-toolbar>
 
         <md-list>
-          <md-list-item>
-            <span class="md-list-item-text">
-              <md-button class="md-primary">ThreeJS</md-button>
-            </span>  
-          </md-list-item>
-
-          <md-list-item>
-            <span class="md-list-item-text">
-              <md-button class="md-primary">Webgl</md-button>
-            </span>
-          </md-list-item>
+          <aside-title title="ThreeJS" />
+          <aside-title title="Webgl" />
         </md-list>
       </md-app-drawer>
     </md-app>
@@ -26,16 +16,28 @@
 </template>
 
 <script>
-  import PageView from '../components/page/page-view'
+  import PageView from '../components/page-view'
+  import AsideTitle from './components/aside-title'
+  import { getCategoryList } from './api'
 
   export default {
     name: "Home",
     components: {
-      PageView
+      PageView,
+      AsideTitle
     },
     computed: {
       childName() {
         console.log(this.$route)
+      }
+    },
+    mounted() {
+      this.getData()
+    },
+    methods: {
+      async getData() {
+        let data = await getCategoryList()
+        console.log('home category', data.data.data)
       }
     }
   }
