@@ -15,12 +15,25 @@
     </md-app-drawer>
 
     <md-app-content class="content-container">
-      main-content
+      <div class="md-layout">
+        <piece-block
+          class="md-layout-item md-size-25"
+          block-add
+        />
+        <piece-block
+          v-for="(piece, index) in pieceList"
+          :key="`piece${index}`"
+          class="md-layout-item md-size-25"
+        >
+          test
+        </piece-block>
+      </div>
     </md-app-content>
   </md-app>
 </template>
 
 <script>
+import PieceBlock from './components/piece-block'
 import AsideTitle from './components/aside-title'
 import AddCateDialog from './components/add-cate-dialog'
 import { getCategoryList, getPieceList } from './api'
@@ -29,19 +42,18 @@ export default {
   name: 'Home',
   components: {
     AsideTitle,
-    AddCateDialog
+    AddCateDialog,
+    PieceBlock
   },
   data() {
     return {
       titleList: [],
+      pieceList: [],
       activateOne: 0,
       addVisible: false
     }
   },
   computed: {
-    childName() {
-      console.log(this.$route)
-    }
   },
   mounted() {
     this.getData()
@@ -49,9 +61,12 @@ export default {
   methods: {
     async getData() {
       const data = await getCategoryList()
-      this.titleList.splice(0, this.titleList.length, {
-        title: '最新推介'
-      }, ...data.data.data)
+      this.titleList.splice(0, this.titleList.length, ...data.data.data)
+
+      if (this.titleList.length > 0) {
+        const pieces = await getPieceList(this.titleList[0].id)
+        this.pieceList.splice(0, this.pieceList.length, ...pieces.data.data)
+      }
     },
     addCategory() {
       this.$refs.addCate.activate()
@@ -70,6 +85,13 @@ export default {
     }
   }
   .content-container{
+    padding-right: 30px;
+    * {
+      box-sizing: border-box;
+    }
     border-left: none;
+    .md-layout-item:not(:first-of-type) {
+      margin-left: 20px;
+    }
   }
 </style>

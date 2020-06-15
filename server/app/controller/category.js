@@ -4,15 +4,22 @@ const Controller = require('egg').Controller
 const fs = require('fs')
 const path = require('path')
 
+// 主序文件目录
+const mainDirection = function (file) {
+  return '../../store/category/' + file
+}
+
 class CategoryController extends Controller {
   getCategory() {
-    return JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../store/category.json'), 'utf8', (err, data) => {
+    // 读取category文件
+    return JSON.parse(fs.readFileSync(path.resolve(__dirname, mainDirection('index.json')), 'utf8', (err, data) => {
       if (err) {
         console.error(err)
         return
       }
     }).toString())
   }
+  // 列表请求
   async list() {
     const { ctx } = this
     let data = {
@@ -43,10 +50,12 @@ class CategoryController extends Controller {
         message = '添加成功'
       }
     } else {
+      query.id = Date.now()
+      this.addBranchCategoryStore(query.id)
       data.list.push(query)
-      data.hash[query.name] = data.list.length - 1
+      data.hash[query.id] = data.list.length - 1
       message = '添加成功'
-      fs.writeFile(path.resolve(__dirname, '../../store/category.json'), JSON.stringify(data),  function(err) {
+      fs.writeFile(path.resolve(__dirname, mainDirection('index.json')), JSON.stringify(data),  function(err) {
         if (err) {
             return console.error(err)
         }
@@ -55,7 +64,7 @@ class CategoryController extends Controller {
     ctx.body = {
       message,
       code,
-      data: query.name
+      data: query.id
     }
   }
   async remove() {
@@ -78,7 +87,7 @@ class CategoryController extends Controller {
         // 以一个隐藏标记来替代直接删除，用以留存数据
         data.list[index].hide = true
         code = 200
-        fs.writeFile(path.resolve(__dirname, '../../store/category.json'), JSON.stringify(data),  function(err) {
+        fs.writeFile(path.resolve(__dirname, mainDirection('index.json')), JSON.stringify(data),  function(err) {
           if (err) {
               return console.error(err)
           }
@@ -91,6 +100,15 @@ class CategoryController extends Controller {
       message,
       code
     }
+  }
+  // 为了提高读写效率，我们每生成一个目录，就
+  addBranchCategoryStore(id) {
+    fs.writeFile(path.resolve(__dirname, mainDirection(id + '.json')), '{"type": "category","list": [],"hash": {}}',  function(err) {
+      if (err) {
+          return console.error(err)
+      }
+    })
+    
   }
 }
 

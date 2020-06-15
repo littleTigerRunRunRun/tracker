@@ -4,7 +4,14 @@
       <h3 class="md-title" style="flex: 1">
         追光®视觉实验室
       </h3>
-      <nav-button v-for="(button, index) in buttons" :key="`nav_button_${index}`" :current="current" :code="button.code" :title="button.title" @jumpTo="jumpTo(button)" />
+      <nav-button
+        v-for="(button, index) in buttons"
+        :key="`nav_button_${index}`"
+        :current="current"
+        :code="button.code"
+        :title="button.title"
+        @jumpTo="jumpTo(button)"
+      />
     </md-toolbar>
 
     <slot name="main" />
@@ -34,7 +41,7 @@ export default {
   },
   methods: {
     jumpTo({ code, component }) {
-      this.current = name
+      this.current = code
 
       this.$emit('pageTo', code)
     }

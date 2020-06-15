@@ -13,17 +13,23 @@ export function addCategory(params) {
   })
 }
 
-export function removeCategoryByName(name) {
+export function removeCategoryByName(categoryId) {
   return axios({
     method: 'get',
     url: '/api/category/remove',
     params: {
-      name
+      categoryId
     }
   })
 }
 
 // 作品列表
-export function getPieceList() {
-
+export function getPieceList(categoryId) {
+  return axios({
+    method: 'get',
+    url: '/api/piece/list',
+    params: {
+      categoryId
+    }
+  })
 }
