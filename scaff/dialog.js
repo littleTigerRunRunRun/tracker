@@ -1,7 +1,7 @@
-let utils = require('./utils')
+const utils = require('./utils')
 const inquirer = require('inquirer')
 
-class Dialog{
+class Dialog {
   constructor(dialog) {
     this._dialog = dialog
     if (dialog.clear) utils.clearControl()
@@ -19,8 +19,8 @@ class Dialog{
 }
 
 let index = 0
-let dialogs = []
-let dialogHash = {}
+const dialogs = []
+const dialogHash = {}
 
 async function excuteDialog() {
   if (dialogHash[index]) index = dialogHash[index]
@@ -30,7 +30,7 @@ async function excuteDialog() {
     excuteDialog()
     return
   }
-  let current = new Dialog(dialogs[index])
+  const current = new Dialog(dialogs[index])
   index = await current.prompt()
   excuteDialog()
 }

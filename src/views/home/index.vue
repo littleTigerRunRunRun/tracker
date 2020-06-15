@@ -9,7 +9,7 @@
       </md-toolbar>
 
       <md-list>
-        <aside-title v-for="(title, index) in titleList" :activate="activateOne === index" :key="`title${index}`" :title-data="title" :index="index" @clickItem="handleCateChange" />
+        <aside-title v-for="(title, index) in titleList" :key="`title${index}`" :activate="activateOne === index" :title-data="title" :index="index" @clickItem="handleCateChange" />
       </md-list>
       <add-cate-dialog ref="addCate" :visible="addVisible" @categoryAdded="getData" />
     </md-app-drawer>
@@ -26,7 +26,7 @@ import AddCateDialog from './components/add-cate-dialog'
 import { getCategoryList, getPieceList } from './api'
 
 export default {
-  name: "Home",
+  name: 'Home',
   components: {
     AsideTitle,
     AddCateDialog
@@ -48,7 +48,7 @@ export default {
   },
   methods: {
     async getData() {
-      let data = await getCategoryList()
+      const data = await getCategoryList()
       this.titleList.splice(0, this.titleList.length, {
         title: '最新推介'
       }, ...data.data.data)

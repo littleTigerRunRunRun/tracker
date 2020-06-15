@@ -1,27 +1,31 @@
 <template>
-   <md-dialog class="add-category-dialog" :md-active.sync="visible">
-      <md-dialog-title>添加一个分类</md-dialog-title>
-      
-      <md-card-content>
-        <md-field>
-          <label>英文分类名</label>
-          <md-input v-model="form.name" />
-        </md-field>
-        <md-field>
-          <label>中文标题</label>
-          <md-input v-model="form.title" />
-        </md-field>
-        <md-field>
-          <label>项目描述</label>
-          <md-input v-model="form.desc" />
-        </md-field>
-      </md-card-content>
+  <md-dialog class="add-category-dialog" :md-active.sync="visible">
+    <md-dialog-title>添加一个分类</md-dialog-title>
 
-      <md-dialog-actions>
-        <md-button class="md-primary md-accent" @click="handleClose">关闭</md-button>
-        <md-button class="md-primary" @click="handleSubmit">提交</md-button>
-      </md-dialog-actions>
-   </md-dialog>
+    <md-card-content>
+      <md-field>
+        <label>英文分类名</label>
+        <md-input v-model="form.name" />
+      </md-field>
+      <md-field>
+        <label>中文标题</label>
+        <md-input v-model="form.title" />
+      </md-field>
+      <md-field>
+        <label>项目描述</label>
+        <md-input v-model="form.desc" />
+      </md-field>
+    </md-card-content>
+
+    <md-dialog-actions>
+      <md-button class="md-primary md-accent" @click="handleClose">
+        关闭
+      </md-button>
+      <md-button class="md-primary" @click="handleSubmit">
+        提交
+      </md-button>
+    </md-dialog-actions>
+  </md-dialog>
 </template>
 
 <script>
@@ -50,7 +54,7 @@ export default {
       this.form.desc = ''
     },
     async handleSubmit() {
-      let { data } = await addCategory(this.form)
+      const { data } = await addCategory(this.form)
       if (data.code === 200) {
         console.log(data.message)
         this.$emit('categoryAdded')

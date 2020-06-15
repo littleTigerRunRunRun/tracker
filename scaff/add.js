@@ -1,9 +1,9 @@
-let strand = require('./dialog.js')
-let project = {
+const strand = require('./dialog.js')
+const project = {
   threeModule: [],
   webglModule: []
 }
-let choicesMap = {
+const choicesMap = {
   '决定就是你了': true,
   '容我三思': false,
   'ThreeJS': 1,
@@ -15,8 +15,8 @@ let choicesMap = {
   'GLinit初始化协助工具': 3
 }
 
-function createPiece() {
-  
+function createPiece () {
+
 }
 
 strand([
@@ -28,11 +28,11 @@ strand([
       { type: 'input', message: '输入一个合适的作品命名', name: 'name' },
       { type: 'input', message: '告诉大家你要做什么', name: 'desc' }
     ],
-    before() {
+    before () {
       console.log('每一个优秀的作品，都始于一次合适的命名(✧◡✧)')
       console.log('用心取一个炫酷的作品名，然后开始快乐地代码之旅吧~')
     },
-    after(answers) {
+    after (answers) {
       Object.assign(project, answers)
     }
   },
@@ -48,12 +48,12 @@ strand([
         '容我三思'
       ]
     }],
-    before() {
+    before () {
       console.log(`作品称呼：${project.nickname}`)
       console.log(`作品命名：${project.name}`)
       console.log(`作品简介：${project.desc}`)
     },
-    router(answers) {
+    router (answers) {
       if (choicesMap[answers.confirm]) return 2
       else return 0
     }
@@ -70,10 +70,10 @@ strand([
         'Webgl'
       ]
     }],
-    before() {
+    before () {
       console.log('选择你要使用的基础技术（这决定了可以选择的绑定模块）')
     },
-    router(answers) {
+    router (answers) {
       project.technology = choicesMap[answers.technology]
       return 2 + choicesMap[answers.technology]
     }
@@ -91,10 +91,10 @@ strand([
         { name: 'OrbitControls相机控制工具', checked: false }
       ]
     }],
-    before() {
+    before () {
       console.log('ThreeJS本身已被默认注入')
     },
-    router(answers) {
+    router (answers) {
       project.threeModule.splice(0, project.threeModule.length, ...(answers.threeModule.map(value => choicesMap[value])))
       createPiece()
     }
@@ -113,7 +113,7 @@ strand([
         { name: 'GLinit初始化协助工具', checked: false }
       ]
     }],
-    router(answers) {
+    router (answers) {
       project.webglModule.splice(0, project.webglModule.length, ...(answers.webglModule.map(value => choicesMap[value])))
       createPiece()
     }

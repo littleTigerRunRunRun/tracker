@@ -6,7 +6,6 @@
         <md-icon v-if="titleData.edit" class="edit-button" @click.native.stop="editCategory">edit</md-icon>
       </md-button>
     </span>
-    
   </md-list-item>
 </template>
 

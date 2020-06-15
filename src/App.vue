@@ -2,8 +2,8 @@
   <div id="app">
     <page-view @pageTo="handlePageTo">
       <component
-        slot="main"
         :is="current.component"
+        slot="main"
       />
     </page-view>
   </div>
@@ -15,7 +15,7 @@ import { pages } from './router'
 
 const components = { PageView }
 for (const key in pages) {
-  let page = pages[key]
+  const page = pages[key]
   components[page.name] = page.component
 }
 
@@ -32,7 +32,7 @@ export default {
   },
   methods: {
     handlePageTo(name) {
-      let page = pages[name]
+      const page = pages[name]
       if (this.current.name === page.name) return
 
       this.current.name = page.name
@@ -42,16 +42,15 @@ export default {
 }
 </script>
 
-
 <style lang="scss">
 /* webkit, opera, IE9 */
-::selection { 
+::selection {
   background:lightblue;
   background:rgb(95, 202, 252);
   color: #fff;
 }
 /* mozilla firefox */
-::-moz-selection { 
+::-moz-selection {
   background:rgb(0, 173, 253);
   color: #fff;
 }

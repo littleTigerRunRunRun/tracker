@@ -18,5 +18,5 @@ export const pages = {
 }
 
 class History {
-  
+
 }

@@ -3,9 +3,9 @@ const tree = require('./dialog-tree.json')
 const category = require('./category')
 console.log(category)
 
-let data = {}
+const data = {}
 
-let root = {
+const root = {
   name: 'root',
   list: [{
     type: 'list',
@@ -19,7 +19,7 @@ let root = {
   }
 }
 
-let addCategory = {
+const addCategory = {
   name: 'addc',
   list: [
     { type: 'input', clear: true, message: '输入英文类别名', name: 'key' }
@@ -36,7 +36,7 @@ let addCategory = {
   }
 }
 
-let comfirmOpenNewCategory = {
+const comfirmOpenNewCategory = {
   name: 'confirmc',
   list: [{
     type: 'list',
