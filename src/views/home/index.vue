@@ -11,29 +11,22 @@
       <md-list>
         <aside-title v-for="(title, index) in titleList" :key="`title${index}`" :activate="activateOne === index" :title-data="title" :index="index" @clickItem="handleCateChange" />
       </md-list>
-      <add-cate-dialog ref="addCate" :visible="addVisible" @categoryAdded="getData" />
+      <add-cate-dialog ref="addCate" @categoryAdded="getData" />
     </md-app-drawer>
 
     <md-app-content class="content-container">
-      <div class="md-layout">
-        <piece-block
-          class="md-layout-item md-size-25"
-          block-add
-        />
-        <piece-block
-          v-for="(piece, index) in pieceList"
-          :key="`piece${index}`"
-          class="md-layout-item md-size-25"
-        >
-          test
-        </piece-block>
-      </div>
+      <piece-block-list
+        :category-id="categoryId"
+        :category-title="categoryTitle"
+        :list="pieceList"
+        @pieceAdded="handlePieceAdded"
+      />
     </md-app-content>
   </md-app>
 </template>
 
 <script>
-import PieceBlock from './components/piece-block'
+import PieceBlockList from './components/piece-block-list'
 import AsideTitle from './components/aside-title'
 import AddCateDialog from './components/add-cate-dialog'
 import { getCategoryList, getPieceList } from './api'
@@ -43,17 +36,24 @@ export default {
   components: {
     AsideTitle,
     AddCateDialog,
-    PieceBlock
+    PieceBlockList
   },
   data() {
     return {
       titleList: [],
       pieceList: [],
-      activateOne: 0,
-      addVisible: false
+      activateOne: 0
     }
   },
   computed: {
+    categoryId() {
+      if (this.titleList.length === 0 || !this.titleList[this.activateOne]) return ''
+      return this.titleList[this.activateOne].id
+    },
+    categoryTitle() {
+      if (this.titleList.length === 0 || !this.titleList[this.activateOne]) return ''
+      return this.titleList[this.activateOne].title
+    }
   },
   mounted() {
     this.getData()
@@ -64,7 +64,7 @@ export default {
       this.titleList.splice(0, this.titleList.length, ...data.data.data)
 
       if (this.titleList.length > 0) {
-        const pieces = await getPieceList(this.titleList[0].id)
+        const pieces = await getPieceList(this.categoryId)
         this.pieceList.splice(0, this.pieceList.length, ...pieces.data.data)
       }
     },
@@ -73,6 +73,9 @@ export default {
     },
     handleCateChange(i) {
       this.activateOne = i
+    },
+    handlePieceAdded() {
+
     }
   }
 }

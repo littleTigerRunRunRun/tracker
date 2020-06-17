@@ -5,6 +5,7 @@ export function getCategoryList() {
   return axios.get('/api/category/list')
 }
 
+// 添加分类
 export function addCategory(params) {
   return axios({
     method: 'get',
@@ -31,5 +32,14 @@ export function getPieceList(categoryId) {
     params: {
       categoryId
     }
+  })
+}
+
+// 添加作品
+export function addPiece(params) {
+  return axios({
+    method: 'get',
+    url: '/api/piece/add',
+    params
   })
 }
