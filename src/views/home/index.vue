@@ -19,7 +19,7 @@
         :category-id="categoryId"
         :category-title="categoryTitle"
         :list="pieceList"
-        @pieceAdded="handlePieceAdded"
+        @pieceAdded="getPiece"
       />
     </md-app-content>
   </md-app>
@@ -64,18 +64,19 @@ export default {
       this.titleList.splice(0, this.titleList.length, ...data.data.data)
 
       if (this.titleList.length > 0) {
-        const pieces = await getPieceList(this.categoryId)
-        this.pieceList.splice(0, this.pieceList.length, ...pieces.data.data)
+        this.getPiece()
       }
+    },
+    async getPiece() {
+      const pieces = await getPieceList(this.categoryId)
+      this.pieceList.splice(0, this.pieceList.length, ...pieces.data.data)
     },
     addCategory() {
       this.$refs.addCate.activate()
     },
     handleCateChange(i) {
       this.activateOne = i
-    },
-    handlePieceAdded() {
-
+      this.getData()
     }
   }
 }
@@ -93,8 +94,5 @@ export default {
       box-sizing: border-box;
     }
     border-left: none;
-    .md-layout-item:not(:first-of-type) {
-      margin-left: 20px;
-    }
   }
 </style>

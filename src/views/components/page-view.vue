@@ -35,7 +35,7 @@ export default {
       buttons: [
         { code: 'home', title: '繁华唱遍', component: HomeComp },
         { code: 'game', title: '我本逍遥', component: GameComp },
-        { code: 'about', title: '薄酒咏志', component: AboutComp }
+        { code: 'about', title: '东风志', component: AboutComp }
       ]
     }
   },
@@ -55,6 +55,14 @@ export default {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     color: #2c3e50;
+    &>.md-toolbar{
+      box-shadow:
+        0px 0px 1px rgba(0, 0, 0, 0.2),
+        0px 0px 2px rgba(0, 0, 0, 0.15),
+        0px 0px 3px rgba(0, 0, 0, 0.1),
+        0px 1px 3px rgba(0, 0, 0, 0.05),
+        0px 3px 5px rgba(0, 0, 0, 0.05);
+    }
     .navigator{
       width: 240px;
       text-align: left;

@@ -22,10 +22,30 @@ class PieceController extends Controller {
   add() {
     const { ctx } = this
     const query = ctx.request.query
-    console.log(query)
     const data = {
-      message: '测试接口请求成功',
-      data: []
+      message: '',
+      data: null
+    }
+    if (!query.name) {
+      data.code = 400
+      data.message = '需要传入作品名称'
+    } else {
+      data.code = 200
+      data.message = '成功创建作品，尽情享受创作吧'
+      data.data = Date.now()
+      const pieces = this.getPieces(query.categoryId) // query.categoryId
+      pieces.list.unshift({
+        id: data.data,
+        name: query.name,
+        desc: query.desc,
+        title: query.title,
+        label: ctx.queries.label
+      })
+      fs.writeFile(path.resolve(__dirname, mainDirection(query.categoryId + '.json')), JSON.stringify(pieces),  function(err) {
+        if (err) {
+            return console.error(err)
+        }
+      })
     }
     ctx.body = data
   }

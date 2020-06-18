@@ -1,32 +1,41 @@
 <template>
-  <md-dialog class="add-piece-dialog" :md-active.sync="visible">
+  <md-dialog
+    class="add-piece-dialog"
+    :md-active.sync="visible"
+    :md-click-outside-to-close="false"
+  >
     <md-dialog-title><em>{{ categoryTitle }}</em><br>添加作品</md-dialog-title>
 
     <md-card-content>
-      <md-field>
+      <md-field :class="getValidationClass('name')">
+        <label>英文名称</label>
+        <md-input v-model="form.name" :disabled="sending" />
+        <span v-if="!$v.form.name.required" class="md-error">请填写项目的英文名称</span>
+      </md-field>
+      <md-field :class="getValidationClass('title')">
         <label>名字</label>
-        <md-input v-model="form.name" />
+        <md-input v-model="form.title" :disabled="sending" />
+        <span v-if="!$v.form.title.required" class="md-error">请填写项目的标题</span>
       </md-field>
       <md-field>
         <label>描述</label>
-        <md-input v-model="form.desc" />
+        <md-input v-model="form.desc" :disabled="sending" />
       </md-field>
-      <md-chips v-model="form.label" :md-limit="4" md-placeholder="添加描述性标签">
+      <md-chips v-model="form.label" class="md-primary" :disabled="sending" :md-limit="3" md-placeholder="添加描述性标签">
         <template slot="md-chip" slot-scope="{ chip }">
           {{ chip }}
         </template>
-
         <div class="md-helper-text">
-          至多四个
+          至多三个
         </div>
       </md-chips>
     </md-card-content>
 
     <md-dialog-actions>
-      <md-button class="md-primary md-accent" @click="handleClose">
+      <md-button class="md-primary md-accent" :disabled="sending" @click="handleClose">
         关闭
       </md-button>
-      <md-button class="md-primary" @click="handleSubmit">
+      <md-button class="md-primary" :disabled="sending" @click="handleSubmit">
         提交
       </md-button>
     </md-dialog-actions>
@@ -34,10 +43,16 @@
 </template>
 
 <script>
+import { validationMixin } from 'vuelidate'
+import { addCategory } from '../api'
+import {
+  required
+} from 'vuelidate/lib/validators'
 import { addPiece } from '../api'
 
 export default {
   name: 'AddCateDialog',
+  mixins: [validationMixin],
   props: {
     categoryId: {
       type: [String, Number],
@@ -51,14 +66,37 @@ export default {
   data() {
     return {
       visible: false,
+      sending: false,
       form: {
         name: '',
+        title: '',
         desc: '',
         label: []
       }
     }
   },
+  validations: {
+    form: {
+      name: {
+        required
+      },
+      title: {
+        required
+      }
+    }
+  },
+  mounted() {
+  },
   methods: {
+    getValidationClass(fieldName) {
+      const field = this.$v.form[fieldName]
+
+      if (field) {
+        return {
+          'md-invalid': field.$invalid && field.$dirty
+        }
+      }
+    },
     activate() {
       this.visible = true
     },
@@ -66,17 +104,23 @@ export default {
       this.visible = false
       this.form.name = ''
       this.form.title = ''
+      this.form.desc = ''
       this.form.label.splice(0, this.form.label.length - 1)
     },
     async handleSubmit() {
-      const { data } = await addPiece(Object.assign({ categoryId: this.categoryId }, this.form))
-      if (data.code === 200) {
-        console.log(data.message)
-        this.$emit('pieceAdded')
-        this.handleClose()
-      } else {
-        console.error(data.message)
-      }
+      this.$v.$touch()
+
+      if (!this.$v.$invalid) {
+        this.sending = true
+        const { data } = await addPiece(Object.assign({ categoryId: this.categoryId }, this.form))
+        this.sending = false
+        if (data.code === 200) {
+          this.$emit('pieceAdded')
+          this.handleClose()
+        } else {
+          console.error(data.message)
+        }
+      } else console.log(this.$v)
     }
   }
 }
@@ -95,7 +139,11 @@ export default {
     .md-card-content{
       padding-left: 30px;
       padding-right: 30px;
-      padding-bottom: 0px;
+      padding-bottom: 16px;
+      padding-top: 8px;
+      .md-field{
+        margin-bottom: 12px;
+      }
     }
     .md-dialog-actions{
       padding-top: 0px;

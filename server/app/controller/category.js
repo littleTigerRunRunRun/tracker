@@ -103,7 +103,7 @@ class CategoryController extends Controller {
   }
   // 为了提高读写效率，我们每生成一个目录，就
   addBranchCategoryStore(id) {
-    fs.writeFile(path.resolve(__dirname, mainDirection(id + '.json')), '{"type": "category","list": [],"hash": {}}',  function(err) {
+    fs.writeFile(path.resolve(__dirname, mainDirection(id + '.json')), '{"type": "piece","list": []}',  function(err) {
       if (err) {
           return console.error(err)
       }
