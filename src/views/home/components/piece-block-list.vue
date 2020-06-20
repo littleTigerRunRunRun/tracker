@@ -17,7 +17,9 @@
     <div
       v-for="(piece, index) in list"
       :key="`piece${index}`"
+      ref="piece"
       class="piece-block md-layout-item md-size-25"
+      @click="viewPiece(piece, index)"
     >
       <img width="100%" src="../../../assets/gold_rect.jpg">
       <div class="piece-content">
@@ -45,6 +47,7 @@ export default {
   components: {
     AddPieceDialog
   },
+  inject: ['handleViewPiece'],
   props: {
     list: {
       type: Array,
@@ -62,6 +65,9 @@ export default {
   methods: {
     addPiece() {
       this.$refs.addPiece.activate()
+    },
+    viewPiece(piece, index) {
+      this.handleViewPiece(piece, this.$refs.piece[index])
     }
   }
 }
@@ -72,6 +78,14 @@ export default {
   width: 100%;
   .piece-block{
     position: relative;
+    width: 100%;
+    &.md-size-25{
+      min-width: 0;
+      max-width: none;
+      flex-basis: calc(25% - 15px);
+      flex-grow: 0;
+      flex-shrink: 25;
+    }
     & > img {
       opacity: 0;
     }
@@ -111,7 +125,7 @@ export default {
         width: 100%;
         height: 100%;
         padding: 6px 10px;
-        background-image: url('../../../assets/view.webp');
+        background-image: url('../../../assets/view.jpg');
         background-size: cover;
         position: relative;
         span{

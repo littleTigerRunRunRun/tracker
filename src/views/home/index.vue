@@ -9,9 +9,20 @@
       </md-toolbar>
 
       <md-list>
-        <aside-title v-for="(title, index) in titleList" :key="`title${index}`" :activate="activateOne === index" :title-data="title" :index="index" @clickItem="handleCateChange" />
+        <aside-title
+          v-for="(title, index) in titleList"
+          :key="`title${index}`"
+          :activate="activateOne === index"
+          :title-data="title"
+          :index="index"
+          @view="handleViewCate(index)"
+          @changeCate="handleCateChange(title)"
+        />
       </md-list>
-      <add-cate-dialog ref="addCate" @categoryAdded="getData" />
+      <add-cate-dialog
+        ref="addCate"
+        @categoryAdded="getData"
+      />
     </md-app-drawer>
 
     <md-app-content class="content-container">
@@ -60,8 +71,9 @@ export default {
   },
   methods: {
     async getData() {
+      this.titleList.splice(0, this.titleList.length)
       const data = await getCategoryList()
-      this.titleList.splice(0, this.titleList.length, ...data.data.data)
+      this.titleList.splice(0, 0, ...data.data.data)
 
       if (this.titleList.length > 0) {
         this.getPiece()
@@ -72,11 +84,18 @@ export default {
       this.pieceList.splice(0, this.pieceList.length, ...pieces.data.data)
     },
     addCategory() {
-      this.$refs.addCate.activate()
+      this.$refs.addCate.activate('创建一个合集', {
+        name: '',
+        title: '',
+        desc: ''
+      })
     },
-    handleCateChange(i) {
+    handleViewCate(i) {
       this.activateOne = i
       this.getData()
+    },
+    handleCateChange(title) {
+      this.$refs.addCate.activate('修改合集', title)
     }
   }
 }

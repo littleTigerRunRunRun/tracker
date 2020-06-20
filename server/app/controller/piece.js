@@ -54,13 +54,13 @@ class PieceController extends Controller {
     const query = ctx.request.query
     let code = 200
     let message = ''
-    let data = null
+    let data = []
     if (!query.categoryId) {
       code = 400
       message = '未提供分类id'
     } else {
       const pieces = this.getPieces(query.categoryId)
-      data = pieces.list
+      data = pieces.list || []
       code = 200
       message = '请求成功'
     }

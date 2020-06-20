@@ -10,12 +10,13 @@
       <md-field :class="getValidationClass('name')">
         <label>英文名称</label>
         <md-input v-model="form.name" :disabled="sending" />
-        <span v-if="!$v.form.name.required" class="md-error">请填写项目的英文名称</span>
+        <span v-if="!$v.form.name.required" class="md-error">请填写作品的英文名称</span>
+        <span v-if="!$v.form.name.correctEnglishName" class="md-error">作品的英文名由大小写英文字母、数字、下划线组成</span>
       </md-field>
       <md-field :class="getValidationClass('title')">
         <label>名字</label>
         <md-input v-model="form.title" :disabled="sending" />
-        <span v-if="!$v.form.title.required" class="md-error">请填写项目的标题</span>
+        <span v-if="!$v.form.title.required" class="md-error">请填写作品的标题</span>
       </md-field>
       <md-field>
         <label>描述</label>
@@ -49,6 +50,9 @@ import {
   required
 } from 'vuelidate/lib/validators'
 import { addPiece } from '../api'
+const correctEnglishName = (str) => {
+  return /^[0-9a-zA-Z_]{1,}$/.test(str)
+}
 
 export default {
   name: 'AddCateDialog',
@@ -78,7 +82,8 @@ export default {
   validations: {
     form: {
       name: {
-        required
+        required,
+        correctEnglishName
       },
       title: {
         required
@@ -142,7 +147,7 @@ export default {
       padding-bottom: 16px;
       padding-top: 8px;
       .md-field{
-        margin-bottom: 12px;
+        margin-bottom: 20px;
       }
     }
     .md-dialog-actions{

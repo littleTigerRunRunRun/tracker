@@ -30,37 +30,48 @@ class CategoryController extends Controller {
     data.data.splice(0, 0, ...category.list.filter((item) => !item.hide))
     ctx.body = data
   }
-  async add() {
+  async update() {
     const { ctx } = this
     let query = ctx.request.query
     let message = ''
     let code = 200
-    let data = this.getCategory()
-    let id = -1
-    if (!query.name){
-      code = 400
-      message = '空的类别名'
-    } else if (data.hash[query.name] !== undefined) {
-      let target = data.hash[query.name]
-      if (!target.hide) {
-        message = '已添加过的类别名'
+    const cateListData = this.getCategory()
+    if (query.id) {
+      const cate = cateListData.list.find((cate) => parseInt(cate.id) === parseInt(query.id))
+      if (cate) {
+        cate.name = query.name
+        cate.title = query.title
+        cate.desc = query.desc
+      }
+      console.log('cate', cate)
+    } else {
+      if (!query.name){
         code = 400
+        message = '空的类别名'
+      } else if (cateListData.hash[query.name] !== undefined) {
+        let target = cateListData.hash[query.name]
+        if (!target.hide) {
+          message = '已添加过的类别名'
+          code = 400
+        } else {
+          // 隐藏逻辑
+          target.hide = false
+          message = '添加成功'
+        }
       } else {
-        target.hide = false
+        // 完全新建
+        query.id = Date.now()
+        this.addBranchCategoryStore(query.id)
+        cateListData.list.push(query)
+        cateListData.hash[query.id] = cateListData.list.length - 1
         message = '添加成功'
       }
-    } else {
-      query.id = Date.now()
-      this.addBranchCategoryStore(query.id)
-      data.list.push(query)
-      data.hash[query.id] = data.list.length - 1
-      message = '添加成功'
-      fs.writeFile(path.resolve(__dirname, mainDirection('index.json')), JSON.stringify(data),  function(err) {
-        if (err) {
-            return console.error(err)
-        }
-      })
     }
+    fs.writeFile(path.resolve(__dirname, mainDirection('index.json')), JSON.stringify(cateListData),  function(err) {
+      if (err) {
+          return console.error(err)
+      }
+    })
     ctx.body = {
       message,
       code,

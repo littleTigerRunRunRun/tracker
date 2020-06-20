@@ -6,14 +6,16 @@
         slot="main"
       />
     </page-view>
+    <view-piece :piece.sync="piece" />
   </div>
 </template>
 
 <script>
 import PageView from './views/components/page-view'
-import { pages } from './router'
+import ViewPiece from './views/piece'
+import { pages, sorter } from './router/index.js'
 
-const components = { PageView }
+const components = { PageView, ViewPiece }
 for (const key in pages) {
   const page = pages[key]
   components[page.name] = page.component
@@ -22,13 +24,22 @@ for (const key in pages) {
 export default {
   name: 'App',
   components,
+  provide() {
+    return {
+      handleViewPiece: this.handleViewPiece
+    }
+  },
   data() {
     return {
       current: {
         name: 'main',
         component: pages.home.name
-      }
+      },
+      piece: null
     }
+  },
+  created() {
+    sorter.path = window.location.pathname
   },
   methods: {
     handlePageTo(name) {
@@ -37,6 +48,12 @@ export default {
 
       this.current.name = page.name
       this.current.component = page.component
+    },
+    handleViewPiece(data, target) {
+      this.piece = {
+        data,
+        target
+      }
     }
   }
 }

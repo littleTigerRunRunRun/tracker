@@ -5,11 +5,11 @@ export function getCategoryList() {
   return axios.get('/api/category/list')
 }
 
-// 添加分类
-export function addCategory(params) {
+// 添加分类 / 修改, 假设有id就修改
+export function updataCategory(params) {
   return axios({
     method: 'get',
-    url: '/api/category/add',
+    url: '/api/category/update',
     params
   })
 }

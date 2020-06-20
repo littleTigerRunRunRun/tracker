@@ -1,7 +1,6 @@
 <template>
   <md-button class="md-primary" :class="{ activate: current === code }" @click="handleClick">
     {{ title }}
-    <!-- <md-tooltip md-direction="bottom">举杯邀明月,对影成三人</md-tooltip> -->
   </md-button>
 </template>
 

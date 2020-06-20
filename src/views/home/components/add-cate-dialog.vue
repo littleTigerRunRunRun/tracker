@@ -4,12 +4,12 @@
     :md-active.sync="visible"
     :md-click-outside-to-close="false"
   >
-    <md-dialog-title>添加一个分类</md-dialog-title>
+    <md-dialog-title>{{ title }}</md-dialog-title>
 
     <md-card-content>
       <md-field :class="getValidationClass('name')">
         <label>英文分类名</label>
-        <md-input v-model="form.name" :disabled="sending" />
+        <md-input v-model="form.name" :disabled="sending || nameDisabled" />
         <span v-if="!$v.form.name.required" class="md-error">为分类添加一个英文名</span>
       </md-field>
       <md-field>
@@ -35,7 +35,7 @@
 
 <script>
 import { validationMixin } from 'vuelidate'
-import { addCategory } from '../api'
+import { updataCategory } from '../api'
 import {
   required
 } from 'vuelidate/lib/validators'
@@ -47,11 +47,14 @@ export default {
     return {
       visible: false,
       sending: false,
+      title: '',
+      id: '',
       form: {
         name: '',
         title: '',
         desc: ''
-      }
+      },
+      nameDisabled: false
     }
   },
   validations: {
@@ -71,7 +74,14 @@ export default {
         }
       }
     },
-    activate() {
+    activate(dialogTitle, { name, title, desc, id }) {
+      this.title = dialogTitle
+      this.form.name = name
+      this.form.title = title
+      this.form.desc = desc
+      if (this.form.name) this.nameDisabled = true
+      else this.nameDisabled = false
+      this.id = id || ''
       this.visible = true
     },
     handleClose() {
@@ -85,7 +95,7 @@ export default {
       this.$v.$touch()
       this.sending = true
 
-      const { data } = await addCategory(this.form)
+      const { data } = await updataCategory(Object.assign({ id: this.id }, this.form))
       this.sending = false
       if (data.code === 200) {
         this.$emit('categoryAdded')
@@ -111,6 +121,10 @@ export default {
       padding-top: 0px;
       padding-bottom: 16px;
       padding-right: 24px;
+    }
+    .md-field.md-disabled, .md-field.md-disabled *{
+      opacity: 0.6;
+      cursor: not-allowed;
     }
   }
 </style>

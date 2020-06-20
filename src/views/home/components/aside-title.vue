@@ -1,10 +1,17 @@
 <template>
   <md-list-item class="category-list">
     <span class="md-list-item-text">
-      <md-button class="md-accent category-button" :class="{ 'md-button-activate': activate }" @click="$emit('clickItem', index)">
+      <md-button class="md-accent category-button" :class="{ 'md-button-activate': activate }" @click="$emit('view', index)">
         {{ titleData.title }}
-        <md-icon v-if="titleData.edit" class="edit-button" @click.native.stop="editCategory">edit</md-icon>
       </md-button>
+      <div class="edit-button-group">
+        <md-button class="md-icon-button" @click.native="editCategory">
+          <md-icon>edit</md-icon>
+        </md-button>
+        <md-button class="md-icon-button" :disabled="true" @click.native="deleteCategory">
+          <md-icon>delete</md-icon>
+        </md-button>
+      </div>
     </span>
   </md-list-item>
 </template>
@@ -34,7 +41,7 @@ export default {
   },
   methods: {
     editCategory() {
-      console.log('edit')
+      this.$emit('changeCate')
     }
   }
 }
@@ -42,22 +49,51 @@ export default {
 
 <style lang="scss">
   .category-list{
+    height: 36px !important;
     pointer-events: none;
-    .md-list-item-text{
-      position: relative;
-      pointer-events: auto;
-    }
-    .edit-button{
-      display: inline;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    .category-button:hover .edit-button, .edit-button:hover{
-      opacity: 1;
+    overflow: hidden;
+    transition: height 0.2s;
+    &:hover {
+      height: 76px !important;
+      .edit-button-group{
+        opacity: 1;
+      }
+      .category-button:before{
+      background-color: currentColor;
+      opacity: .12;
+      }
     }
     .md-button-activate:before {
       background-color: currentColor;
       opacity: .12;
+    }
+    .md-list-item-text{
+      position: relative;
+      pointer-events: auto;
+      font-size: 0px;
+    }
+    .edit-button-group{
+      height: 28px;
+      line-height: 28px;
+      margin-top: 6px;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.5s;
+      .md-button{
+        width: 28px;
+        height: 28px;
+        min-width: 0;
+        .md-ripple{
+          padding: 0;
+        }
+        .md-button-content{
+          height: 100%;
+        }
+        i{
+          vertical-align: middle;
+          font-size: 18px !important;
+        }
+      }
     }
   }
 </style>
