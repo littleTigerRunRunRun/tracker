@@ -57,7 +57,10 @@ export default {
   },
   methods: {
     view() {
+      this.lastPiece = true
+
       const rect = this.piece.target.getBoundingClientRect()
+      this.director.playScene('moveIn')
     },
     handleButtonClick(code) {
       console.log('button click!', code)

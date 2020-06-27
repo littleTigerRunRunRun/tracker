@@ -1,6 +1,80 @@
 import GSAP from 'gsap'
 const Timeline = GSAP.core.Timeline
 
+class Charactor {
+  constructor(charactor) {
+    this.name = charactor.name
+    this.length = charactor.length || 1
+    this.target = charactor.target || null
+    this.masses = charactor.masses || false
+    this.temporary = charactor.temporary || false
+  }
+
+  // 更换演员对象
+  change(target) {
+    this._changed = true
+    this.target = target
+    // 群演
+    if (target instanceof Array) {
+      this.masses = true
+      this.length = target.length
+    }
+  }
+}
+
+class Prop {
+  constructor(prop) {
+    this.name = prop.name
+    this.type = prop.type
+    this.value = prop.value
+    this.temporary = prop.temporary || false
+  }
+}
+
+class Action {
+  constructor(action) {
+    this.index = action.index
+    this.desc = action.desc
+    this.charactorsName = action.charactors
+    this.masses = typeof action.charactors === 'string'
+    this.timeline = new Timeline({})
+  }
+  setCharactors(charactors) {
+    this.charactors = charactors
+  }
+}
+
+class Scene {
+  constructor({ name, actions, director }) {
+    this.name = name
+    this.director = director
+    this.registerActions(actions)
+  }
+
+  registerActions(actions) {
+    this.actions = []
+    for (const action of actions) {
+      const sceneAction = new Action(action)
+      let charactors
+      if (typeof action.charactors === 'string') {
+        charactors = this.director._charactors[action.charactors]
+      } else {
+        charactors = action.charactors.map((name) => {
+          return this.director._charactors[name]
+        })
+      }
+      sceneAction.setCharactors(charactors)
+      this.actions.push(sceneAction)
+    }
+  }
+
+  run() {
+    for (const action of this.actions) {
+      console.log(action)
+    }
+  }
+}
+
 // 剧组
 export default class Director {
   constructor({ storyborad }) {
@@ -19,12 +93,7 @@ export default class Director {
   // list是在留出演员的职位，不一定立刻到位
   listCharactors(charactors) {
     for (const charactor of charactors) {
-      this._charactors[charactor.name] = {
-        name: charactor.name,
-        masses: charactor.masses || false,
-        length: charactor.length || 1,
-        target: charactor.target || null
-      }
+      this._charactors[charactor.name] = new Charactor(charactor)
     }
   }
   // 批量添加角色
@@ -36,24 +105,14 @@ export default class Director {
   // 添加角色
   addCharactor(name, target) {
     if (!this._charactors[name]) {
-      this._charactors[name] = {
-        name: name,
+      this._charactors[name] = new Charactor({
+        name,
         masses: (target instanceof Array),
         length: target.length || 1,
         target,
         temporary: true // 这说明这是一个临时演员
-      }
-    } else {
-      // 换角的标记
-      if (this._charactors[name.target]) this._charactors[name].change = true
-      else this._charactors[name].change = false
-      // 演员就位
-      this._charactors[name].target = target
-      if (target instanceof Array) {
-        this._charactors[name].masses = true
-        this._charactors[name].length = target.length
-      }
-    }
+      })
+    } else this._charactors[name].change({ target })
   }
 
   // 道具
@@ -61,11 +120,11 @@ export default class Director {
   // list是留出道具位，不一定要赋值
   listProps(props) {
     for (const prop of props) {
-      this._props[prop.name] = {
+      this._props[prop.name] = new Prop({
         name: prop.name,
         type: this.getPropType(prop.value || prop.default), // 目前的情况只有这两种
         value: prop.value || prop.default || null
-      }
+      })
     }
   }
   getPropType(value) {
@@ -76,18 +135,18 @@ export default class Director {
   }
   addProps(props) {
     for (const name in props) {
-      this.addProps(name, props[name])
+      this.addProp(name, props[name])
     }
   }
   addProp(name, value) {
     if (this._props[name]) this._props[name].value = value
     else {
-      this._props[name] = {
+      this._props[name] = new Prop({
         name,
         value,
         type: getPropType(value),
         temporary: true // 临时标记
-      }
+      })
     }
   }
 
@@ -101,20 +160,11 @@ export default class Director {
   // 为什么这里使用的register而不是add来形容呢，这里的行为更像是手枪打开保险的程度。
   // action里面的具体动画，都会在这一步注册成tweenline里的内容
   registerScene(name, actions) {
-    const scene = { actions: {}}
-    scene.timeline = new Timeline()
-
-    for (const action of actions) {
-      console.log(action)
-      const sceneAction = {}
-
-      if (typeof action.charactors === 'string') {
-
-      } else {
-
-      }
-    }
+    const scene = new Scene({ name, actions, director: this })
 
     this._scenes[name] = scene
+  }
+  playScene(name) {
+    this._scenes[name].run()
   }
 }
