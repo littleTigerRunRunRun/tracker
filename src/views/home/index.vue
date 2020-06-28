@@ -29,6 +29,7 @@
       <piece-block-list
         :category-id="categoryId"
         :category-title="categoryTitle"
+        :category-name="categoryName"
         :list="pieceList"
         @pieceAdded="getPiece"
       />
@@ -64,6 +65,10 @@ export default {
     categoryTitle() {
       if (this.titleList.length === 0 || !this.titleList[this.activateOne]) return ''
       return this.titleList[this.activateOne].title
+    },
+    categoryName() {
+      if (this.titleList.length === 0 || !this.titleList[this.activateOne]) return ''
+      return this.titleList[this.activateOne].name
     }
   },
   mounted() {
@@ -92,7 +97,7 @@ export default {
     },
     handleViewCate(i) {
       this.activateOne = i
-      this.getData()
+      this.getPiece()
     },
     handleCateChange(title) {
       this.$refs.addCate.activate('修改合集', title)

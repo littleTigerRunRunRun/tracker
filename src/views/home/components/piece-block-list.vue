@@ -60,6 +60,10 @@ export default {
     categoryTitle: {
       type: String,
       default: ''
+    },
+    categoryName: {
+      type: [String, Number],
+      default: ''
     }
   },
   methods: {
@@ -67,7 +71,7 @@ export default {
       this.$refs.addPiece.activate()
     },
     viewPiece(piece, index) {
-      this.handleViewPiece(piece, this.$refs.piece[index])
+      this.handleViewPiece(Object.assign(piece, { categoryName: this.categoryName }), this.$refs.piece[index])
     }
   }
 }

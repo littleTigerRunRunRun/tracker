@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="piece"
     ref="main"
     class="view-piece"
   >
@@ -17,10 +18,17 @@
         <md-icon>{{ button.icon }}</md-icon>
       </md-button>
     </div>
+    <div class="piece-main">
+      <component
+        :is="comp"
+        v-if="comp"
+      />
+    </div>
   </div>
 </template>
 
 <script>
+import Vue from 'vue'
 import director from './storyboard'
 
 export default {
@@ -40,7 +48,8 @@ export default {
         { code: 'close', icon: 'close' }
       ],
       lastPiece: null,
-      director
+      director,
+      comp: ''
     }
   },
   watch: {
@@ -51,19 +60,26 @@ export default {
     }
   },
   mounted() {
-    this.$nextTick(() => {
-      this.addCharactors()
-    })
   },
   methods: {
     view() {
+      this.comp = () => import(`../../pieces/${this.piece.data.categoryName}/${this.piece.data.name}/entry.vue`)
       this.lastPiece = true
 
-      const rect = this.piece.target.getBoundingClientRect()
-      this.director.playScene('moveIn')
+      this.$nextTick(() => {
+        this.addCharactors()
+        const rect = this.piece.target.getBoundingClientRect()
+        this.director.addProp('startBound', { left: rect.left, top: rect.top, width: rect.width / window.innerWidth * 100, height: rect.height / window.innerHeight * 100 })
+        this.director.playScene('moveIn')
+      })
     },
     handleButtonClick(code) {
-      console.log('button click!', code)
+      const rect = this.piece.target.getBoundingClientRect()
+      this.director.addProp('startBound', { left: rect.left, top: rect.top, width: rect.width / window.innerWidth * 100, height: rect.height / window.innerHeight * 100 })
+      this.director.playScene('moveOut').then(() => {
+        this.$emit('update:piece', null)
+        this.lastPiece = false
+      })
     },
     addCharactors() {
       this.director.addCharactors({
@@ -79,10 +95,11 @@ export default {
   .view-piece{
     position: fixed;
     z-index: 1000;
-    left: -10000px;
+    left: 0px;
     top: 0px;
     background-image: url('../../assets/view.jpg');
     background-size: cover;
+    overflow: hidden;
     .button-group{
       position: absolute;
       right: 8px;
@@ -91,13 +108,21 @@ export default {
         position: absolute;
         right: -44px;
         cursor: pointer;
-        color: #000;
-        background-color: #fff;
+        color: #fff;
+        background-color: #999;
         opacity: 0.6;
         border-radius: 0px;
         margin: 0px;
         transform: rotate(90deg);
+        i{
+          color: #fff;
+        }
       }
+    }
+    .piece-main{
+      width: 100%;
+      height: 100%;
+      position: relative;
     }
   }
 </style>
