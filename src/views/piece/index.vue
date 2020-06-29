@@ -74,12 +74,17 @@ export default {
       })
     },
     handleButtonClick(code) {
-      const rect = this.piece.target.getBoundingClientRect()
-      this.director.addProp('startBound', { left: rect.left, top: rect.top, width: rect.width / window.innerWidth * 100, height: rect.height / window.innerHeight * 100 })
-      this.director.playScene('moveOut').then(() => {
-        this.$emit('update:piece', null)
-        this.lastPiece = false
-      })
+      switch (code) {
+        case 'close': {
+          const rect = this.piece.target.getBoundingClientRect()
+          this.director.addProp('startBound', { left: rect.left, top: rect.top, width: rect.width / window.innerWidth * 100, height: rect.height / window.innerHeight * 100 })
+          this.director.playScene('moveOut').then(() => {
+            this.$emit('update:piece', null)
+            this.lastPiece = false
+          })
+          break
+        }
+      }
     },
     addCharactors() {
       this.director.addCharactors({

@@ -1,6 +1,6 @@
 <template>
   <div class="piece-entry">
-    <radar-dash-board />
+    <radar-dash-board :value="value" />
   </div>
 </template>
 
@@ -14,7 +14,20 @@ export default {
   },
   data() {
     return {
-
+      value: 0
+    }
+  },
+  mounted() {
+    this.interval = setInterval(() => {
+      this.changeValue(Math.random() * 100)
+    }, 3000)
+  },
+  beforeDestroy() {
+    clearInterval(this.interval)
+  },
+  methods: {
+    changeValue(value) {
+      this.value = value
     }
   }
 }
@@ -24,8 +37,8 @@ export default {
   .piece-entry{
     width: 100%;
     height: 100%;
-    background-color: #000;
     opacity: 0;
+    background-color: #0B203F;
     animation: fadeOut 0.4s 0.5s;
     animation-fill-mode: forwards;
   }
