@@ -36,6 +36,12 @@
         </mask>
       </defs>
       <g class="chart-main">
+        <g v-if="radarOpen" class="radar-bg">
+          <circle v-for="(radar, index) in radarAnimes" :key="`radar${index}`" :stroke="fill" :stroke-width="centerWidth" fill="none" :cx="mainRadius" :cy="mainRadius" :r="radarRadius[0]" class="radar">
+            <animate attributeName="opacity" fill="freeze" :values="radar.opacity" :keyTimes="radar.time" :dur="radar.duration" repeatCount="indefinite" />
+            <animate attributeName="r" fill="freeze" :values="radar.radius" :keyTimes="radar.time" :dur="radar.duration" repeatCount="indefinite" />
+          </circle>
+        </g>
         <path class="outerPath" :d="bgPath" fill="url(#cover_gradient)" />
         <g>
           <path class="outer" :d="outerPath" :stroke-width="outerWidth" :stroke="fill" fill-opacity="0.8" stroke-linecap="square" stroke-linejoin="round" mask="url(#radiusMask)" />
@@ -52,7 +58,7 @@
           <circle :cx="mainRadius" :cy="mainRadius" :r="coreRadius" :fill="fill" :fill-opacity="coreOpacity" />
         </g>
         <g class="pointer">
-          <path class="outer" :d="pointerOuterPath" fill="none" :stroke-width="outerWidth" :stroke="fill" :stroke-opacity="1" stroke-linecap="round" :style="{ strokeDasharray: `${radiusLength} ${radiusLength}`, strokeDashoffset: Math.min((100 - value) / 100 * radiusLength, radiusLength - 2) }" />
+          <path class="outer" :d="pointerOuterPath" fill="none" :stroke-width="outerWidth" :stroke="fill" :stroke-opacity="1" stroke-linecap="round" :style="{ strokeDasharray: `${radiusLength} ${radiusLength}`, strokeDashoffset: Math.min((100 - value) / 100 * radiusLength, radiusLength - 0.01) }" />
           <rect class="inner" :x="mainRadius - outerRadius" :y="mainRadius - outerWidth * 0.5" :width="outerRadius" :height="outerWidth" fill="url(#pointer_inner_gradient)" :transform="pointerRotate" />
         </g>
         <g class="score">
@@ -132,6 +138,22 @@ export default {
           y: this.mainRadius + Math.cos(angle) * this.scaleRadius,
           rotate: `rotate(${angle / Math.PI * 180} ${this.mainRadius} ${this.mainRadius})`,
           scaleText
+        })
+      }
+      return array
+    },
+    radarAnimes() {
+      const array = []
+      const randomDelay = Math.random() * this.radarDuration
+      const commonDuration = (this.radarDuration + randomDelay + this.radarInterval) / 1000
+      for (let i = 0; i < this.radarNum; i++) {
+        const start = (randomDelay + i / this.radarNum * this.radarDuration) / 1000 / commonDuration
+        const end = start + this.radarDuration / 1000 / commonDuration
+        array.push({
+          duration: commonDuration + 's',
+          time: '0; ' + start + '; ' + end + '; 1',
+          radius: this.radarRadius[0] + '; ' + this.radarRadius[0] + '; ' + this.radarRadius[1] + '; ' + this.radarRadius[1],
+          opacity: this.radarOpacity[0] + '; ' + this.radarOpacity[0] + '; ' + this.radarOpacity[1] + '; ' + this.radarOpacity[1]
         })
       }
       return array

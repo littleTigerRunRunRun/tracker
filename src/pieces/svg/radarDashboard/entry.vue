@@ -1,6 +1,6 @@
 <template>
   <div class="piece-entry">
-    <radar-dash-board :value="value" />
+    <radar-dash-board :fill="fill" class="orange" :value="value" />
   </div>
 </template>
 
@@ -14,7 +14,8 @@ export default {
   },
   data() {
     return {
-      value: 0
+      value: 0,
+      fill: '#FEDD04'
     }
   },
   mounted() {

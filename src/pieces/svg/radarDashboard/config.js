@@ -123,10 +123,28 @@ export default {
     }
   },
   // 雷达波效果
-  radarStart: {
-    type: Object,
-    default: () => {
-
-    }
+  radarOpen: {
+    type: Boolean,
+    default: true
+  },
+  radarRadius: {
+    type: Array,
+    default: () => [20, 320]
+  },
+  radarOpacity: {
+    type: Array,
+    default: () => [0.2, 0]
+  },
+  radarNum: {
+    type: Number,
+    default: 4
+  },
+  radarDuration: {
+    type: Number,
+    default: 4000
+  },
+  radarInterval: {
+    type: Number,
+    default: 12000
   }
 }
