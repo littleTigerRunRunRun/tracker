@@ -131,7 +131,6 @@ export default {
       for (let i = 0; i <= this.scaleNum; i++) {
         const angle = sa + i / this.scaleNum * (Math.PI - sa) * 2
         const scaleText = this.scales.find((scale) => scale.index === i)
-        console.log(scaleText)
         array.push({
           value: i / this.scaleNum * 100,
           x: this.mainRadius - Math.sin(angle) * this.scaleRadius,

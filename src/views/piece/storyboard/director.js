@@ -108,7 +108,7 @@ class Action extends IdObject {
       }
     }
   }
-  play() {
+  play(params) {
     const rc = this.relativeCharactors // 快速通道
     for (const clip of this.clips) {
       if (rc instanceof Charactor) {
@@ -119,7 +119,7 @@ class Action extends IdObject {
             from: this.assignObjects(clip.from, i),
             to: this.assignObjects(clip.to, i),
             duration: this.getPropValue(clip.duration, i),
-            delay: this.getPropValue(clip.delay, i),
+            delay: this.getPropValue(clip.delay, i) + (params.delay || 0),
             target,
             ease: clip.ease,
             onUpdate: clip.update
@@ -134,7 +134,7 @@ class Action extends IdObject {
             from: this.assignObjects(clip.from),
             to: this.assignObjects(clip.to),
             duration: this.getPropValue(clip.duration),
-            delay: this.getPropValue(clip.delay),
+            delay: this.getPropValue(clip.delay) + (params.delay || 0),
             target,
             ease: clip.ease,
             onUpdate: clip.update
@@ -178,12 +178,12 @@ class Scene extends IdObject {
     }
   }
 
-  play() {
+  play(params) {
     let all = []
     for (const action of this.actions) {
-      all = all.concat(action.play())
+      all = all.concat(action.play(params))
     }
-    return Promise.all(all)
+    return all
   }
 }
 
@@ -283,7 +283,15 @@ export default class Director {
 
     this._scenes[name] = scene
   }
-  playScene(name) {
-    return this._scenes[name].play()
+  playScenes(scenes) {
+    if (typeof scenes === 'string') return Promise.all(this._scenes[scenes].play({}))
+    else if (scenes instanceof Array) {
+      let all = []
+      for (const scene of scenes) {
+        all = all.concat(this._scenes[scene.name].play(scene))
+      }
+      return Promise.all(all)
+    }
+    // return this._scenes[name].play()
   }
 }

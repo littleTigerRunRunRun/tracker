@@ -1,12 +1,27 @@
 import Director from './storyboard/director'
 
+const rangeStartMap = [
+  { left: 60, top: 60 },
+  { right: 60, top: 60 },
+  { left: 60, bottom: 60 },
+  { right: 60, bottom: 60 }
+]
+const rangeEndMap = [
+  { left: 10, top: 10 },
+  { right: 10, top: 10 },
+  { left: 10, bottom: 10 },
+  { right: 10, bottom: 10 }
+]
+
 const director = new Director({
   storyborad: {
     // 演员
     charactors: [
       { name: 'main' },
       { name: 'title' },
-      { name: 'tools', masses: true, length: 4 } // 群众演员
+      { name: 'tools', masses: true }, // 群众演员
+      { name: 'captureRanges', masses: true, length: 4 },
+      { name: 'captureShocks', masses: true, length: 2 }
     ],
     // 道具，这里指会被调用到的关键数据
     props: [
@@ -15,9 +30,11 @@ const director = new Director({
       { name: 'toolsEnterDuration', value: (index) => 600 - index * 80 },
       { name: 'toolsLeaveDuration', value: (index) => 300 - index * 30 },
       { name: 'toolsEnterDelay', value: (index) => index * 50 },
-      { name: 'toolsLeaveDelay', value: (index) => 30 - index * 10 },
+      { name: 'toolsLeaveDelay', value: (index) => 40 - index * 10 },
       { name: 'toolsRight', value: (index) => { return { right: 152 - 48 * index } } },
-      { name: 'toolsStart', value: { opacity: 0, right: -44, rotate: 90 }}
+      { name: 'toolsStart', value: { opacity: 0, right: -44, rotate: 90 }},
+      { name: 'rangesStartPosition', value: (index) => rangeStartMap[index] },
+      { name: 'rangesEndPosition', value: (index) => rangeEndMap[index] }
     ],
     // 镜头
     scenes: {
@@ -50,7 +67,40 @@ const director = new Director({
               }
             }
           ]
-        },
+        }
+      ],
+      moveOut: [
+        {
+          charactors: ['main'],
+          desc: '点击关闭，主背景回到初始位置和大小',
+          actionClips: [
+            {
+              delay: 0,
+              duration: 400,
+              ease: 'easeIn',
+              from: ['endBound'],
+              to: ['startBound'],
+              update({ width, height, left, top }) {
+                this.target.style.width = `${width}%`
+                this.target.style.height = `${height}%`
+                this.target.style.left = `${left}px`
+                this.target.style.top = `${top}px`
+              }
+            },
+            {
+              delay: 300,
+              duration: 200,
+              ease: 'easeIn',
+              from: [{ opacity: 1 }],
+              to: [{ opacity: 0 }],
+              update({ opacity }) {
+                this.target.style.opacity = opacity
+              }
+            }
+          ]
+        }
+      ],
+      toolsIn: [
         {
           charactors: 'tools', // 群演的戏一般单独写在一起不与演员融合
           desc: '主背景进入以后，工具依次进入',
@@ -70,36 +120,7 @@ const director = new Director({
           ]
         }
       ],
-      moveOut: [
-        {
-          charactors: ['main'],
-          desc: '点击关闭，主背景回到初始位置和大小',
-          actionClips: [
-            {
-              delay: 200,
-              duration: 400,
-              ease: 'easeIn',
-              from: ['endBound'],
-              to: ['startBound'],
-              update({ width, height, left, top }) {
-                this.target.style.width = `${width}%`
-                this.target.style.height = `${height}%`
-                this.target.style.left = `${left}px`
-                this.target.style.top = `${top}px`
-              }
-            },
-            {
-              delay: 500,
-              duration: 200,
-              ease: 'easeIn',
-              from: [{ opacity: 1 }],
-              to: [{ opacity: 0 }],
-              update({ opacity }) {
-                this.target.style.opacity = opacity
-              }
-            }
-          ]
-        },
+      toolsOut: [
         {
           charactors: 'tools', // 群演的戏一般单独写在一起不与演员融合
           desc: '主背景进入以后，工具依次进入',
@@ -114,6 +135,47 @@ const director = new Director({
                 this.target.style.opacity = opacity
                 this.target.style.right = `${right}px`
                 this.target.style.transform = `rotate(${rotate}deg)`
+              }
+            }
+          ]
+        }
+      ],
+      captureIn: [
+        {
+          charactors: 'captureRanges',
+          desc: '点击截图按钮后，按钮群退出，展示截图范围',
+          actionClips: [
+            {
+              delay: 0,
+              duration: 400,
+              ease: 'linear',
+              from: ['rangesStartPosition', { opacity: 0 }],
+              to: ['rangesEndPosition', { opacity: 1 }],
+              update({ opacity, left, right, top, bottom }) {
+                this.target.style.opacity = opacity
+                if (left !== undefined) this.target.style.left = `${left}px`
+                if (right !== undefined) this.target.style.right = `${right}px`
+                if (top !== undefined) this.target.style.top = `${top}px`
+                if (bottom !== undefined) this.target.style.bottom = `${bottom}px`
+              }
+            }
+          ]
+        }
+      ],
+      captureShock: [
+        {
+          charactors: 'captureShocks',
+          desc: '截屏器上下快速咬合，形成拍摄的感觉',
+          actionClips: [
+            {
+              delay: 0,
+              duration: 200,
+              ease: 'linear',
+              frameByFrame: true,
+              from: [{ height: 0 }],
+              to: [{ height: 50 }],
+              update({ height }) {
+                this.target.style.height = `${height}%`
               }
             }
           ]
