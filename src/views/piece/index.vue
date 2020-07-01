@@ -4,13 +4,22 @@
     ref="main"
     class="view-piece"
   >
-    <div class="piece-main">
+    <div ref="comp" class="piece-main">
       <component
         :is="comp"
         v-if="comp"
       />
     </div>
-    <div v-show="capture" class="capture">
+    <div v-show="capture.activate" class="capture" :class="{ activate: capture.activate }">
+      <div v-show="capture.src" ref="captureImage" class="capture-image">
+        <img :src="capture.src">
+        <md-button class="md-icon-button button-done" @click.native="handleSave">
+          <md-icon>done</md-icon>
+        </md-button>
+        <md-button class="md-icon-button button-clear" @click.native="handleCancel">
+          <md-icon>clear</md-icon>
+        </md-button>
+      </div>
       <div class="capture-shock">
         <div ref="cst" class="shock-top" />
         <div ref="csb" class="shock-bottom" />
@@ -21,6 +30,7 @@
         <div ref="rlb" class="range-left-bottom" />
         <div ref="rrb" class="range-right-bottom" />
       </div>
+      <div class="capture-hide" />
     </div>
     <!--右上角的按钮群-->
     <div
@@ -31,7 +41,7 @@
         :key="`button${bindex}`"
         ref="tools"
         class="md-icon-button"
-        :disabled="capture && button.code === 'screenshot'"
+        :disabled="capture.activate && button.code === 'screenshot'"
         @click.native="handleButtonClick(button.code)"
       >
         <md-icon>{{ button.icon }}</md-icon>
@@ -42,8 +52,8 @@
 
 <script>
 import director from './storyboard'
-import html2canvas from 'html2canvas'
-// console.log(html2canvas)
+// import html2canvas from 'html2canvas'
+import domtoimage from 'dom-to-image'
 
 export default {
   name: 'ViewPiece',
@@ -64,7 +74,10 @@ export default {
       lastPiece: null,
       director,
       comp: '',
-      capture: false
+      capture: {
+        activate: false,
+        src: ''
+      }
     }
   },
   watch: {
@@ -101,21 +114,56 @@ export default {
           break
         }
         case 'screenshot': {
-          this.capture = true
-          this.director.playScenes([{ name: 'toolsOut' }, { name: 'captureIn', delay: 200 }, { name: 'captureShock', delay: 800 }])
+          this.capture.activate = true
+          this.director.playScenes([{ name: 'toolsOut' }, { name: 'captureIn', delay: 200 }, { name: 'captureShock', delay: 600 }]).then(() => {
+            // console.log(this.$refs.comp)
+            // html2canvas(this.$refs.comp, {
+            //   foreignObjectRendering: true,
+            //   useCORS: true
+            // }).then((canvas) => {
+            //   document.body.appendChild(canvas)
+            //   canvas.style.position = 'fixed'
+            //   canvas.style.zIndex = 99
+            //   canvas.style.left = 0
+            //   canvas.style.top = 0
+            // })
+            domtoimage.toPng(this.$refs.comp).then((src) => {
+              this.capture.src = src
+              this.$nextTick(() => {
+                const { width, height } = this.$refs.captureImage.getBoundingClientRect()
+                this.director.addProps({
+                  imageStartSize: { width, height },
+                  imageEndSize: { width: width * 0.2, height: height * 0.2 }
+                })
+                this.director.playScenes([{ name: 'toolsIn' }, { name: 'captureOut' }, { name: 'captureImageMove', delay: 100 }])
+              })
+            })
+          })
           break
         }
       }
     },
+    handleCancel() {
+      this.director.playScenes('captureCancel').then(() => {
+        this.clearCapture()
+      })
+    },
+    handleSave() {
+
+    },
     clearCapture() {
-      this.capture = false
+      this.capture.activate = false
+      this.capture.src = ''
+
+      this.director.resetCharator('captureImage')
     },
     addCharactors() {
       this.director.addCharactors({
         main: this.$refs.main,
         tools: this.$refs.tools.map((vcomp) => vcomp.$el),
         captureRanges: [this.$refs.rlt, this.$refs.rrt, this.$refs.rlb, this.$refs.rrb],
-        captureShocks: [this.$refs.cst, this.$refs.csb]
+        captureShocks: [this.$refs.cst, this.$refs.csb],
+        captureImage: this.$refs.captureImage
       })
     }
   }
@@ -143,10 +191,48 @@ export default {
       width: 100%;
       height: 100%;
       pointer-events: none;
+      &.activate{
+        pointer-events: auto;
+      }
+      .capture-image{
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 2px solid #fff;
+        box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.4);
+        overflow: hidden;
+        img {
+          width: 100%;
+          height: 100%;
+        }
+        .button-done, .button-clear {
+          position: absolute;
+          bottom: 4px;
+          background-color: #999;
+          border-radius: 0px;
+          width: 32px;
+          height: 32px;
+          min-width: 0px;
+          margin: 0;
+          &:before, .md-ripple, .md-ripple-wave{
+            border-radius: 0px !important;
+          }
+          i{
+            color: #fff;
+          }
+        }
+        .button-done {
+          right: 40px;
+        }
+        .button-clear {
+          right: 4px;
+        }
+      }
       .capture-range{
         position: absolute;
         width: 100%;
         height: 100%;
+        top: 0;
         div{
           position: absolute;
           width: 30px;
@@ -206,6 +292,9 @@ export default {
       right: 8px;
       top: 8px;
       .md-button{
+        &:before, .md-ripple, .md-ripple-wave{
+          border-radius: 0px !important;
+        }
         position: absolute;
         right: -44px;
         cursor: pointer;
@@ -215,9 +304,6 @@ export default {
         border-radius: 0px;
         margin: 0px;
         transform: rotate(90deg);
-        i{
-          color: #fff;
-        }
       }
     }
   }

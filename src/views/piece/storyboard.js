@@ -12,16 +12,22 @@ const rangeEndMap = [
   { left: 10, bottom: 10 },
   { right: 10, bottom: 10 }
 ]
+const rangeOutEndMap = [
+  { left: -10, top: -10 },
+  { right: -10, top: -10 },
+  { left: -10, bottom: -10 },
+  { right: -10, bottom: -10 }
+]
 
 const director = new Director({
   storyborad: {
     // 演员
     charactors: [
       { name: 'main' },
-      { name: 'title' },
       { name: 'tools', masses: true }, // 群众演员
       { name: 'captureRanges', masses: true, length: 4 },
-      { name: 'captureShocks', masses: true, length: 2 }
+      { name: 'captureShocks', masses: true, length: 2 },
+      { name: 'captureImage', engrave: ['style.width', 'style.height', 'style.left', 'style.top'] } // engrave on one's mind
     ],
     // 道具，这里指会被调用到的关键数据
     props: [
@@ -34,7 +40,10 @@ const director = new Director({
       { name: 'toolsRight', value: (index) => { return { right: 152 - 48 * index } } },
       { name: 'toolsStart', value: { opacity: 0, right: -44, rotate: 90 }},
       { name: 'rangesStartPosition', value: (index) => rangeStartMap[index] },
-      { name: 'rangesEndPosition', value: (index) => rangeEndMap[index] }
+      { name: 'rangesEndPosition', value: (index) => rangeEndMap[index] },
+      { name: 'rangesOutEndPosition', value: (index) => rangeOutEndMap[index] },
+      { name: 'imageStartSize' },
+      { name: 'imageEndSize' }
     ],
     // 镜头
     scenes: {
@@ -147,10 +156,32 @@ const director = new Director({
           actionClips: [
             {
               delay: 0,
-              duration: 400,
-              ease: 'linear',
+              duration: 200,
+              ease: 'easeOut',
               from: ['rangesStartPosition', { opacity: 0 }],
               to: ['rangesEndPosition', { opacity: 1 }],
+              update({ opacity, left, right, top, bottom }) {
+                this.target.style.opacity = opacity
+                if (left !== undefined) this.target.style.left = `${left}px`
+                if (right !== undefined) this.target.style.right = `${right}px`
+                if (top !== undefined) this.target.style.top = `${top}px`
+                if (bottom !== undefined) this.target.style.bottom = `${bottom}px`
+              }
+            }
+          ]
+        }
+      ],
+      captureOut: [
+        {
+          charactors: 'captureRanges',
+          desc: '拍完照后，截图范围消失',
+          actionClips: [
+            {
+              delay: 0,
+              duration: 300,
+              ease: 'easeIn',
+              from: ['rangesEndPosition', { opacity: 1 }],
+              to: ['rangesOutEndPosition', { opacity: 0 }],
               update({ opacity, left, right, top, bottom }) {
                 this.target.style.opacity = opacity
                 if (left !== undefined) this.target.style.left = `${left}px`
@@ -170,12 +201,51 @@ const director = new Director({
             {
               delay: 0,
               duration: 200,
-              ease: 'linear',
+              ease: 'goback',
               frameByFrame: true,
               from: [{ height: 0 }],
               to: [{ height: 50 }],
               update({ height }) {
                 this.target.style.height = `${height}%`
+              }
+            }
+          ]
+        }
+      ],
+      captureImageMove: [
+        {
+          charactors: ['captureImage'],
+          desc: '截图完成后，截图缩小至左上角',
+          actionClips: [
+            {
+              delay: 0,
+              duration: 400,
+              ease: 'easeOut',
+              from: ['imageStartSize', { left: 0, top: 0 }],
+              to: ['imageEndSize', { left: 10, top: 10 }],
+              update({ width, height, left, top }) {
+                this.target.style.width = `${width}px`
+                this.target.style.height = `${height}px`
+                this.target.style.left = `${left}px`
+                this.target.style.top = `${top}px`
+              }
+            }
+          ]
+        }
+      ],
+      captureCancel: [
+        {
+          charactors: ['captureImage'],
+          desc: '截图完成后，截图缩小至左上角',
+          actionClips: [
+            {
+              delay: 0,
+              duration: 400,
+              ease: 'turnBackIn2',
+              from: [{ top: 10 }],
+              to: [{ top: -500 }],
+              update({ top }) {
+                this.target.style.top = `${top}px`
               }
             }
           ]

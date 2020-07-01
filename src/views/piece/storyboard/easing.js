@@ -1,13 +1,40 @@
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value))
+}
+
 export default {
-  // t=当前动画运行了多长时间,b=动画开始位置,c动画结束位置,d=动画总时长
+  // t=当前动画运行了多长时间,b=动画开始位置,c动画结束位置,d=动画总时长,p是处理后的当前时间占比percent
   linear(t, b, c, d) {
-    if (t > d) t = d
-    return ((c - b) * t / d + b)
+    const p = clamp(t, 0, d) / d
+    return ((c - b) * p + b)
   },
   easeIn(t, b, c, d) {
-    if (t > d) t = d
-    t /= d
-    return (c - b) * t * t * t + b
+    const p = clamp(t, 0, d) / d
+    return (c - b) * p * p * p + b
+  },
+  easeOut(t, b, c, d) {
+    const p = 1 - clamp(t, 0, d) / d
+    return (c - b) * (1 - p * p * p) + b
+  },
+  goback(t, b, c, d) {
+    const p = clamp(t, 0, d) / d
+    return (c - b) * Math.sin(p * Math.PI) + b
+  },
+  turnBackIn1(t, b, c, d) {
+    const p = clamp(t, 0, d) / d - 0.1
+    return (c - b) * (5 / 4 * p * p - 1 / 60) + b
+  },
+  turnBackIn2(t, b, c, d) {
+    const p = clamp(t, 0, d) / d - 0.2
+    return (c - b) * (5 / 3 * p * p - 1 / 15) + b
+  },
+  turnBackOut1(t, b, c, d) {
+    const p = clamp(t, 0, d) / d - 0.9
+    return (c - b) * (-5 / 4 * p * p + 61 / 60) + b
+  },
+  turnBackOut2(t, b, c, d) {
+    const p = clamp(t, 0, d) / d - 0.8
+    return (c - b) * (-5 / 3 * p * p + 16 / 15) + b
   }
   // jquery-easing.js
   // easeInQuad: function(t, b, c, d) {

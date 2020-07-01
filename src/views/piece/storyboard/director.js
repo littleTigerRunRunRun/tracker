@@ -16,8 +16,12 @@ class Charactor {
     this.target = charactor.target || null
     this.masses = charactor.masses || false
     this.temporary = charactor.temporary || false
+    this.engrave(charactor.engrave)
   }
+  // engrave on one's mind铭记
+  engrave(engrave) {
 
+  }
   // 更换演员对象
   change({ target }) {
     this._changed = true
@@ -35,6 +39,9 @@ class Charactor {
     }
     if (this.target instanceof Array) return this.target[index]
     return this.target
+  }
+  reset() {
+
   }
 }
 
@@ -232,6 +239,9 @@ export default class Director {
         temporary: true // 这说明这是一个临时演员
       })
     } else this.charactors[name].change({ target })
+  }
+  resetCharator(name) {
+
   }
 
   // 道具
