@@ -37,7 +37,7 @@ class Tick {
 const tick = new Tick()
 
 export class Tween {
-  constructor({ target, duration, delay, ease, from, to, setMapFuncs, getMapFuncs, onUpdate }) {
+  constructor({ target, duration, delay, ease, from, to, setMapFuncs, getMapFuncs, onUpdate, filters = null }) {
     this.tick = tick
     this.target = target
     this.duration = duration
@@ -54,6 +54,7 @@ export class Tween {
     }
 
     this.onUpdate = onUpdate
+    this.filters = filters // onUpdate的轻量化处理
 
     this.tickId = this.tick.add(this.update.bind(this))
   }
@@ -115,7 +116,9 @@ export class Tween {
     const lerps = {}
     for (const key in this._to) {
       lerps[key] = this.easing(total, this._from[key], this._to[key], this.duration)
-      if (!this.onUpdate) (this.setMapFunc[key] || this._defaultSetMapFunc)(key, lerps[key])
+      if (!this.onUpdate && !this.filters) { (this.setMapFuncs[key] || this._defaultSetMapFunc)(key, lerps[key]) }
+      // 这一步是因为对于某些mvvm对象，tween的差值单位可能变化，但是自己又只能设置一套，这种操作就能在不同单位间切换使用
+      if (this.filters) { (this.setMapFuncs[key] || this._defaultSetMapFunc)(key, { value: lerps[key], filter: this.filters[key] || '' }) }
     }
     if (this.onUpdate) this.onUpdate(lerps)
   }

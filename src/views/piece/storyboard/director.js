@@ -1,4 +1,5 @@
 import { Timeline, Tween } from './tween'
+import Charactor from './charactor'
 
 // 一个抽象类，它会存储最近的directorId作为指针，并且将自动找寻自己对应的props和charactors
 class IdObject {
@@ -7,42 +8,6 @@ class IdObject {
   }
   get charactors() { return _charactors[this.directorId] }
   get props() { return _props[this.directorId] }
-}
-
-class Charactor {
-  constructor(charactor) {
-    this.name = charactor.name
-    this.length = charactor.length || 1
-    this.target = charactor.target || null
-    this.masses = charactor.masses || false
-    this.temporary = charactor.temporary || false
-    this.engrave(charactor.engrave)
-  }
-  // engrave on one's mind铭记
-  engrave(engrave) {
-
-  }
-  // 更换演员对象
-  change({ target }) {
-    this._changed = true
-    this.target = target
-    // 群演
-    if (target instanceof Array) {
-      this.masses = true
-      this.length = target.length
-    }
-  }
-  getTarget(index) {
-    if (!this.target) {
-      console.error(`名为${this.name}的演员未就位`)
-      return
-    }
-    if (this.target instanceof Array) return this.target[index]
-    return this.target
-  }
-  reset() {
-
-  }
 }
 
 class Prop {
@@ -99,6 +64,7 @@ class Action extends IdObject {
       newClip.from = clip.from
       newClip.to = clip.to
       newClip.update = clip.update
+      newClip.filters = clip.filters
       newClip.ease = clip.ease
       this.clips.push(newClip)
     }
@@ -129,11 +95,13 @@ class Action extends IdObject {
             delay: this.getPropValue(clip.delay, i) + (params.delay || 0),
             target,
             ease: clip.ease,
-            onUpdate: clip.update
+            onUpdate: clip.update,
+            filters: clip.filters
           })
           this.timeline.add(tween)
         }
       } else {
+        // console.log(clip.filters)
         if (Object.keys(rc).length === 1) {
           // 单对象动画
           const target = rc[0].getTarget()
@@ -144,7 +112,8 @@ class Action extends IdObject {
             delay: this.getPropValue(clip.delay) + (params.delay || 0),
             target,
             ease: clip.ease,
-            onUpdate: clip.update
+            onUpdate: clip.update,
+            filters: clip.filters
           })
           this.timeline.add(tween)
           // how to set delay
@@ -241,7 +210,8 @@ export default class Director {
     } else this.charactors[name].change({ target })
   }
   resetCharator(name) {
-
+    this.charactors[name].reset()
+    console.log(this.charactors[name])
   }
 
   // 道具

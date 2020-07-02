@@ -19,6 +19,7 @@
         <md-button class="md-icon-button button-clear" @click.native="handleCancel">
           <md-icon>clear</md-icon>
         </md-button>
+        <div ref="captureImageHide" class="hide-white" />
       </div>
       <div class="capture-shock">
         <div ref="cst" class="shock-top" />
@@ -115,7 +116,7 @@ export default {
         }
         case 'screenshot': {
           this.capture.activate = true
-          this.director.playScenes([{ name: 'toolsOut' }, { name: 'captureIn', delay: 200 }, { name: 'captureShock', delay: 600 }]).then(() => {
+          this.director.playScenes([{ name: 'toolsOut' }, { name: 'captureRangeIn', delay: 200 }, { name: 'captureShock', delay: 600 }]).then(() => {
             // console.log(this.$refs.comp)
             // html2canvas(this.$refs.comp, {
             //   foreignObjectRendering: true,
@@ -135,7 +136,7 @@ export default {
                   imageStartSize: { width, height },
                   imageEndSize: { width: width * 0.2, height: height * 0.2 }
                 })
-                this.director.playScenes([{ name: 'toolsIn' }, { name: 'captureOut' }, { name: 'captureImageMove', delay: 100 }])
+                this.director.playScenes([{ name: 'toolsIn' }, { name: 'captureRangeOut' }, { name: 'captureImageMove', delay: 100 }])
               })
             })
           })
@@ -149,7 +150,11 @@ export default {
       })
     },
     handleSave() {
-
+      const bound = this.$refs.captureImage.getBoundingClientRect()
+      this.director.addProp('imageShrinkBound')
+      this.director.playScenes('captureSave').then(() => {
+        console.log('save!')
+      })
     },
     clearCapture() {
       this.capture.activate = false
@@ -226,6 +231,15 @@ export default {
         }
         .button-clear {
           right: 4px;
+        }
+        .captureImageHide{
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          opacity: 0;
+          background-color: #fff;
         }
       }
       .capture-range{
