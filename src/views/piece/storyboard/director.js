@@ -36,22 +36,37 @@ class Action extends IdObject {
     this.timeline = new Timeline()
     this.addClips(action.actionClips)
   }
-  getProp(name) {
-    if (this.props[name]) return this.props[name]
-    console.error(`找不到名为${name}的道具(prop)`)
-  }
+  // getProp(name) {
+  //   if (this.props[name]) return this.props[name]
+  //   console.error(`找不到名为${name}的道具(prop)`)
+  // }
   getPropValue(name, index) {
-    if (typeof name === 'string') {
-      if (this.props[name]) return this.props[name].getValue(index)
-      console.error(`找不到名为${name}的道具(prop)`)
+    // 提供一种全新的功能，支持prop.childProp,childProp2的方式抽出部分属性组成一个新的对象
+    if (name.indexOf && name.indexOf('.') > -1) {
+      name = name.split('.')
+      const childs = name[1].split(',')
+      const propValue = this.getPropValue(name[0], index)
+      const result = {}
+      for (const key of childs) {
+        result[key] = propValue[key]
+      }
+      return result
+    } else {
+      if (typeof name === 'string') {
+        if (this.props[name]) return this.props[name].getValue(index)
+        console.error(`找不到名为${name}的道具(prop)`)
+      }
+      return name
     }
-    return name
   }
   // 将可能包含了prop的对象数组中的prop取值并完成assign
-  assignObjects(array, index) {
+  assignObjects(array, temporaryData, index) {
     let assignObj = {}
     const valueGotArray = array.map((prop) => {
-      assignObj = Object.assign(assignObj, this.getPropValue(prop, index))
+      // console.log(prop, temporaryData)
+      if (temporaryData && temporaryData[prop]) {
+        assignObj = Object.assign(assignObj, temporaryData[prop])
+      } else assignObj = Object.assign(assignObj, this.getPropValue(prop, index))
     })
     return assignObj
   }
@@ -81,7 +96,7 @@ class Action extends IdObject {
       }
     }
   }
-  play(params) {
+  play(params, temporaryData) {
     const rc = this.relativeCharactors // 快速通道
     for (const clip of this.clips) {
       if (rc instanceof Charactor) {
@@ -89,8 +104,8 @@ class Action extends IdObject {
         for (let i = 0; i < rc.length; i++) {
           const target = rc.getTarget(i)
           const tween = new Tween({
-            from: this.assignObjects(clip.from, i),
-            to: this.assignObjects(clip.to, i),
+            from: this.assignObjects(clip.from, temporaryData, i),
+            to: this.assignObjects(clip.to, temporaryData, i),
             duration: this.getPropValue(clip.duration, i),
             delay: this.getPropValue(clip.delay, i) + (params.delay || 0),
             target,
@@ -106,8 +121,8 @@ class Action extends IdObject {
           // 单对象动画
           const target = rc[0].getTarget()
           const tween = new Tween({
-            from: this.assignObjects(clip.from),
-            to: this.assignObjects(clip.to),
+            from: this.assignObjects(clip.from, temporaryData),
+            to: this.assignObjects(clip.to, temporaryData),
             duration: this.getPropValue(clip.duration),
             delay: this.getPropValue(clip.delay) + (params.delay || 0),
             target,
@@ -154,10 +169,10 @@ class Scene extends IdObject {
     }
   }
 
-  play(params) {
+  play(params, temporaryData) {
     let all = []
     for (const action of this.actions) {
-      all = all.concat(action.play(params))
+      all = all.concat(action.play(params, temporaryData))
     }
     return all
   }
@@ -263,15 +278,18 @@ export default class Director {
 
     this._scenes[name] = scene
   }
-  playScenes(scenes) {
-    if (typeof scenes === 'string') return Promise.all(this._scenes[scenes].play({}))
+  playScenes(scenes, temporaryData) {
+    if (typeof scenes === 'string') return Promise.all(this._scenes[scenes].play({}, temporaryData))
     else if (scenes instanceof Array) {
       let all = []
       for (const scene of scenes) {
-        all = all.concat(this._scenes[scene.name].play(scene))
+        all = all.concat(this._scenes[scene.name].play(scene, temporaryData))
       }
       return Promise.all(all)
     }
     // return this._scenes[name].play()
+  }
+  destroy() {
+    // 销毁
   }
 }

@@ -22,7 +22,8 @@ const director = new Director({
       { name: 'tools', type: 'dom', masses: true }, // 群众演员
       { name: 'captureRanges', type: 'dom', masses: true, length: 4 },
       { name: 'captureShocks', type: 'dom', masses: true, length: 2 },
-      { name: 'captureImage', type: 'dom', engrave: ['width', 'height', 'left', 'top'] } // engrave on one's mind
+      { name: 'captureImage', type: 'dom', engrave: ['width', 'height', 'left', 'top', 'rotate'] }, // engrave on one's mind
+      { name: 'captureImageContent', type: 'dom', engrave: ['opacity'] }
     ],
     // 道具，这里指会被调用到的关键数据
     props: [
@@ -213,6 +214,46 @@ const director = new Director({
               ease: 'easeIn',
               from: ['imageEndSize', { top: 10, left: 10 }],
               to: ['imageShrinkBound']
+            }
+          ]
+        },
+        {
+          charactors: ['captureImage'],
+          desc: '内容旋转',
+          actionClips: [
+            {
+              delay: 200,
+              duration: 1000,
+              ease: 'easeIn',
+              from: [{ rotate: 0 }],
+              to: [{ rotate: 360 }]
+            }
+          ]
+        },
+        // 这种动画应该加一个继承类的配置
+        {
+          charactors: ['captureImage'],
+          desc: '下落',
+          actionClips: [
+            {
+              delay: 300,
+              duration: 1000,
+              ease: 'easeIn',
+              from: ['imageShrinkBound.top'],
+              to: ['endTop']
+            }
+          ]
+        },
+        {
+          charactors: ['captureImageContent'],
+          desc: '在外容器缩小成一个正方形的同时，内容逐渐褪去',
+          actionClips: [
+            {
+              delay: 100,
+              duration: 200,
+              ease: 'linear',
+              from: [{ opacity: 1 }],
+              to: [{ opacity: 0 }]
             }
           ]
         }

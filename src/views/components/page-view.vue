@@ -34,7 +34,7 @@ export default {
       current: 'home',
       buttons: [
         { code: 'home', title: '繁华唱遍', component: HomeComp },
-        { code: 'game', title: '我本逍遥', component: GameComp },
+        { code: 'game', title: '点石成金', component: GameComp },
         { code: 'about', title: '东风志', component: AboutComp }
       ]
     }

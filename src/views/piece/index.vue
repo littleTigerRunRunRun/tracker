@@ -10,16 +10,20 @@
         v-if="comp"
       />
     </div>
+    <div class="decorators">
+      <div class="water-spray" />
+    </div>
     <div v-show="capture.activate" class="capture" :class="{ activate: capture.activate }">
       <div v-show="capture.src" ref="captureImage" class="capture-image">
-        <img :src="capture.src">
-        <md-button class="md-icon-button button-done" @click.native="handleSave">
-          <md-icon>done</md-icon>
-        </md-button>
-        <md-button class="md-icon-button button-clear" @click.native="handleCancel">
-          <md-icon>clear</md-icon>
-        </md-button>
-        <div ref="captureImageHide" class="hide-white" />
+        <div ref="captureImageContent" class="image-content">
+          <img :src="capture.src">
+          <md-button class="md-icon-button button-done" :disabled="capture.imageDisabled" @click.native="handleSave">
+            <md-icon>done</md-icon>
+          </md-button>
+          <md-button class="md-icon-button button-clear" :disabled="capture.imageDisabled" @click.native="handleCancel">
+            <md-icon>clear</md-icon>
+          </md-button>
+        </div>
       </div>
       <div class="capture-shock">
         <div ref="cst" class="shock-top" />
@@ -52,6 +56,7 @@
 </template>
 
 <script>
+import { saveCapture } from './api'
 import director from './storyboard'
 // import html2canvas from 'html2canvas'
 import domtoimage from 'dom-to-image'
@@ -77,7 +82,8 @@ export default {
       comp: '',
       capture: {
         activate: false,
-        src: ''
+        src: '',
+        imageDisabled: false
       }
     }
   },
@@ -89,6 +95,9 @@ export default {
     }
   },
   mounted() {
+  },
+  beforeDestroy() {
+    this.director.destroy()
   },
   methods: {
     view() {
@@ -145,22 +154,36 @@ export default {
       }
     },
     handleCancel() {
+      this.capture.imageDisabled = true
       this.director.playScenes('captureCancel').then(() => {
+        this.capture.imageDisabled = false
         this.clearCapture()
       })
     },
     handleSave() {
       const bound = this.$refs.captureImage.getBoundingClientRect()
-      this.director.addProp('imageShrinkBound')
-      this.director.playScenes('captureSave').then(() => {
-        console.log('save!')
+      this.director.addProp('imageShrinkBound', {
+        width: 20,
+        height: 20,
+        left: bound.left + (bound.width - 20) / 2,
+        top: 10
+      })
+      saveCapture({ src: this.capture.src }).then((data) => {
+        console.log(data)
+      })
+      this.capture.imageDisabled = true
+      this.director.playScenes('captureSave', { endTop: { top: window.innerHeight + 10 }}).then(() => {
+        this.capture.imageDisabled = false
+        this.clearCapture()
       })
     },
     clearCapture() {
       this.capture.activate = false
       this.capture.src = ''
+      this.capture.imageDisabled = false
 
       this.director.resetCharator('captureImage')
+      this.director.resetCharator('captureImageContent')
     },
     addCharactors() {
       this.director.addCharactors({
@@ -168,7 +191,8 @@ export default {
         tools: this.$refs.tools.map((vcomp) => vcomp.$el),
         captureRanges: [this.$refs.rlt, this.$refs.rrt, this.$refs.rlb, this.$refs.rrb],
         captureShocks: [this.$refs.cst, this.$refs.csb],
-        captureImage: this.$refs.captureImage
+        captureImage: this.$refs.captureImage,
+        captureImageContent: this.$refs.captureImageContent
       })
     }
   }
@@ -206,6 +230,15 @@ export default {
         border: 2px solid #fff;
         box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.4);
         overflow: hidden;
+        transform-origin: 50% 50%;
+        backface-visibility: hidden;
+        background-color: #fff;
+        .image-content{
+          width: 100%;
+          height: 100%;
+          position: relative;
+          opacity: 1;
+        }
         img {
           width: 100%;
           height: 100%;
@@ -232,21 +265,13 @@ export default {
         .button-clear {
           right: 4px;
         }
-        .captureImageHide{
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          opacity: 0;
-          background-color: #fff;
-        }
       }
       .capture-range{
         position: absolute;
         width: 100%;
         height: 100%;
         top: 0;
+        pointer-events: none;
         div{
           position: absolute;
           width: 30px;
@@ -287,6 +312,7 @@ export default {
         height: calc(100% - 22px);
         left: 11px;
         top: 11px;
+        pointer-events: none;
         div {
           position: absolute;
           width: 100%;
@@ -318,6 +344,9 @@ export default {
         border-radius: 0px;
         margin: 0px;
         transform: rotate(90deg);
+        i{
+          color: #fff;
+        }
       }
     }
   }
