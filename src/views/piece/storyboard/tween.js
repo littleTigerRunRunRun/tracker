@@ -123,7 +123,8 @@ export class Tween {
     if (this.onUpdate) this.onUpdate(lerps)
   }
   update(now) {
-    const total = Math.max(0, now - this._startTime - this.delay)
+    const total = now - this._startTime - this.delay
+    if (total < 0) return
     if (total > this.duration) {
       this.lerp(this.duration)
       this.activate = false

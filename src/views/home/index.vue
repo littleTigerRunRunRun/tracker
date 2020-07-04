@@ -50,6 +50,7 @@ export default {
     AddCateDialog,
     PieceBlockList
   },
+  inject: ['piecesRefreshEvent'],
   data() {
     return {
       titleList: [],
@@ -73,6 +74,10 @@ export default {
   },
   mounted() {
     this.getData()
+    this.piecesRefreshEvent.push(this.getPiece)
+  },
+  beforeDestroy() {
+    this.piecesRefreshEvent.splice(this.piecesRefreshEvent.indexOf(this.getPiece, 1))
   },
   methods: {
     async getData() {

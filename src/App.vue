@@ -6,7 +6,7 @@
         slot="main"
       />
     </page-view>
-    <view-piece :piece.sync="piece" />
+    <view-piece :piece.sync="piece" @pieceRefresh="handlePieceRefresh" />
   </div>
 </template>
 
@@ -26,7 +26,8 @@ export default {
   components,
   provide() {
     return {
-      handleViewPiece: this.handleViewPiece
+      handleViewPiece: this.handleViewPiece,
+      piecesRefreshEvent: this.piecesRefreshEvent
     }
   },
   data() {
@@ -35,6 +36,7 @@ export default {
         name: 'main',
         component: pages.home.name
       },
+      piecesRefreshEvent: [],
       piece: null
     }
   },
@@ -54,6 +56,9 @@ export default {
         data,
         target
       }
+    },
+    handlePieceRefresh() {
+      this.piecesRefreshEvent.map((item) => { item() })
     }
   }
 }

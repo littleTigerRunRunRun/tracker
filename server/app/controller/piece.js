@@ -41,13 +41,16 @@ class PieceController extends Controller {
         title: query.title,
         label: ctx.queries.label
       })
-      fs.writeFile(path.resolve(__dirname, mainDirection(query.categoryId + '.json')), JSON.stringify(pieces),  function(err) {
-        if (err) {
-            return console.error(err)
-        }
-      })
+      this.writePieces(query.categoryId, pieces)
     }
     ctx.body = data
+  }
+  writePieces(categoryId, pieces) {
+    fs.writeFile(path.resolve(__dirname, mainDirection(categoryId + '.json')), JSON.stringify(pieces),  function(err) {
+      if (err) {
+          return console.error(err)
+      }
+    })
   }
   list() {
     const { ctx } = this
@@ -68,6 +71,37 @@ class PieceController extends Controller {
       message,
       code,
       data
+    }
+  }
+  saveCapture() {
+    const { ctx } = this
+    const body = ctx.request.body
+    const src = body.src.replace(/^data:image\/\w+;base64,/, '')
+    const dataBuffer = Buffer.from(src, 'base64')
+    const pieces = this.getPieces(body.categoryId)
+    
+    const piece = pieces.list.find((item) => item.id === body.id)
+
+    if (!piece) {
+      ctx.body = {
+        message: '不存在的作品id',
+        code: 500,
+        data: null
+      }
+    } else {
+      const fileName = body.id + '.jpg'
+      piece.capture = 'http://127.0.0.1:7001/public/img/capture/' + fileName
+      this.writePieces(body.categoryId, pieces)
+      fs.writeFile(path.resolve(__dirname, '../public/img/capture/' + fileName), dataBuffer, function(err) {
+        if(err){
+          console.error(err)
+        }
+      })
+      ctx.body = {
+        message: '保存成功',
+        code: 200,
+        data: null
+      }
     }
   }
 }

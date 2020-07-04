@@ -23,7 +23,7 @@
     >
       <img width="100%" src="../../../assets/gold_rect.jpg">
       <div class="piece-content">
-        <div class="common-content">
+        <div class="common-content" :style="{ backgroundImage: `url(${piece.capture || 'http://127.0.0.1:7001/public/img/capture/default.jpg'})` }">
           <span class="title">
             {{ piece.title }}
           </span>
@@ -71,7 +71,7 @@ export default {
       this.$refs.addPiece.activate()
     },
     viewPiece(piece, index) {
-      this.handleViewPiece(Object.assign(piece, { categoryName: this.categoryName }), this.$refs.piece[index])
+      this.handleViewPiece(Object.assign(piece, { categoryName: this.categoryName, categoryId: this.categoryId }), this.$refs.piece[index])
     }
   }
 }
@@ -129,7 +129,6 @@ export default {
         width: 100%;
         height: 100%;
         padding: 6px 10px;
-        background-image: url('../../../assets/view.jpg');
         background-size: cover;
         position: relative;
         span{

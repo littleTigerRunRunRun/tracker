@@ -4,7 +4,7 @@
     ref="main"
     class="view-piece"
   >
-    <div ref="comp" class="piece-main">
+    <div ref="comp" class="piece-main" :style="{ backgroundImage: `url(${piece.data.capture || 'http://127.0.0.1:7001/public/img/capture/default.jpg'})` }">
       <component
         :is="comp"
         v-if="comp"
@@ -73,7 +73,7 @@ export default {
     return {
       buttons: [
         { code: 'screenshot', icon: 'photo_camera' },
-        { code: 'setConfig', icon: 'build' },
+        { code: 'config', icon: 'build' },
         { code: 'readMD', icon: 'menu_book' },
         { code: 'close', icon: 'close' }
       ],
@@ -101,6 +101,7 @@ export default {
   },
   methods: {
     view() {
+      // console.log(this.piece)
       this.comp = () => import(`../../pieces/${this.piece.data.categoryName}/${this.piece.data.name}/entry.vue`)
       this.lastPiece = true
 
@@ -151,6 +152,10 @@ export default {
           })
           break
         }
+        case 'config': {
+          this.director.playScenes([{ name: 'toolsOut' }])
+          break
+        }
       }
     },
     handleCancel() {
@@ -166,13 +171,14 @@ export default {
         width: 20,
         height: 20,
         left: bound.left + (bound.width - 20) / 2,
-        top: 10
+        bottom: bound.height / 2 + 10
       })
-      saveCapture({ src: this.capture.src }).then((data) => {
+      saveCapture({ src: this.capture.src, id: this.piece.data.id, categoryId: this.piece.data.categoryId }).then((data) => {
         console.log(data)
+        this.$emit('pieceRefresh')
       })
       this.capture.imageDisabled = true
-      this.director.playScenes('captureSave', { endTop: { top: window.innerHeight + 10 }}).then(() => {
+      this.director.playScenes('captureSave', { endBottom: { bottom: window.innerHeight + 10 }}).then(() => {
         this.capture.imageDisabled = false
         this.clearCapture()
       })
@@ -210,7 +216,7 @@ export default {
       width: 100%;
       height: 100%;
       position: relative;
-      background-image: url('../../assets/view.jpg');
+      // background-image: url('../../assets/view.jpg');
       background-size: cover;
     }
     .capture{

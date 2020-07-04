@@ -13,4 +13,5 @@ module.exports = app => {
   // 作品相关
   router.get('/api/piece/list', controller.piece.list)
   router.get('/api/piece/add', controller.piece.add)
+  router.post('/api/piece/saveCapture', controller.piece.saveCapture)
 }

@@ -226,7 +226,7 @@ export default class Director {
   }
   resetCharator(name) {
     this.charactors[name].reset()
-    console.log(this.charactors[name])
+    // console.log(this.charactors[name])
   }
 
   // 道具

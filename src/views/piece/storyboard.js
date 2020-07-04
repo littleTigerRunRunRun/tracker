@@ -22,7 +22,7 @@ const director = new Director({
       { name: 'tools', type: 'dom', masses: true }, // 群众演员
       { name: 'captureRanges', type: 'dom', masses: true, length: 4 },
       { name: 'captureShocks', type: 'dom', masses: true, length: 2 },
-      { name: 'captureImage', type: 'dom', engrave: ['width', 'height', 'left', 'top', 'rotate'] }, // engrave on one's mind
+      { name: 'captureImage', type: 'dom', engrave: ['width', 'height', 'left', 'bottom', 'rotate'] }, // engrave on one's mind
       { name: 'captureImageContent', type: 'dom', engrave: ['opacity'] }
     ],
     // 道具，这里指会被调用到的关键数据
@@ -176,14 +176,14 @@ const director = new Director({
       captureImageMove: [
         {
           charactors: ['captureImage'],
-          desc: '截图完成后，截图缩小至左上角',
+          desc: '截图完成后，截图缩小至左下角',
           actionClips: [
             {
               delay: 0,
               duration: 400,
               ease: 'easeOut',
-              from: ['imageStartSize', { left: 0, top: 0 }],
-              to: ['imageEndSize', { left: 10, top: 10 }]
+              from: ['imageStartSize', { left: 0, bottom: 0 }],
+              to: ['imageEndSize', { left: 10, bottom: 10 }]
             }
           ]
         }
@@ -191,14 +191,14 @@ const director = new Director({
       captureCancel: [
         {
           charactors: ['captureImage'],
-          desc: '截图被取消，上移消失',
+          desc: '截图被取消，下移消失',
           actionClips: [
             {
               delay: 0,
               duration: 400,
               ease: 'turnBackIn2',
-              from: [{ top: 10 }],
-              to: [{ top: -500 }]
+              from: [{ bottom: 10 }],
+              to: [{ bottom: -500 }]
             }
           ]
         }
@@ -206,13 +206,13 @@ const director = new Director({
       captureSave: [
         {
           charactors: ['captureImage'],
-          desc: '截图保存,类似于一滴水掉落下去',
+          desc: '截图保存，图片转化成一个颗粒，我们可以理解成是压缩成了数据',
           actionClips: [
             {
               delay: 0,
               duration: 300,
               ease: 'easeIn',
-              from: ['imageEndSize', { top: 10, left: 10 }],
+              from: ['imageEndSize', { bottom: 10, left: 10 }],
               to: ['imageShrinkBound']
             }
           ]
@@ -222,8 +222,8 @@ const director = new Director({
           desc: '内容旋转',
           actionClips: [
             {
-              delay: 200,
-              duration: 1000,
+              delay: 0,
+              duration: 1300,
               ease: 'easeIn',
               from: [{ rotate: 0 }],
               to: [{ rotate: 360 }]
@@ -233,14 +233,14 @@ const director = new Director({
         // 这种动画应该加一个继承类的配置
         {
           charactors: ['captureImage'],
-          desc: '下落',
+          desc: '上升的动画，暗示数据在上传到服务器',
           actionClips: [
             {
               delay: 300,
               duration: 1000,
               ease: 'easeIn',
-              from: ['imageShrinkBound.top'],
-              to: ['endTop']
+              from: ['imageShrinkBound.bottom'],
+              to: ['endBottom']
             }
           ]
         },
