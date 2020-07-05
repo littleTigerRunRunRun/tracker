@@ -46,7 +46,10 @@
         :key="`button${bindex}`"
         ref="tools"
         class="md-icon-button"
-        :disabled="capture.activate && button.code === 'screenshot'"
+        :disabled="
+          (capture.activate && button.code === 'screenshot') ||
+          (markdown.activate && button.code === 'markdown')
+        "
         @click.native="handleButtonClick(button.code)"
       >
         <md-icon>{{ button.icon }}</md-icon>
@@ -74,7 +77,7 @@ export default {
       buttons: [
         { code: 'screenshot', icon: 'photo_camera' },
         { code: 'config', icon: 'build' },
-        { code: 'readMD', icon: 'menu_book' },
+        { code: 'markdown', icon: 'menu_book' },
         { code: 'close', icon: 'close' }
       ],
       lastPiece: null,
@@ -84,6 +87,9 @@ export default {
         activate: false,
         src: '',
         imageDisabled: false
+      },
+      markdown: {
+        activate: false
       }
     }
   },
@@ -127,17 +133,6 @@ export default {
         case 'screenshot': {
           this.capture.activate = true
           this.director.playScenes([{ name: 'toolsOut' }, { name: 'captureRangeIn', delay: 200 }, { name: 'captureShock', delay: 600 }]).then(() => {
-            // console.log(this.$refs.comp)
-            // html2canvas(this.$refs.comp, {
-            //   foreignObjectRendering: true,
-            //   useCORS: true
-            // }).then((canvas) => {
-            //   document.body.appendChild(canvas)
-            //   canvas.style.position = 'fixed'
-            //   canvas.style.zIndex = 99
-            //   canvas.style.left = 0
-            //   canvas.style.top = 0
-            // })
             domtoimage.toPng(this.$refs.comp).then((src) => {
               this.capture.src = src
               this.$nextTick(() => {
@@ -154,6 +149,14 @@ export default {
         }
         case 'config': {
           this.director.playScenes([{ name: 'toolsOut' }])
+          break
+        }
+        case 'markdown': {
+          // (() => import(`../../pieces/${this.piece.data.categoryName}/${this.piece.data.name}/doc.md`))().then((data) => {
+          //   console.log(data)
+          // })
+          this.markdown.activate = true
+          this.director.playScenes([{ name: 'markdownIn' }])
           break
         }
       }
@@ -174,7 +177,7 @@ export default {
         bottom: bound.height / 2 + 10
       })
       saveCapture({ src: this.capture.src, id: this.piece.data.id, categoryId: this.piece.data.categoryId }).then((data) => {
-        console.log(data)
+        // console.log(data)
         this.$emit('pieceRefresh')
       })
       this.capture.imageDisabled = true

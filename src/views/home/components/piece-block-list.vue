@@ -23,7 +23,8 @@
     >
       <img width="100%" src="../../../assets/gold_rect.jpg">
       <div class="piece-content">
-        <div class="common-content" :style="{ backgroundImage: `url(${piece.capture || 'http://127.0.0.1:7001/public/img/capture/default.jpg'})` }">
+        <div class="common-content">
+          <img :src="piece.capture || 'http://127.0.0.1:7001/public/img/capture/default.jpg'" >
           <span class="title">
             {{ piece.title }}
           </span>
@@ -131,6 +132,14 @@ export default {
         padding: 6px 10px;
         background-size: cover;
         position: relative;
+        &>img{
+          position: absolute;
+          min-width: 100%;
+          min-height: 100%;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+        }
         span{
           color: #fff;
           display: inline-block;

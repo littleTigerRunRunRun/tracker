@@ -19,7 +19,7 @@ const director = new Director({
     charactors: [
       // dom类型会被劫持一层，进而简化样式赋值
       { name: 'main', type: 'dom' },
-      { name: 'tools', type: 'dom', masses: true }, // 群众演员
+      { name: 'tools', type: 'dom', masses: true, length: 4 }, // 群众演员
       { name: 'captureRanges', type: 'dom', masses: true, length: 4 },
       { name: 'captureShocks', type: 'dom', masses: true, length: 2 },
       { name: 'captureImage', type: 'dom', engrave: ['width', 'height', 'left', 'bottom', 'rotate'] }, // engrave on one's mind
@@ -240,6 +240,7 @@ const director = new Director({
               duration: 1000,
               ease: 'easeIn',
               from: ['imageShrinkBound.bottom'],
+              // 这里这个endBottom属于临时资产，是在play的时候传入的，无需预先定义
               to: ['endBottom']
             }
           ]
@@ -257,6 +258,36 @@ const director = new Director({
             }
           ]
         }
+      ],
+      markdownIn: [
+        {
+          charactors: 'tools.2',
+          desc: '点击动画后，工具-第三个，即文档markdown按钮向左侧旋转移动到左上角后放大到全量',
+          actionClips: [
+            {
+              delay: 0,
+              duration: 300,
+              ease: 'linear',
+              from: [{ opacity: 1 }],
+              to: [{ opacity: 0 }]
+              // from: ['toolsRight', { rotate: 0 }],
+              // to: ['markdownRight', { rotate: 720 }]
+            }
+          ]
+        }
+        // {
+        //   charactors: 'tools-2', // 群演的戏一般单独写在一起不与演员融合
+        //   desc: '主背景进入以后，工具依次进入',
+        //   actionClips: [
+        //     {
+        //       delay: 'toolsLeaveDelay',
+        //       duration: 'toolsLeaveDuration',
+        //       ease: 'linear',
+        //       from: ['toolsRight', { opacity: 1, rotate: 0 }],
+        //       to: ['toolsStart']
+        //     }
+        //   ]
+        // }
       ]
     }
   }

@@ -31,7 +31,7 @@ class Action extends IdObject {
   constructor(action) {
     super()
     this.desc = action.desc
-    this.charactorsName = action.charactors
+    // 大部分的action在初始化时是没有charactors到位的
     this.masses = typeof action.charactors === 'string'
     this.timeline = new Timeline()
     this.addClips(action.actionClips)
@@ -83,6 +83,10 @@ class Action extends IdObject {
       newClip.ease = clip.ease
       this.clips.push(newClip)
     }
+  }
+  setMassesCharactors({ target, gather }) {
+    this.relativeCharactors = target
+    this.relativeGather = gather
   }
   setCharactors(charactors) {
     // 为了不与charactors的getter重名
@@ -152,19 +156,48 @@ class Scene extends IdObject {
     this.registerActions(actions)
   }
 
+  fetchGather(charactors) {
+    let gather = []
+    let target = null
+
+    if (charactors.indexOf('.') > -1) {
+      const split = charactors.split('.')
+      target = this.charactors[split[0]]
+      gather = split[1].split(',').map((item) => parseInt(item))
+    } else if (charactors.indexOf('-') > -1) {
+      const split = charactors.split('-')
+      target = this.charactors[split[0]]
+      const filter = split[1].split(',').map((item) => parseInt(item))
+      for (let i = 0; i < target.length; i++) {
+        if (!filter.includes(i)) gather.push(i)
+      }
+    } else {
+      target = this.charactors[charactors]
+      for (let i = 0; i < target.length; i++) {
+        gather.push(i)
+      }
+    }
+
+    return {
+      target,
+      gather
+    }
+  }
+
   registerActions(actions) {
     this.actions = []
     for (const action of actions) {
       const sceneAction = new Action(action)
       let charactors
       if (typeof action.charactors === 'string') {
-        charactors = this.charactors[action.charactors]
+        const massesCharactor = this.fetchGather(action.charactors)
+        sceneAction.setMassesCharactors(massesCharactor)
       } else {
         charactors = action.charactors.map((name) => {
           return this.charactors[name]
         })
+        sceneAction.setCharactors(charactors)
       }
-      sceneAction.setCharactors(charactors)
       this.actions.push(sceneAction)
     }
   }
@@ -178,7 +211,7 @@ class Scene extends IdObject {
   }
 }
 
-let directorLastestId = 0
+let directorLastestId = 0 // 全局有多个剧本的情况下，用这个id区分演员池和道具池
 const _charactors = {} // 演员池
 const _props = {} // 道具集，道具包含了数据和通过序列生成数据的工具函数
 // 剧组

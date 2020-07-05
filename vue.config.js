@@ -11,5 +11,11 @@ module.exports = {
         }
       }
     }
+  },
+  chainWebpack: (config) => {
+    const rule = config.module.rule('markdown').test(/\.md$/)
+    rule.use('html-loader').loader('html-loader')
+    rule.use('markdown-loader').loader('markdown-loader')
+    rule.end()
   }
 }
