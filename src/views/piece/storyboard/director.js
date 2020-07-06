@@ -102,10 +102,12 @@ class Action extends IdObject {
   }
   play(params, temporaryData) {
     const rc = this.relativeCharactors // 快速通道
+    const gather = this.relativeGather
     for (const clip of this.clips) {
       if (rc instanceof Charactor) {
         // 群演动画
         for (let i = 0; i < rc.length; i++) {
+          if (!gather.includes(i)) continue
           const target = rc.getTarget(i)
           const tween = new Tween({
             from: this.assignObjects(clip.from, temporaryData, i),

@@ -261,33 +261,18 @@ const director = new Director({
       ],
       markdownIn: [
         {
-          charactors: 'tools.2',
+          charactors: 'tools',
           desc: '点击动画后，工具-第三个，即文档markdown按钮向左侧旋转移动到左上角后放大到全量',
           actionClips: [
             {
               delay: 0,
-              duration: 300,
+              duration: 200,
               ease: 'linear',
-              from: [{ opacity: 1 }],
-              to: [{ opacity: 0 }]
-              // from: ['toolsRight', { rotate: 0 }],
-              // to: ['markdownRight', { rotate: 720 }]
+              from: ['toolsRight'],
+              to: [{ right: 8 }]
             }
           ]
         }
-        // {
-        //   charactors: 'tools-2', // 群演的戏一般单独写在一起不与演员融合
-        //   desc: '主背景进入以后，工具依次进入',
-        //   actionClips: [
-        //     {
-        //       delay: 'toolsLeaveDelay',
-        //       duration: 'toolsLeaveDuration',
-        //       ease: 'linear',
-        //       from: ['toolsRight', { opacity: 1, rotate: 0 }],
-        //       to: ['toolsStart']
-        //     }
-        //   ]
-        // }
       ]
     }
   }

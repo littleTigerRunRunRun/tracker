@@ -48,7 +48,7 @@
         class="md-icon-button"
         :disabled="
           (capture.activate && button.code === 'screenshot') ||
-          (markdown.activate && button.code === 'markdown')
+            (markdown.activate && button.code === 'markdown')
         "
         @click.native="handleButtonClick(button.code)"
       >
@@ -80,6 +80,9 @@ export default {
         { code: 'markdown', icon: 'menu_book' },
         { code: 'close', icon: 'close' }
       ],
+      toolMap: {
+        markdown: 2
+      },
       lastPiece: null,
       director,
       comp: '',
@@ -127,6 +130,7 @@ export default {
             this.$emit('update:piece', null)
             this.lastPiece = false
             this.clearCapture()
+            this.clearMarkdown()
           })
           break
         }
@@ -156,7 +160,8 @@ export default {
           //   console.log(data)
           // })
           this.markdown.activate = true
-          this.director.playScenes([{ name: 'markdownIn' }])
+          const bound = this.$refs.tools[this.toolMap.markdown].$el.getBoundingClientRect()
+          this.director.playScenes([{ name: 'markdownIn' }, { name: 'toolsout' }], { markdownLeft: { left: bound.left }})
           break
         }
       }
@@ -193,6 +198,9 @@ export default {
 
       this.director.resetCharator('captureImage')
       this.director.resetCharator('captureImageContent')
+    },
+    clearMarkdown() {
+      this.markdown.activate = false
     },
     addCharactors() {
       this.director.addCharactors({
@@ -338,9 +346,11 @@ export default {
     }
     .button-group{
       position: absolute;
-      right: 8px;
+      width: 100%;
+      right: 0px;
       top: 8px;
       .md-button{
+        transition: none !important;
         &:before, .md-ripple, .md-ripple-wave{
           border-radius: 0px !important;
         }

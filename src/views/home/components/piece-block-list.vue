@@ -24,7 +24,7 @@
       <img width="100%" src="../../../assets/gold_rect.jpg">
       <div class="piece-content">
         <div class="common-content">
-          <img :src="piece.capture || 'http://127.0.0.1:7001/public/img/capture/default.jpg'" >
+          <img :src="piece.capture || 'http://127.0.0.1:7001/public/img/capture/default.jpg'">
           <span class="title">
             {{ piece.title }}
           </span>
@@ -146,6 +146,7 @@ export default {
           width: 100%;
         }
         .title{
+          position: relative;
           font-size: 18px;
           color: #fff;
           font-weight: bold;
@@ -153,6 +154,7 @@ export default {
           margin-top: 4px;
         }
         .desc{
+          position: relative;
           text-shadow: 0 0 4px #000;
           margin-top: 8px;
         }
