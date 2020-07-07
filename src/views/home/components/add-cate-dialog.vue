@@ -95,13 +95,18 @@ export default {
       this.$v.$touch()
       this.sending = true
 
-      const { data } = await updataCategory(Object.assign({ id: this.id }, this.form))
-      this.sending = false
-      if (data.code === 200) {
-        this.$emit('categoryAdded')
-        this.handleClose()
-      } else {
-        console.error(data.message)
+      try {
+        const { data } = await updataCategory(Object.assign({ id: this.id }, this.form))
+        this.sending = false
+        if (data.code === 200) {
+          this.$emit('categoryAdded')
+          this.handleClose()
+        } else {
+          console.error(data.message)
+        }
+      } catch (e) {
+        console.error(e)
+        this.sending = false
       }
     }
   }

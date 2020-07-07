@@ -10,16 +10,25 @@ const mainDirection = function (file) {
 }
 
 class PieceController extends Controller {
-  getPieces(id) {
+  getCategory() {
     // 读取category文件
-    return JSON.parse(fs.readFileSync(path.resolve(__dirname, mainDirection(id + '.json')), 'utf8', (err, data) => {
+    return JSON.parse(fs.readFileSync(path.resolve(__dirname, mainDirection('index.json')), 'utf8', (err, data) => {
       if (err) {
         console.error(err)
         return
       }
     }).toString())
   }
-  add() {
+  getPieces(categoryId) {
+    const piece = fs.readFileSync(path.resolve(__dirname, mainDirection(categoryId + '.json')), 'utf8', (err, data) => {
+      if (err) {
+        console.error(err)
+        return
+      }
+    }).toString()
+    return JSON.parse(piece)
+  }
+  async add() {
     const { ctx } = this
     const query = ctx.request.query
     const data = {
@@ -34,16 +43,51 @@ class PieceController extends Controller {
       data.message = '成功创建作品，尽情享受创作吧'
       data.data = Date.now()
       const pieces = this.getPieces(query.categoryId) // query.categoryId
-      pieces.list.unshift({
+      const piece = {
         id: data.data,
         name: query.name,
         desc: query.desc,
         title: query.title,
         label: ctx.queries.label
-      })
+      }
+      console.log(pieces)
+      pieces.list.unshift(piece)
       this.writePieces(query.categoryId, pieces)
+      this.addTemplate(query.categoryId, piece)
     }
     ctx.body = data
+  }
+  addTemplate(categoryId, piece) {
+    const { ctx } = this
+    const category = this.getCategory().list.find((cate) => (cate.id - 0) === (categoryId - 0))
+    
+    const cateName = category.name
+    const catePath = path.resolve(__dirname, '../../../src/pieces/' + cateName)
+    if (!fs.existsSync(catePath)) this.mkdir(catePath)
+    this.mkdir(catePath + '/' + piece.name)
+    // 创建项目入口entry.vue，里面会有快速启动设置（二次生成）
+    this.copyTemplate('entry.vue', catePath + '/' + piece.name, {})
+    // 创建doc.md，也就是文档入口
+    // 创建config.js,也就是配置入口
+    // 我们要对vue/js/css类型的项目做不同的配置响应
+    ctx.body = {
+      message: '添加成功',
+      code: 200,
+      data: ''
+    }
+  }
+  // 虽然有copy的专门方法，不过为了方便做插值我们还是这样吧
+  copyTemplate(sourceName, piecePath, templateDeals) {
+    fs.readFile(path.resolve(__dirname, '../template/' + sourceName), (err, data) => {
+      if (err) throw new Error('something wrong was happended');
+      fs.writeFile((piecePath + '/' + sourceName), data, function(err) {
+        if (err) throw new Error('something wrong was happended');
+      })
+    })
+  }
+  // 生成文件夹
+  mkdir(filepath) {
+    fs.mkdirSync(filepath)
   }
   writePieces(categoryId, pieces) {
     fs.writeFile(path.resolve(__dirname, mainDirection(categoryId + '.json')), JSON.stringify(pieces),  function(err) {

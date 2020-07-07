@@ -92,7 +92,7 @@ export default {
     async getPiece() {
       const pieces = await getPieceList(this.categoryId)
       this.pieceList.splice(0, this.pieceList.length, ...pieces.data.data)
-      console.log('get piece', this.pieceList)
+      // console.log('get piece', this.pieceList)
     },
     addCategory() {
       this.$refs.addCate.activate('创建一个合集', {

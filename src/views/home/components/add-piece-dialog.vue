@@ -117,13 +117,18 @@ export default {
 
       if (!this.$v.$invalid) {
         this.sending = true
-        const { data } = await addPiece(Object.assign({ categoryId: this.categoryId }, this.form))
-        this.sending = false
-        if (data.code === 200) {
-          this.$emit('pieceAdded')
-          this.handleClose()
-        } else {
-          console.error(data.message)
+        try {
+          const { data } = await addPiece(Object.assign({ categoryId: this.categoryId }, this.form))
+          this.sending = false
+          if (data.code === 200) {
+            this.$emit('pieceAdded')
+            this.handleClose()
+          } else {
+            console.error(data.message)
+          }
+        } catch (e) {
+          console.error(e)
+          this.sending = false
         }
       } else console.log(this.$v)
     }
