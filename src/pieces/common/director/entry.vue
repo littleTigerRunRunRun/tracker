@@ -1,32 +1,68 @@
 <template>
-  <div class="tracker-piece-entry">
-    <!-- 这里开始后续都可以清理 -->
-    <div ref="title" class="tracker-piece-title">
-      director导演系统
-    </div>
-    <div ref="content" class="tracker-piece-container">
-      <div class="start">
-        模仿电影拍摄的过程来开发描述性的时间轴动画
-      </div>
+  <div class="tracker-piece-entry" ref="container">
+    <div class="show-how-blocks">
+      <div class="block1 block" />
+      <div class="block2 block" />
+      <div class="block3 block" />
     </div>
   </div>
 </template>
 
 <script>
+import Director from '@/lib/storyboard/director.js'
+
 export default {
   name: 'Director',
   props: {},
   data() {
     return {
+      director: new Director({
+        storyborad: {
+          charactors: [
+            { name: 'container', type: 'dom' }
+          ],
+          props: [],
+          scenes: {
+            in: [
+              {
+                charactors: ['container'],
+                desc: '进入后背景颜色淡入',
+                actionClips: [
+                  {
+                    delay: 0,
+                    duration: 400,
+                    ease: 'easeOut',
+                    from: [{ opacity: 0 }],
+                    to: [{ opacity: 1 }]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      })
     }
   },
   mounted() {
+    requestAnimationFrame(() => {
+      console.log('mounted!')
+      this.addCharactors()
+      this.director.playScenes([{ name: 'in', delay: 200 }])
+    })
   },
   beforeDestroy() {
+    this.director.destroy()
+    this.director = null
   },
   methods: {
     onEnterEnd() {
       // 完全进入且动画结束的钩子
+    },
+    addCharactors() {
+      console.log(this.$refs.container, this.director)
+      this.director.addCharactors({
+        container: this.$refs.container
+      })
     }
   }
 }
@@ -38,26 +74,28 @@ export default {
     width: 100%;
     height: 100%;
     /* 这里开始后续都可以清理 */
-    padding: 56px 8px 8px 8px;
-    .tracker-piece-title{
-      position: absolute;
-      top: 8px;
-      left: 16px;
-      height: 40px;
-      line-height: 40px;
-      color: #fff;
-      font-size: 24px;
-      text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
-    }
-    .tracker-piece-container{
-      position: relative;
-      width: 100%;
-      height: 100%;
-      left: 0px;
-      background-color: rgba(255, 255, 255, 0.8);
-      padding: 16px;
-      .start{
-        font-size: 20px;
+    background-color: #fff;
+    opacity: 0;
+    .show-how-blocks{
+      .block{
+        width: 60px;
+        height: 60px;
+        position: absolute;
+      }
+      .block1{
+        top: 100px;
+        left: 100px;
+        background-color: #DC4E41;
+      }
+      .block2{
+        top: 200px;
+        left: 100px;
+        background-color: #1BA160;
+      }
+      .block3{
+        top: 300px;
+        left: 100px;
+        background-color: #FFCD42;
       }
     }
   }
