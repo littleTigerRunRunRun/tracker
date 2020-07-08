@@ -1,4 +1,4 @@
-import Director from './storyboard/director'
+import Director from '@/lib/storyboard/director'
 
 const rangeStartMap = [
   { left: 60, top: 60 },

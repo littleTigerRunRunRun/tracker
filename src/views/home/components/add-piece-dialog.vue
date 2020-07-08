@@ -11,7 +11,7 @@
         <label>英文名称</label>
         <md-input v-model="form.name" :disabled="sending" />
         <span v-if="!$v.form.name.required" class="md-error">请填写作品的英文名称</span>
-        <span v-if="!$v.form.name.correctEnglishName" class="md-error">作品的英文名由大小写英文字母、数字、下划线组成</span>
+        <span v-if="$v.form.name.required && !$v.form.name.correctEnglishName" class="md-error">作品的英文名由大小写英文字母、数字、下划线组成</span>
       </md-field>
       <md-field :class="getValidationClass('title')">
         <label>名字</label>
@@ -30,6 +30,11 @@
           至多三个
         </div>
       </md-chips>
+      <transition name="moveIn">
+        <div v-if="errorMessage" class="api-error-text">
+          {{ errorMessage }}
+        </div>
+      </transition>
     </md-card-content>
 
     <md-dialog-actions>
@@ -76,7 +81,8 @@ export default {
         title: '',
         desc: '',
         label: []
-      }
+      },
+      errorMessage: ''
     }
   },
   validations: {
@@ -106,11 +112,13 @@ export default {
       this.visible = true
     },
     handleClose() {
+      this.$v.$reset()
       this.visible = false
       this.form.name = ''
       this.form.title = ''
       this.form.desc = ''
       this.form.label.splice(0, this.form.label.length - 1)
+      this.errorMessage = ''
     },
     async handleSubmit() {
       this.$v.$touch()
@@ -123,11 +131,13 @@ export default {
           if (data.code === 200) {
             this.$emit('pieceAdded')
             this.handleClose()
+            this.errorMessage = ''
           } else {
-            console.error(data.message)
+            this.errorMessage = data.message
           }
         } catch (e) {
           console.error(e)
+          this.errorMessage = JSON.stringify(e)
           this.sending = false
         }
       } else console.log(this.$v)
@@ -160,5 +170,20 @@ export default {
       padding-bottom: 16px;
       padding-right: 24px;
     }
+    .api-error-text{
+      position: absolute;
+      width: 320px;
+      line-height: 18px;
+      bottom: 38px;
+      transform: translate(0%, 50%);
+      color: #ff1744;
+    }
+  }
+  .move-in-enter-active, .move-in-leave-active {
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  .move-in-enter, .move-in-leave-to {
+    opacity: 0;
+    transform: translate(-10px, 0);
   }
 </style>

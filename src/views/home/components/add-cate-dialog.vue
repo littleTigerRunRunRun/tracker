@@ -11,6 +11,7 @@
         <label>英文分类名</label>
         <md-input v-model="form.name" :disabled="sending || nameDisabled" />
         <span v-if="!$v.form.name.required" class="md-error">为分类添加一个英文名</span>
+        <span v-if="$v.form.name.required && !$v.form.name.correctEnglishName" class="md-error">作品的英文名由大小写英文字母、数字、下划线组成</span>
       </md-field>
       <md-field>
         <label>中文标题</label>
@@ -20,6 +21,11 @@
         <label>项目描述</label>
         <md-input v-model="form.desc" :disabled="sending" />
       </md-field>
+      <transition name="moveIn">
+        <div v-if="errorMessage" class="api-error-text">
+          {{ errorMessage }}
+        </div>
+      </transition>
     </md-card-content>
 
     <md-dialog-actions>
@@ -39,6 +45,9 @@ import { updataCategory } from '../api'
 import {
   required
 } from 'vuelidate/lib/validators'
+const correctEnglishName = (str) => {
+  return /^[0-9a-zA-Z_]{1,}$/.test(str)
+}
 
 export default {
   name: 'AddCateDialog',
@@ -54,13 +63,15 @@ export default {
         title: '',
         desc: ''
       },
-      nameDisabled: false
+      nameDisabled: false,
+      errorMessage: ''
     }
   },
   validations: {
     form: {
       name: {
-        required
+        required,
+        correctEnglishName
       }
     }
   },
@@ -83,6 +94,7 @@ export default {
       else this.nameDisabled = false
       this.id = id || ''
       this.visible = true
+      this.errorMessage = ''
     },
     handleClose() {
       this.$v.$reset()
@@ -101,11 +113,12 @@ export default {
         if (data.code === 200) {
           this.$emit('categoryAdded')
           this.handleClose()
+          this.errorMessage = ''
         } else {
-          console.error(data.message)
+          this.errorMessage = data.message
         }
       } catch (e) {
-        console.error(e)
+        this.errorMessage = JSON.stringify(e)
         this.sending = false
       }
     }
@@ -131,5 +144,20 @@ export default {
       opacity: 0.6;
       cursor: not-allowed;
     }
+    .api-error-text{
+      position: absolute;
+      width: 320px;
+      line-height: 18px;
+      bottom: 38px;
+      transform: translate(0%, 50%);
+      color: #ff1744;
+    }
+  }
+  .move-in-enter-active, .move-in-leave-active {
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  .move-in-enter, .move-in-leave-to {
+    opacity: 0;
+    transform: translate(-10px, 0);
   }
 </style>

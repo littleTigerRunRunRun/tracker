@@ -39,21 +39,26 @@ class PieceController extends Controller {
       data.code = 400
       data.message = '需要传入作品名称'
     } else {
-      data.code = 200
-      data.message = '成功创建作品，尽情享受创作吧'
-      data.data = Date.now()
       const pieces = this.getPieces(query.categoryId) // query.categoryId
-      const piece = {
-        id: data.data,
-        name: query.name,
-        desc: query.desc,
-        title: query.title,
-        label: ctx.queries.label
+      if (pieces.list.find((piece) => piece.name === query.name)) {
+        data.code = 400
+        data.message = 'name为' + query.name + '的作品已经存在'
       }
-      console.log(pieces)
-      pieces.list.unshift(piece)
-      this.writePieces(query.categoryId, pieces)
-      this.addTemplate(query.categoryId, piece)
+      else {
+        data.code = 200
+        data.message = '成功创建作品，尽情享受创作吧'
+        data.data = Date.now()
+        const piece = {
+          id: data.data,
+          name: query.name,
+          desc: query.desc,
+          title: query.title,
+          label: ctx.queries.label
+        }
+        pieces.list.unshift(piece)
+        this.writePieces(query.categoryId, pieces)
+        this.addTemplate(query.categoryId, piece)
+      }
     }
     ctx.body = data
   }
@@ -66,7 +71,12 @@ class PieceController extends Controller {
     if (!fs.existsSync(catePath)) this.mkdir(catePath)
     this.mkdir(catePath + '/' + piece.name)
     // 创建项目入口entry.vue，里面会有快速启动设置（二次生成）
-    this.copyTemplate('entry.vue', catePath + '/' + piece.name, {})
+    this.copyTemplate('entry.vue', catePath + '/' + piece.name, {
+      name: piece.name,
+      title: piece.title,
+      desc: piece.desc,
+      upperName: piece.name[0].toUpperCase() + piece.name.slice(1)
+    })
     // 创建doc.md，也就是文档入口
     // 创建config.js,也就是配置入口
     // 我们要对vue/js/css类型的项目做不同的配置响应
@@ -80,7 +90,17 @@ class PieceController extends Controller {
   copyTemplate(sourceName, piecePath, templateDeals) {
     fs.readFile(path.resolve(__dirname, '../template/' + sourceName), (err, data) => {
       if (err) throw new Error('something wrong was happended');
-      fs.writeFile((piecePath + '/' + sourceName), data, function(err) {
+      let str = data.toString()
+      if (templateDeals) {
+        try {
+          for (let key in templateDeals) {
+            str = str.replace(new RegExp('<% ' +  key + ' %>', 'g'), templateDeals[key])
+          }
+        } catch (e) {
+          console.log(e)
+        }
+      }
+      fs.writeFile((piecePath + '/' + sourceName), str, function(err) {
         if (err) throw new Error('something wrong was happended');
       })
     })

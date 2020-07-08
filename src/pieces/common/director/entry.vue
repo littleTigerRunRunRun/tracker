@@ -2,11 +2,11 @@
   <div class="tracker-piece-entry">
     <!-- 这里开始后续都可以清理 -->
     <div ref="title" class="tracker-piece-title">
-      <% name %><% title %>
+      director导演系统
     </div>
     <div ref="content" class="tracker-piece-container">
       <div class="start">
-        <% desc %>
+        模仿电影拍摄的过程来开发描述性的时间轴动画
       </div>
     </div>
   </div>
@@ -14,7 +14,7 @@
 
 <script>
 export default {
-  name: '<% upperName %>',
+  name: 'Director',
   props: {},
   data() {
     return {
