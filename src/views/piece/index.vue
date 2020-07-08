@@ -3,8 +3,9 @@
     v-if="piece"
     ref="main"
     class="view-piece"
+    :style="{ backgroundImage: `url(${piece.data.capture || 'http://127.0.0.1:7001/public/img/capture/default.jpg'})` }"
   >
-    <div ref="comp" class="piece-main" :style="{ backgroundImage: `url(${piece.data.capture || 'http://127.0.0.1:7001/public/img/capture/default.jpg'})` }">
+    <div ref="comp" class="piece-main">
       <component
         :is="comp"
         v-if="comp"
@@ -223,12 +224,12 @@ export default {
     left: 0px;
     top: 0px;
     overflow: hidden;
+    background-size: cover;
     .piece-main{
       width: 100%;
       height: 100%;
       position: relative;
       // background-image: url('../../assets/view.jpg');
-      background-size: cover;
     }
     .capture{
       position: absolute;

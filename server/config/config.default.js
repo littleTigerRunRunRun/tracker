@@ -18,8 +18,15 @@ module.exports = appInfo => {
 
   config.security = {
     csrf: {
-      headerName: 'x-csrf-token'
-    }
+      enable: false,
+      ignoreJSON: true
+      // headerName: 'x-csrf-token'
+    },
+    domainWhiteList: ['http://localhost:8080']
+  }
+  config.cors = {
+    origin: '*',
+    allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH'
   }
 
   // add your middleware config here

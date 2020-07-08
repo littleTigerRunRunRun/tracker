@@ -7,3 +7,8 @@ module.exports = {
   //   enable: true,
   // }
 };
+
+exports.cors = {
+  enable: true,
+  package: 'egg-cors'
+}
