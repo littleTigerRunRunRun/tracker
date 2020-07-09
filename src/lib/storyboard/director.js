@@ -23,6 +23,7 @@ class Prop {
       return
     }
     if (this.type === 'function') return this.value(index)
+    else if (this.value instanceof Array) return this.value[index]
     else return this.value
   }
 }
@@ -140,7 +141,20 @@ class Action extends IdObject {
           // how to set delay
         } else {
           // 多对象动画
-          console.log('multitarget anime')
+          for (let i = 0; i < rc.length; i++) {
+            const target = rc[i].getTarget()
+            const tween = new Tween({
+              from: this.assignObjects(clip.from, temporaryData, i),
+              to: this.assignObjects(clip.to, temporaryData, i),
+              duration: this.getPropValue(clip.duration, i),
+              delay: this.getPropValue(clip.delay, i) + (params.delay || 0),
+              target,
+              ease: clip.ease,
+              onUpdate: clip.update,
+              filters: clip.filters
+            })
+            this.timeline.add(tween)
+          }
         }
       }
     }
@@ -191,6 +205,7 @@ class Scene extends IdObject {
     for (const action of actions) {
       const sceneAction = new Action(action)
       let charactors
+      // 群演动画
       if (typeof action.charactors === 'string') {
         const massesCharactor = this.fetchGather(action.charactors)
         sceneAction.setMassesCharactors(massesCharactor)

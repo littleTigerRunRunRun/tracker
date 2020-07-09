@@ -36,8 +36,10 @@ class Tick {
 }
 const tick = new Tick()
 
+let tweenId = 0
 export class Tween {
   constructor({ target, duration, delay, ease, from, to, setMapFuncs, getMapFuncs, onUpdate, filters = null }) {
+    this._tweenId = tweenId++
     this.tick = tick
     this.target = target
     this.duration = duration
@@ -58,7 +60,9 @@ export class Tween {
 
     this.tickId = this.tick.add(this.update.bind(this))
   }
-  _defaultSetMapFunc = (key, value) => { this.target[key] = value }
+  _defaultSetMapFunc = (key, value) => {
+    this.target[key] = value
+  }
   _defaultGetMapFunc = (key) => this.target[key]
   _activate = false
   set activate(val) {
@@ -105,6 +109,7 @@ export class Tween {
   }
   _startTime = 0
   start() {
+    // console.log(this._from, this._tweenId)
     this._startTime = Date.now()
     this.activate = true
     return this
