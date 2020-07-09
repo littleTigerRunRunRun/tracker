@@ -43,16 +43,38 @@
       <div class="timeline-main">
         <timeline-ui-control @control="handleControl" />
         <div class="timeline-targets">
-          <div
+          <template
             v-for="(target, key) in timelineTargets"
-            :key="`target${key}`"
-            class="timeline-target"
           >
-            {{ target.name }}
-            <md-button class="md-icon-button button-add" @click.native="addClip">
-              <md-icon>add</md-icon>
-            </md-button>
-          </div>
+            <div
+              :key="`target${key}`"
+              class="timeline-target"
+            >
+              {{ target.name }}
+              <md-button class="md-icon-button button-add" @click.native="addClip(key)">
+                <md-icon>add</md-icon>
+              </md-button>
+            </div>
+            <div
+              :key="`lines${key}`"
+              class="timeline-lines"
+              :style="{ height: `${target.child.length * 32}px` }"
+            >
+              <div
+                v-for="(child, cindex) in target.child"
+                :key="`child${cindex}`"
+                class="timeline"
+              >
+                <md-field>
+                  <md-select v-model="child.attr" name="attr">
+                    <md-option v-for="(attr, aindex) in optionsAttr" :key="`attr${aindex}`" :value="attr">
+                      {{ attr }}
+                    </md-option>
+                  </md-select>
+                </md-field>
+              </div>
+            </div>
+          </template>
         </div>
       </div>
     </div>
@@ -160,7 +182,8 @@ export default {
         block1: [],
         block2: [],
         block3: []
-      }
+      },
+      optionsAttr: ['left', 'top', 'opacity', 'rotate']
     }
   },
   computed: {
@@ -205,8 +228,8 @@ export default {
       // 控制器指令
       console.log(code)
     },
-    addClip() {
-      console.log('clip')
+    addClip(key) {
+      this.targetChild[key].push({ attr: '', ease: 'linear' })
     }
   }
 }
@@ -277,6 +300,28 @@ export default {
                 &:hover {
                   color: rgba(0, 0, 0, 0.8);
                 }
+              }
+            }
+          }
+          .timeline-lines{
+            padding-left: 16px;
+            height: 0px;
+            transition: height 0.3s;
+            .timeline{
+              width: 100%;
+              height: 30px;
+              line-height: 30px;
+              background-color: #e5e5e5;
+              text-indent: 8px;
+              box-shadow:
+                0 1px 5px rgba(0, 0, 0, 0.15),
+                0 0 3px rgba(0, 0, 0, 0.15);
+              margin-bottom: 1px;
+              .md-field {
+                padding-top: 0px;
+                height: 100%;
+                min-height: 0;
+                margin: 0;
               }
             }
           }

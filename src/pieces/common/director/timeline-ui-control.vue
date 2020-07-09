@@ -68,11 +68,11 @@ export default {
       }
       &.toggling{
         i{
-          color: #FF040B !important;
+          color: #B50012 !important;
         }
         &:hover {
           i{
-            color: #FF040B !important;
+            color: #B50012 !important;
           }
         }
       }
