@@ -67,7 +67,7 @@ export default class {
   }
 
   renderScales() {
-    console.log(this.width, this.height, this.config)
+    // console.log(this.width, this.height, this.config)
     this.ctx.clearRect(0, 0, this.width, this.height)
     const config = this.config
     const height = this.config.height

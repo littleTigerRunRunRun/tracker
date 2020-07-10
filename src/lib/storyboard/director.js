@@ -3,8 +3,8 @@ import Charactor from './charactor'
 
 // 一个抽象类，它会存储最近的directorId作为指针，并且将自动找寻自己对应的props和charactors
 class IdObject {
-  constructor() {
-    this.directorId = directorLastestId
+  constructor({ directorId }) {
+    this.directorId = directorId
   }
   get charactors() { return _charactors[this.directorId] }
   get props() { return _props[this.directorId] }
@@ -30,7 +30,7 @@ class Prop {
 
 class Action extends IdObject {
   constructor(action) {
-    super()
+    super({ directorId: action.directorId })
     this.desc = action.desc
     // 大部分的action在初始化时是没有charactors到位的
     this.masses = typeof action.charactors === 'string'
@@ -74,17 +74,24 @@ class Action extends IdObject {
   addClips(clips) {
     this.clips = []
     for (const clip of clips) {
-      const newClip = {}
-      newClip.delay = clip.delay
-      newClip.duration = clip.duration
-      newClip.repeat = clip.repeat || 1
-      newClip.from = clip.from
-      newClip.to = clip.to
-      newClip.update = clip.update
-      newClip.filters = clip.filters
-      newClip.ease = clip.ease
-      this.clips.push(newClip)
+      this.addClip(clip)
     }
+  }
+  addClip(clip) {
+    const newClip = {}
+    newClip.delay = clip.delay
+    newClip.duration = clip.duration
+    newClip.repeat = clip.repeat || 1
+    newClip.from = clip.from
+    newClip.to = clip.to
+    newClip.update = clip.update
+    newClip.filters = clip.filters
+    newClip.ease = clip.ease
+    this.clips.push(newClip)
+    return newClip
+  }
+  editClip(index, key, value) {
+    this.clips[index][key] = value
   }
   setMassesCharactors({ target, gather }) {
     this.relativeCharactors = target
@@ -169,14 +176,17 @@ class Action extends IdObject {
       return this.timeline.play(gather)
     } else return this.timeline.play(gather)
   }
+  timelineControl(code) {
+    if (this.timeline) this.timeline.timelineControl(code)
+  }
   onComplete() {
     console.log('anime complete')
   }
 }
 
 class Scene extends IdObject {
-  constructor({ name, actions }) {
-    super()
+  constructor({ name, actions, directorId }) {
+    super({ directorId })
     this.name = name
     this.registerActions(actions)
   }
@@ -212,20 +222,29 @@ class Scene extends IdObject {
   registerActions(actions) {
     this.actions = []
     for (const action of actions) {
-      const sceneAction = new Action(action)
-      let charactors
-      // 群演动画
-      if (typeof action.charactors === 'string') {
-        const massesCharactor = this.fetchGather(action.charactors)
-        sceneAction.setMassesCharactors(massesCharactor)
-      } else {
-        charactors = action.charactors.map((name) => {
-          return this.charactors[name]
-        })
-        sceneAction.setCharactors(charactors)
-      }
-      this.actions.push(sceneAction)
+      this.addAction(action)
     }
+  }
+
+  addAction(action) {
+    const sceneAction = new Action(Object.assign({ directorId: this.directorId }, action))
+    let charactors
+    // 群演动画
+    if (typeof action.charactors === 'string') {
+      const massesCharactor = this.fetchGather(action.charactors)
+      sceneAction.setMassesCharactors(massesCharactor)
+    } else {
+      charactors = action.charactors.map((name) => {
+        return this.charactors[name]
+      })
+      sceneAction.setCharactors(charactors)
+    }
+    this.actions.push(sceneAction)
+    return sceneAction
+  }
+
+  getAction(index) {
+    return this.actions[index]
   }
 
   play(params, temporaryData) {
@@ -235,6 +254,10 @@ class Scene extends IdObject {
     }
     return all
   }
+
+  timelineControl(code) {
+    for (const action of this.actions) action.timelineControl(code)
+  }
 }
 
 let directorLastestId = 0 // 全局有多个剧本的情况下，用这个id区分演员池和道具池
@@ -243,8 +266,7 @@ const _props = {} // 道具集，道具包含了数据和通过序列生成数�
 // 剧组
 export default class Director {
   constructor({ storyborad }) {
-    directorLastestId = Date.now()
-    this.directorId = directorLastestId
+    this.directorId = ++directorLastestId
     _charactors[directorLastestId] = {}
     _props[directorLastestId] = {}
     this.plan(storyborad)
@@ -333,9 +355,12 @@ export default class Director {
   // 为什么这里使用的register而不是add来形容呢，这里的行为更像是手枪打开保险的程度。
   // action里面的具体动画，都会在这一步注册成tweenline里的内容
   registerScene(name, actions) {
-    const scene = new Scene({ name, actions })
+    const scene = new Scene({ directorId: this.directorId, name, actions })
 
     this._scenes[name] = scene
+  }
+  getScene(name) {
+    return this._scenes[name]
   }
   playScenes(scenes, temporaryData) {
     if (typeof scenes === 'string') return Promise.all(this._scenes[scenes].play({}, temporaryData))

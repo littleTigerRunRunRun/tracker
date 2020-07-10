@@ -10,7 +10,7 @@
           opacity: charactors.block1.opacity,
           left: `${charactors.block1.left}px`,
           top: `${charactors.block1.top}px`,
-          rotate: `transform: rotate(${charactors.block1.rotate}deg)`,
+          transform: `rotate(${charactors.block1.rotate}deg)`,
           backgroundColor: `hsl(5, 69%, ${charactors.block1.lightness}%)`
         }"
       />
@@ -20,7 +20,7 @@
           opacity: charactors.block2.opacity,
           left: `${charactors.block2.left}px`,
           top: `${charactors.block2.top}px`,
-          rotate: `transform: rotate(${charactors.block2.rotate}deg)`,
+          transform: `rotate(${charactors.block2.rotate}deg)`,
           backgroundColor: `hsl(151, 71%, ${charactors.block2.lightness}%)`
         }"
       />
@@ -30,7 +30,7 @@
           opacity: charactors.block3.opacity,
           left: `${charactors.block3.left}px`,
           top: `${charactors.block3.top}px`,
-          rotate: `transform: rotate(${charactors.block3.rotate}deg)`,
+          transform: `rotate(${charactors.block3.rotate}deg)`,
           backgroundColor: `hsl(44, 100%, ${charactors.block3.lightness}%)`
         }"
       />
@@ -70,14 +70,14 @@
                 class="timeline"
               >
                 <md-field>
-                  <md-select id="attr" v-model="child.attr" md-dense name="attr" placeholder="过渡属性" md-class="timeline-attr-select">
+                  <md-select id="attr" v-model="child.attr" md-dense name="attr" placeholder="过渡属性" md-class="timeline-attr-select" @md-selected="refreshClip(key, cindex, child)">
                     <md-option v-for="(attr, aindex) in optionsAttr" :key="`attr${aindex}`" :value="attr" :disabled="target.usedChild.includes(attr)">
                       {{ attr }}
                     </md-option>
                   </md-select>
                 </md-field>
                 <md-field>
-                  <md-select id="ease" v-model="child.ease" md-dense name="ease" placeholder="过渡属性" md-class="timeline-attr-select">
+                  <md-select id="ease" v-model="child.ease" md-dense name="ease" placeholder="时间曲线" md-class="timeline-attr-select" @md-selected="refreshClip(key, cindex, child)">
                     <md-option v-for="(ease, aindex) in optionsEase" :key="`ease${aindex}`" :value="ease">
                       {{ ease }}
                     </md-option>
@@ -100,16 +100,16 @@
                 class="timeline-viewer-line"
               >
                 <!--这里的5是viewerConfig.scales.unitFrame * 1000 / viewerConfig.scales.unitInterval-->
-                <horizontal-stretchable class="timeline-clip-block" :width.sync="clip.duration" :x-scale="5" :style="{ width: `${clip.duration / 5}px`, left: `${viewerConfig.scales.indent + clip.delay / 5}px` }">
-                  <dragable :x.sync="clip.delay" :x-range="[0, 10000]" :x-scale="5" :y-enable="false">
+                <horizontal-stretchable class="timeline-clip-block" :width.sync="clip.duration" :x-scale="5" :style="{ width: `${clip.duration / 5}px`, left: `${viewerConfig.scales.indent + clip.delay / 5}px` }" @change="refreshClip(key, cindex, clip)">
+                  <dragable :x.sync="clip.delay" :x-range="[0, 10000]" :x-scale="5" :y-enable="false" @change="refreshClip(key, cindex, clip)">
                     <div class="show-text">
                       <span class="label">from</span>
                       <md-field>
-                        <md-input v-model="clip.from" placeholder="from" />
+                        <md-input v-model="clip.from" placeholder="from" type="number" @blur.native="refreshClip(key, cindex, clip)" />
                       </md-field>
                       <span class="label">to</span>
                       <md-field>
-                        <md-input v-model="clip.to" placeholder="To" />
+                        <md-input v-model="clip.to" placeholder="To" type="number" @blur="refreshClip(key, cindex, clip)" />
                       </md-field>
                     </div>
                   </dragable>
@@ -119,7 +119,7 @@
           </template>
         </div>
         <!-- time anchor -->
-        <div class="timeline-anchor" :style="{ marginLeft: `${viewerConfig.anchor.indent}px`, left: `${viewerConfig.anchor.left}px`, width: `${viewerConfig.anchor.width}px`, top: `${viewerConfig.anchor.height}px`, height: `calc(100% - ${viewerConfig.anchor.height}px` }">
+        <!-- <div class="timeline-anchor" :style="{ marginLeft: `${viewerConfig.anchor.indent}px`, left: `${viewerConfig.anchor.left}px`, width: `${viewerConfig.anchor.width}px`, top: `${viewerConfig.anchor.height}px`, height: `calc(100% - ${viewerConfig.anchor.height}px` }">
           <div class="timeline-anchor-line" :style="{ backgroundColor: viewerConfig.anchor.fill, left: `${(viewerConfig.anchor.width - 1) / 2}px` }" />
           <dragable :style="{ width: `${viewerConfig.anchor.width}px`, height: `${viewerConfig.anchor.height}px` }" :x.sync="viewerConfig.anchor.left" :x-range="[0, 10000]" :y-enable="false">
             <svg
@@ -135,7 +135,7 @@
               <path stroke="none" :fill="viewerConfig.anchor.fill" :d="`M0,0 L${viewerConfig.anchor.width},0 L${viewerConfig.anchor.width},${viewerConfig.anchor.height - viewerConfig.anchor.lean} L${viewerConfig.anchor.width / 2},${viewerConfig.anchor.height} L0,${viewerConfig.anchor.height - viewerConfig.anchor.lean} Z`" />
             </svg>
           </dragable>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -271,6 +271,11 @@ export default {
         block2: [],
         block3: []
       },
+      actions: {
+        block1: null,
+        block2: null,
+        block3: null
+      },
       optionsAttr: ['left', 'top', 'opacity', 'rotate'],
       optionsEase,
       viewerConfig: {
@@ -298,7 +303,24 @@ export default {
             { interval: 20, width: 1, height: 6, color: '#ccc' }
           ]
         }
-      }
+      },
+      dynamicDirector: new Director({
+        storyborad: {
+          charactors: [
+            { name: 'block1' },
+            { name: 'block2' },
+            { name: 'block3' }
+          ],
+          props: [],
+          scenes: {
+            edit: [
+              { charactors: ['block1'], desc: '对block1的可编辑动画', actionClips: [] },
+              { charactors: ['block2'], desc: '对block2的可编辑动画', actionClips: [] },
+              { charactors: ['block3'], desc: '对block3的可编辑动画', actionClips: [] }
+            ]
+          }
+        }
+      })
     }
   },
   computed: {
@@ -331,6 +353,10 @@ export default {
   mounted() {
     requestAnimationFrame(() => {
       this.addCharactors()
+      const sceneEdit = this.dynamicDirector.getScene('edit')
+      this.actions.block1 = sceneEdit.getAction(0)
+      this.actions.block2 = sceneEdit.getAction(1)
+      this.actions.block3 = sceneEdit.getAction(2)
       this.director.playScenes([{ name: 'in', delay: 400 }]).then(() => {
         this.director.playScenes([{ name: 'targetHighlight' }])
         this.timelineViewer = new TimelineViewer({ container: this.$refs.viewer, config: this.viewerConfig })
@@ -346,14 +372,37 @@ export default {
       // 完全进入且动画结束的钩子
     },
     addCharactors() {
+      this.dynamicDirector.addCharactors(this.charactors)
       this.director.addCharactors(this.charactors)
     },
     handleControl(code) {
       // 控制器指令
-      console.log(code)
+      switch (code) {
+        case 'play': {
+          this.dynamicDirector.playScenes('edit')
+          break
+        }
+        default: {
+          this.dynamicDirector.getScene('edit').timelineControl(code)
+          break
+        }
+      }
     },
     addClip(key) {
       this.targetChild[key].push({ attr: '', ease: 'linear', from: 0, to: 1, duration: 1000, delay: 0 })
+      this.actions[key].addClip({ duration: 1000, delay: 0, ease: 'linear', from: {}, to: {}})
+    },
+    refreshClip(key, index, clip) {
+      const action = this.actions[key]
+      const from = {}
+      const to = {}
+      from[clip.attr] = parseInt(clip.from)
+      to[clip.attr] = parseInt(clip.to)
+      action.editClip(index, 'duration', clip.duration)
+      action.editClip(index, 'delay', clip.delay)
+      action.editClip(index, 'ease', clip.ease)
+      action.editClip(index, 'from', [from])
+      action.editClip(index, 'to', [to])
     },
     searchTargetDom(key) {
       // todo: 测试动画进程中再次播放会发生什么
@@ -526,12 +575,14 @@ export default {
                 height: 24px;
                 top: 2px;
                 background-color: #ccc;
+                box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
                 .show-text{
                   font-size: 12px;;
                   color: #000;
                   text-indent: 8px;
                   line-height: 24px;
                   // text-shadow: 0 0 4px #000;
+                  white-space: nowrap;
                   .label{
                     display: inline-block;
                   }

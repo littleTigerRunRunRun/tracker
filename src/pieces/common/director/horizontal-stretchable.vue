@@ -54,9 +54,8 @@ export default {
       if (!this.moving || this.lock) return
       const width = this.clamp(this.width + (e.pageX - this.lastX) * this.xScale, this.xRange[0], this.xRange[1])
 
-      const data = {}
       this.$emit('update:width', width)
-      data.width = width
+      this.$emit('change', width)
 
       this.lastX = e.pageX
     },

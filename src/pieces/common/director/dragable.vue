@@ -85,6 +85,7 @@ export default {
         this.$emit('update:y', y)
         data.y = y
       }
+      this.$emit('change', data)
 
       this.lastX = e.pageX
       this.lastY = e.pageY

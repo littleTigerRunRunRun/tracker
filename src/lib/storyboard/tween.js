@@ -110,11 +110,31 @@ export class Tween {
 
   }
   _startTime = 0
+  _pauseTime = 0
+  _lastTime = 0
   start() {
+    if (this.pausing) {
+      this.pausing = false
+      return this
+    }
     // console.log(this._from, this._tweenId)
     this._startTime = Date.now()
+    this._pauseTime = 0
+    this._lastTime = this._startTime
     this.activate = true
     return this
+  }
+  pause() {
+    this.pausing = true
+  }
+  frameMove = 0
+  prevFrame() {
+    if (!this.pausing) return
+    this.frameMove = -1
+  }
+  nextFrame() {
+    if (!this.pausing) return
+    this.frameMove = 1
   }
   wait(time) {
     return this
@@ -130,7 +150,18 @@ export class Tween {
     if (this.onUpdate) this.onUpdate(lerps)
   }
   update(now) {
-    const total = now - this._startTime - this.delay
+    if (this.pausing && !this.frameMove) {
+      this._pauseTime += (now - this._lastTime)
+      this._lastTime = now
+      return
+    }
+    if (this.pausing) {
+      this._pauseTime += (now - this._lastTime)
+      this._pauseTime -= this.frameMove * 20
+      this.frameMove = 0
+    }
+
+    const total = now - this._startTime - this.delay - this._pauseTime
     if (total < 0) return
     if (total > this.duration) {
       this.lerp(this.duration)
@@ -139,6 +170,8 @@ export class Tween {
         this.callbackFunc()
       }
     } else this.lerp(total % this.oneTurnDuration)
+
+    this._lastTime = now
   }
   callback(func) {
     this.callbackFunc = func
@@ -149,6 +182,7 @@ export class Tween {
 export class Timeline {
   constructor() {
     this.tweens = []
+    this.playingList = []
   }
   add(tween) {
     this.tweens.push(tween)
@@ -157,6 +191,7 @@ export class Timeline {
     const all = []
     this.tweens.map((tween) => {
       if (!gather || (gather.indexOf(tween.groupIndex) > -1)) {
+        if (!this.playingList.includes(tween)) this.playingList.push(tween)
         // console.log(gather, tween.groupIndex)
         all.push(new Promise((resolve) => {
           tween.start().callback(() => {
@@ -166,5 +201,27 @@ export class Timeline {
       }
     })
     return all
+  }
+  timelineControl(code) {
+    for (const tween of this.playingList) {
+      switch (code) {
+        case 'pause': {
+          tween.pause()
+          break
+        }
+        case 'stop': {
+          tween.stop()
+          break
+        }
+        case 'prev': {
+          tween.prevFrame()
+          break
+        }
+        case 'next': {
+          tween.nextFrame()
+          break
+        }
+      }
+    }
   }
 }
