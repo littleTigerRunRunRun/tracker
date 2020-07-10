@@ -1,10 +1,10 @@
 <template>
   <div
-    v-if="piece"
+    v-show="piece"
     ref="main"
     class="view-piece"
-    :style="{ backgroundImage: `url(${piece.data.capture || 'http://127.0.0.1:7001/public/img/capture/default.jpg'})` }"
   >
+    <div class="background" :style="{ backgroundImage: `url(${piece && piece.data && piece.data.capture || 'http://127.0.0.1:7001/public/img/capture/default.jpg'})` }" />
     <div ref="comp" class="piece-main">
       <component
         :is="comp"
@@ -113,7 +113,6 @@ export default {
   },
   methods: {
     view() {
-      // console.log(this.piece)
       this.comp = () => import(`../../pieces/${this.piece.data.categoryName}/${this.piece.data.name}/entry.vue`)
       this.lastPiece = true
 
@@ -122,7 +121,7 @@ export default {
         const rect = this.piece.target.getBoundingClientRect()
         this.director.addProp('startBound', { left: rect.left, top: rect.top, width: rect.width / window.innerWidth * 100, height: rect.height / window.innerHeight * 100 })
         this.director.playScenes([{ name: 'moveIn' }, { name: 'toolsIn', delay: 100 }]).then(() => {
-          if (this.$refs.target.onEnterEnd) this.$refs.target.onEnterEnd()
+          if (this.$refs.target && this.$refs.target.onEnterEnd) this.$refs.target.onEnterEnd()
         })
       })
     },
@@ -224,11 +223,18 @@ export default {
 <style lang="scss">
   .view-piece{
     position: fixed;
-    z-index: 1000;
+    z-index: 11;
     left: 0px;
     top: 0px;
     overflow: hidden;
-    background-size: cover;
+    .background{
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+      background-size: cover;
+    }
     .piece-main{
       width: 100%;
       height: 100%;

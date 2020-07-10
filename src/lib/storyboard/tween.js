@@ -38,15 +38,17 @@ const tick = new Tick()
 
 let tweenId = 0
 export class Tween {
-  constructor({ target, duration, delay, ease, from, to, setMapFuncs, getMapFuncs, onUpdate, filters = null }) {
+  constructor({ target, repeat, groupIndex = 0, duration, delay, ease, from, to, setMapFuncs, getMapFuncs, onUpdate, filters = null }) {
     this._tweenId = tweenId++
     this.tick = tick
     this.target = target
-    this.duration = duration
+    this.oneTurnDuration = duration
+    this.duration = duration * (repeat || 1)
     this.delay = delay
     this.ease = ease || 'linear'
     this._from = from
     this._to = to
+    this.groupIndex = groupIndex
 
     this.setMapFuncs = {}
     this.getMapFuncs = {}
@@ -136,7 +138,7 @@ export class Tween {
       if (this.callbackFunc) {
         this.callbackFunc()
       }
-    } else this.lerp(total)
+    } else this.lerp(total % this.oneTurnDuration)
   }
   callback(func) {
     this.callbackFunc = func
@@ -151,14 +153,17 @@ export class Timeline {
   add(tween) {
     this.tweens.push(tween)
   }
-  play() {
+  play(gather) {
     const all = []
     this.tweens.map((tween) => {
-      all.push(new Promise((resolve) => {
-        tween.start().callback(() => {
-          resolve()
-        })
-      }))
+      if (!gather || (gather.indexOf(tween.groupIndex) > -1)) {
+        // console.log(gather, tween.groupIndex)
+        all.push(new Promise((resolve) => {
+          tween.start().callback(() => {
+            resolve()
+          })
+        }))
+      }
     })
     return all
   }

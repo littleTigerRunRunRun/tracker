@@ -77,6 +77,7 @@ class Action extends IdObject {
       const newClip = {}
       newClip.delay = clip.delay
       newClip.duration = clip.duration
+      newClip.repeat = clip.repeat || 1
       newClip.from = clip.from
       newClip.to = clip.to
       newClip.update = clip.update
@@ -103,49 +104,19 @@ class Action extends IdObject {
   }
   play(params, temporaryData) {
     const rc = this.relativeCharactors // 快速通道
-    const gather = this.relativeGather
-    for (const clip of this.clips) {
-      if (rc instanceof Charactor) {
-        // 群演动画
-        for (let i = 0; i < rc.length; i++) {
-          if (!gather.includes(i)) continue
-          const target = rc.getTarget(i)
-          const tween = new Tween({
-            from: this.assignObjects(clip.from, temporaryData, i),
-            to: this.assignObjects(clip.to, temporaryData, i),
-            duration: this.getPropValue(clip.duration, i),
-            delay: this.getPropValue(clip.delay, i) + (params.delay || 0),
-            target,
-            ease: clip.ease,
-            onUpdate: clip.update,
-            filters: clip.filters
-          })
-          this.timeline.add(tween)
-        }
-      } else {
-        // console.log(clip.filters)
-        if (Object.keys(rc).length === 1) {
-          // 单对象动画
-          const target = rc[0].getTarget()
-          const tween = new Tween({
-            from: this.assignObjects(clip.from, temporaryData),
-            to: this.assignObjects(clip.to, temporaryData),
-            duration: this.getPropValue(clip.duration),
-            delay: this.getPropValue(clip.delay) + (params.delay || 0),
-            target,
-            ease: clip.ease,
-            onUpdate: clip.update,
-            filters: clip.filters
-          })
-          this.timeline.add(tween)
-          // how to set delay
-        } else {
-          // 多对象动画
+    const gather = params.gather || this.relativeGather
+    if (this.timeline.tweens.length === 0) {
+      for (const clip of this.clips) {
+        if (rc instanceof Charactor) {
+          // 群演动画
           for (let i = 0; i < rc.length; i++) {
-            const target = rc[i].getTarget()
+            if (!gather.includes(i)) continue
+            const target = rc.getTarget(i)
             const tween = new Tween({
+              groupIndex: i,
               from: this.assignObjects(clip.from, temporaryData, i),
               to: this.assignObjects(clip.to, temporaryData, i),
+              repeat: this.getPropValue(clip.repeat),
               duration: this.getPropValue(clip.duration, i),
               delay: this.getPropValue(clip.delay, i) + (params.delay || 0),
               target,
@@ -155,10 +126,48 @@ class Action extends IdObject {
             })
             this.timeline.add(tween)
           }
+        } else {
+          // console.log(clip.filters)
+          if (Object.keys(rc).length === 1) {
+            // 单对象动画
+            const target = rc[0].getTarget()
+            const tween = new Tween({
+              from: this.assignObjects(clip.from, temporaryData),
+              to: this.assignObjects(clip.to, temporaryData),
+              repeat: this.getPropValue(clip.repeat),
+              duration: this.getPropValue(clip.duration),
+              delay: this.getPropValue(clip.delay) + (params.delay || 0),
+              target,
+              ease: clip.ease,
+              onUpdate: clip.update,
+              filters: clip.filters
+            })
+            this.timeline.add(tween)
+            // how to set delay
+          } else {
+            // 多对象动画
+            for (let i = 0; i < rc.length; i++) {
+              if (gather && !gather.includes(i)) continue
+              const target = rc[i].getTarget()
+              const tween = new Tween({
+                groupIndex: i,
+                from: this.assignObjects(clip.from, temporaryData, i),
+                to: this.assignObjects(clip.to, temporaryData, i),
+                repeat: this.getPropValue(clip.repeat, i),
+                duration: this.getPropValue(clip.duration, i),
+                delay: this.getPropValue(clip.delay, i) + (params.delay || 0),
+                target,
+                ease: clip.ease,
+                onUpdate: clip.update,
+                filters: clip.filters
+              })
+              this.timeline.add(tween)
+            }
+          }
         }
       }
-    }
-    return this.timeline.play()
+      return this.timeline.play(gather)
+    } else return this.timeline.play(gather)
   }
   onComplete() {
     console.log('anime complete')

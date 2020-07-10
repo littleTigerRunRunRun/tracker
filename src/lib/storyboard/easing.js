@@ -16,9 +16,23 @@ export default {
     const p = 1 - clamp(t, 0, d) / d
     return (c - b) * (1 - p * p * p) + b
   },
+  easeInOut(t, b, c, d) {
+    let p = clamp(t, 0, d) / d
+    if (p < 0.5) {
+      p = p * 2
+      return (c - b) * p * p * p * 0.5 + b
+    } else {
+      p = 2 - p * 2
+      return (c - b) * (1 - p * p * p * 0.5) + b
+    }
+  },
   goback(t, b, c, d) {
     const p = clamp(t, 0, d) / d
     return (c - b) * Math.sin(p * Math.PI) + b
+  },
+  smoothGoBack(t, b, c, d) {
+    const p = clamp(t, 0, d) / d
+    return (c - b) * (Math.sin(p * Math.PI * 2 - Math.PI * 0.5) * 0.5 + 0.5) + b
   },
   turnBackIn1(t, b, c, d) {
     const p = clamp(t, 0, d) / d - 0.1
