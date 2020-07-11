@@ -389,7 +389,7 @@ export default {
       }
     },
     addClip(key) {
-      this.targetChild[key].push({ attr: '', ease: 'linear', from: 0, to: 1, duration: 1000, delay: 0 })
+      this.targetChild[key].push({ attr: '', ease: 'linear', from: 100, to: 400, duration: 1000, delay: 0 })
       this.actions[key].addClip({ duration: 1000, delay: 0, ease: 'linear', from: {}, to: {}})
     },
     refreshClip(key, index, clip) {
