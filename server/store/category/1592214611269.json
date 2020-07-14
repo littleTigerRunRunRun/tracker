@@ -2,6 +2,7 @@
     "type": "piece",
     "list": [{
         "id": 1592447209650,
+        "type": "piece",
         "name": "colorReplace",
         "title": "图片颜色替换",
         "desc": "利用HSL颜色，实现了保留中性色细节的单色调颜色替换",

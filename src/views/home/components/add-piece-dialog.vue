@@ -22,14 +22,14 @@
         <label>描述</label>
         <md-input v-model="form.desc" :disabled="sending" />
       </md-field>
-      <md-chips v-model="form.label" class="md-primary" :disabled="sending" :md-limit="3" md-placeholder="添加描述性标签">
-        <template slot="md-chip" slot-scope="{ chip }">
-          {{ chip }}
-        </template>
-        <div class="md-helper-text">
-          至多三个
-        </div>
-      </md-chips>
+      <div class="piece-type-form">
+        <md-radio v-model="form.type" value="piece" class="md-primary">
+          作品
+        </md-radio>
+        <md-radio v-model="form.type" value="gather" class="md-primary">
+          合集
+        </md-radio>
+      </div>
       <transition name="moveIn">
         <div v-if="errorMessage" class="api-error-text">
           {{ errorMessage }}
@@ -77,10 +77,10 @@ export default {
       visible: false,
       sending: false,
       form: {
+        type: 'piece',
         name: '',
         title: '',
-        desc: '',
-        label: []
+        desc: ''
       },
       errorMessage: ''
     }
@@ -114,10 +114,10 @@ export default {
     handleClose() {
       this.$v.$reset()
       this.visible = false
+      this.form.type = 'piece'
       this.form.name = ''
       this.form.title = ''
       this.form.desc = ''
-      this.form.label.splice(0, this.form.label.length - 1)
       this.errorMessage = ''
     },
     async handleSubmit() {
@@ -126,7 +126,7 @@ export default {
       if (!this.$v.$invalid) {
         this.sending = true
         try {
-          const { data } = await addPiece(Object.assign({ categoryId: this.categoryId }, this.form))
+          const { data } = await addPiece(Object.assign({ categoryId: this.categoryId, label: [] }, this.form))
           this.sending = false
           if (data.code === 200) {
             this.$emit('pieceAdded')

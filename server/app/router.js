@@ -13,6 +13,6 @@ module.exports = app => {
   // 作品相关
   router.get('/api/piece/list', controller.piece.list)
   router.get('/api/piece/add', controller.piece.add)
-  router.get('/api/piece/mkdir', controller.piece.mkdir)
+  router.get('/api/piece/delete', controller.piece.delete)
   router.post('/api/piece/saveCapture', controller.piece.saveCapture)
 }

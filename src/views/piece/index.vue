@@ -119,6 +119,7 @@ export default {
       this.$nextTick(() => {
         this.addCharactors()
         const rect = this.piece.target.getBoundingClientRect()
+        console.log(rect)
         this.director.addProp('startBound', { left: rect.left, top: rect.top, width: rect.width / window.innerWidth * 100, height: rect.height / window.innerHeight * 100 })
         this.director.playScenes([{ name: 'moveIn' }, { name: 'toolsIn', delay: 100 }]).then(() => {
           if (this.$refs.target && this.$refs.target.onEnterEnd) this.$refs.target.onEnterEnd()

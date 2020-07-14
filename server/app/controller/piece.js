@@ -53,7 +53,8 @@ class PieceController extends Controller {
           name: query.name,
           desc: query.desc,
           title: query.title,
-          label: ctx.queries.label
+          label: ctx.queries.label,
+          type: query.type
         }
         pieces.list.unshift(piece)
         this.writePieces(query.categoryId, pieces)
@@ -167,6 +168,32 @@ class PieceController extends Controller {
         data: null
       }
     }
+  }
+  edit() {
+    const { ctx } = this
+    const query = ctx.request.query
+    const data = {
+      message: '',
+      data: null
+    }
+    const pieces = this.getPieces(query.categoryId) // query.categoryId
+    const piece = pieces.list.find((piece) => piece.id === query.id)
+    if (!piece) {
+      data.code = 400
+      data.message = 'id为' + query.id + '的作品不存在'
+    } else {
+      data.code = 200
+      data.message = '成功创建作品，尽情享受创作吧'
+      data.data = query.id
+      piece.desc = query.desc,
+      piece.title = query.title,
+      piece.label = ctx.queries.label
+      this.writePieces(query.categoryId, pieces)
+    }
+    ctx.body = data
+  }
+  delete() {
+
   }
 }
 

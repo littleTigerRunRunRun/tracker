@@ -52,9 +52,14 @@ export default {
       this.current.component = page.component
     },
     handleViewPiece(data, target) {
-      this.piece = {
-        data,
-        target
+      console.log(target)
+      if (data.type === 'gather') {
+        console.log(data, target)
+      } else {
+        this.piece = {
+          data,
+          target
+        }
       }
     },
     handlePieceRefresh() {

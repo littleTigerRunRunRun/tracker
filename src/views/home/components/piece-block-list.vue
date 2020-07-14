@@ -19,21 +19,24 @@
       :key="`piece${index}`"
       ref="piece"
       class="piece-block md-layout-item md-size-25"
+      :class="{ 'piece-gather': piece.type === 'gather' }"
       @click="viewPiece(piece, index)"
     >
       <img width="100%" src="../../../assets/gold_rect.jpg">
       <div class="piece-content">
         <div class="common-content">
           <img :src="piece.capture || 'http://127.0.0.1:7001/public/img/capture/default.jpg'">
-          <span class="title">
-            {{ piece.title }}
-          </span>
-          <span class="desc">
-            {{ piece.desc }}
-          </span>
-          <span class="label">
-            {{ piece.label.join('/') }}
-          </span>
+          <div class="content-block">
+            <span class="title text-content">
+              {{ piece.title }}
+            </span>
+            <span class="desc text-content">
+              {{ piece.desc }}
+            </span>
+            <!-- <span class="label text-content">
+              {{ piece.label.join('/') }}
+            </span> -->
+          </div>
         </div>
       </div>
     </div>
@@ -84,6 +87,8 @@ export default {
   .piece-block{
     position: relative;
     width: 100%;
+    transform-style:preserve-3d;
+    perspective:800px;
     &.md-size-25{
       min-width: 0;
       max-width: none;
@@ -92,26 +97,43 @@ export default {
       flex-shrink: 25;
     }
     & > img {
+      position: relative;
       opacity: 0;
     }
     &:not(:first-of-type) {
       margin-left: 20px;
     }
-    .piece-content{
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      left: 0;
-      top: 0;
-      cursor: pointer;
-      transition: box-shadow 0.2s;
-      border-radius: 4px;
-      overflow: hidden;
-      box-shadow:
-        0px 1px 1px rgba(0, 0, 0, 0.05),
-        0px 1px 3px rgba(0, 0, 0, 0.05),
-        -1px 1px 3px rgba(0, 0, 0, 0.05);
-      &:hover{
+    &.piece-gather{
+      .piece-content{
+        .common-content{
+          transform: translate(4px, -4px);
+        }
+        &:before, &:after{
+          content: '';
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          display: block;
+          background-color: #fff;
+          top: 0px;
+          left: 0px;
+          z-index: -1;
+          box-shadow:
+            0px 1px 1px rgba(0, 0, 0, 0.15),
+            0px 1px 3px rgba(0, 0, 0, 0.15),
+            -1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        &:before{
+          transform: translate(-4px, 4px);
+        }
+        &:after{
+          transform: translate(0px, 0px);
+        }
+      }
+    }
+    &:hover{
+      .piece-content{
+        transform: translateZ(30px);
         box-shadow:
           0px 1px 1px rgba(0, 0, 0, 0.05),
           0px 1px 3px rgba(0, 0, 0, 0.05),
@@ -120,6 +142,26 @@ export default {
           1px 2px 5px rgba(0, 0, 0, 0.05),
           1px 2px 7px 2px rgba(0, 0, 0, 0.05);
       }
+      .common-content{
+        .content-block{
+          bottom: 0px;
+          background-color: rgba(0, 0, 0, 0.6);
+        }
+      }
+    }
+    .piece-content{
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.3s;
+      // border-radius: 4px;
+      box-shadow:
+        0px 1px 1px rgba(0, 0, 0, 0.05),
+        0px 1px 3px rgba(0, 0, 0, 0.05),
+        -1px 1px 3px rgba(0, 0, 0, 0.05);
       .add-button{
         position: absolute;
         top: 50%;
@@ -129,9 +171,9 @@ export default {
       .common-content{
         width: 100%;
         height: 100%;
-        padding: 6px 10px;
         background-size: cover;
         position: relative;
+        overflow: hidden;
         &>img{
           position: absolute;
           min-width: 100%;
@@ -140,29 +182,40 @@ export default {
           top: 50%;
           transform: translate(-50%, -50%);
         }
-        span{
-          color: #fff;
-          display: inline-block;
-          width: 100%;
-        }
-        .title{
-          position: relative;
-          font-size: 18px;
-          color: #fff;
-          font-weight: bold;
-          text-shadow: 0 0 2px #000;
-          margin-top: 4px;
-        }
-        .desc{
-          position: relative;
-          text-shadow: 0 0 4px #000;
-          margin-top: 8px;
-        }
-        .label{
+        .content-block{
           position: absolute;
-          bottom: 12px;
-          left: 10px;
-          text-shadow: 0 0 4px #000;
+          padding: 0 10px;
+          bottom: -36px;
+          width: 100%;
+          height: 68px;
+          background-color: rgba(0, 0, 0, 0.1);
+          transition: bottom 0.3s, background-color 0.3s;
+          .text-content{
+            position: relative;
+            color: #fff;
+            width: 100%;
+            display: inline-block;
+          }
+          .title{
+            height: 32px;
+            line-height: 32px;
+            font-size: 16px;
+            color: #fff;
+            font-weight: bold;
+            text-shadow: 0 0 2px #000;
+            opacity: 0.8;
+          }
+          .desc{
+            font-size: 12px;
+            height: 14px;
+            line-height: 14px;
+            text-shadow: 0 0 4px #000;
+            opacity: 0.4;
+          }
+          .label{
+            text-shadow: 0 0 4px #000;
+            opacity: 0.4;
+          }
         }
       }
     }

@@ -1,10 +1,17 @@
 {
     "type": "piece",
     "list": [{
+        "id": 1594721611590,
+        "name": "test1",
+        "desc": "测试生成的合集",
+        "title": "平台合集生成测试",
+        "type": "gather"
+    }, {
         "id": 1594120848688,
         "name": "testground",
         "desc": "测试平台自身可能出现的问题",
         "title": "平台测试",
-        "label": ["测试", "平台自用"]
+        "label": ["测试", "平台自用"],
+        "type": "piece"
     }]
 }
