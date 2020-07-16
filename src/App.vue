@@ -52,7 +52,6 @@ export default {
       this.current.component = page.component
     },
     handleViewPiece(data, target) {
-      console.log(target)
       if (data.type === 'gather') {
         console.log(data, target)
       } else {
