@@ -3,6 +3,11 @@ import {
   AmbientLight, DirectionalLight, SpotLight,
   Object3D, BoxGeometry, SphereBufferGeometry, PlaneBufferGeometry, MeshPhongMaterial, MeshLambertMaterial, MeshBasicMaterial, Mesh
 } from '@/lib/three.module.js'
+import { EffectComposer } from '@/lib/postprocessing/EffectComposer'
+import { RenderPass } from '@/lib/postprocessing/RenderPass'
+import { ShaderPass } from '@/lib/postprocessing/ShaderPass'
+import { DotScreenShader } from '@/lib/shaders/DotScreenShader'
+import { RGBShiftShader } from '@/lib/shaders/RGBShiftShader'
 
 export default class MainScene {
   constructor({ container }) {
@@ -10,6 +15,7 @@ export default class MainScene {
 
     this.initScenes()
     this.addSceneThings()
+    this.addComposer()
     window.addEventListener('resize', this.onResize)
 
     this.update()
@@ -17,6 +23,7 @@ export default class MainScene {
 
   onResize = this.onResizeFunc.bind(this)
   onResizeFunc() {
+    this.refresh
     this.camera.aspect = window.innerWidth / window.innerHeight
     this.camera.updateProjectionMatrix()
   }
@@ -71,10 +78,22 @@ export default class MainScene {
     }
   }
 
+  addComposer() {
+    // 将画布内的内容绘制到RenderPass这个VBO里面，然后传递个下一个后处理
+    this.composer = new EffectComposer(this.renderer)
+    this.composer.addPass(new RenderPass(this.scene, this.camera))
+
+    // 点阵后处理
+    const dotScreen = new ShaderPass(DotScreenShader)
+    dotScreen.uniforms.scale.value = 4
+    this.composer.addPass(dotScreen)
+  }
+
   update = this.updateFunc.bind(this)
   updateFunc() {
     this.main.rotation.y += 0.005
-    this.renderer.render(this.scene, this.camera)
+    // this.renderer.render(this.scene, this.camera)
+    this.composer.render()
 
     this._tick = requestAnimationFrame(this.update)
   }

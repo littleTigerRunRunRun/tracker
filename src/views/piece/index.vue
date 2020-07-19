@@ -123,7 +123,6 @@ export default {
   },
   methods: {
     showPieceStraight() {
-      console.log('show piece')
       this.comp = () => import(`../../pieces/${this.straightPath[1]}/${this.straightPath[2]}/entry.vue`)
 
       this.$nextTick(() => {
