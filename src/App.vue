@@ -6,7 +6,11 @@
         slot="main"
       />
     </page-view>
-    <view-piece :piece.sync="piece" @pieceRefresh="handlePieceRefresh" />
+    <view-piece
+      :piece.sync="piece"
+      :straight-path.sync="straightPath"
+      @pieceRefresh="handlePieceRefresh"
+    />
   </div>
 </template>
 
@@ -37,13 +41,22 @@ export default {
         component: pages.home.name
       },
       piecesRefreshEvent: [],
-      piece: null
+      piece: null,
+      straightPath: []
     }
   },
   created() {
     sorter.path = window.location.pathname
+    this.checkRouter()
+  },
+  mounted() {
   },
   methods: {
+    checkRouter() {
+      if (sorter.paths[0] === 'piece') {
+        this.straightPath = sorter.paths
+      }
+    },
     handlePageTo(name) {
       const page = pages[name]
       if (this.current.name === page.name) return

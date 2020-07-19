@@ -1,8 +1,11 @@
 <template>
   <div
-    v-show="piece"
+    v-show="piece || straightPath.length"
     ref="main"
     class="view-piece"
+    :class="{
+      'straight-path': straightPath.length > 0
+    }"
   >
     <div class="background" :style="{ backgroundImage: `url(${piece && piece.data && piece.data.capture || 'http://127.0.0.1:7001/public/img/capture/default.jpg'})` }" />
     <div ref="comp" class="piece-main">
@@ -72,6 +75,10 @@ export default {
     piece: {
       type: Object,
       default: null
+    },
+    straightPath: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
@@ -106,12 +113,28 @@ export default {
     }
   },
   mounted() {
+    if (this.straightPath.length > 0) {
+      this.showPieceStraight()
+    }
   },
   beforeDestroy() {
     this.director.destroy()
     this.director = null
   },
   methods: {
+    showPieceStraight() {
+      console.log('show piece')
+      this.comp = () => import(`../../pieces/${this.straightPath[1]}/${this.straightPath[2]}/entry.vue`)
+
+      this.$nextTick(() => {
+        this.addCharactors()
+        // console.log(rect)
+        this.director.addProp('startBound', { left: 0, top: 0, width: 100, height: 100 })
+        this.director.playScenes([{ name: 'toolsIn', delay: 100 }]).then(() => {
+          if (this.$refs.target && this.$refs.target.onEnterEnd) this.$refs.target.onEnterEnd()
+        })
+      })
+    },
     view() {
       this.comp = () => import(`../../pieces/${this.piece.data.categoryName}/${this.piece.data.name}/entry.vue`)
       this.lastPiece = true
@@ -129,10 +152,13 @@ export default {
     handleButtonClick(code) {
       switch (code) {
         case 'close': {
-          const rect = this.piece.target.getBoundingClientRect()
-          this.director.addProp('startBound', { left: rect.left, top: rect.top, width: rect.width / window.innerWidth * 100, height: rect.height / window.innerHeight * 100 })
+          if (this.piece && this.piece.target) {
+            const rect = this.piece.target.getBoundingClientRect()
+            this.director.addProp('startBound', { left: rect.left, top: rect.top, width: rect.width / window.innerWidth * 100, height: rect.height / window.innerHeight * 100 })
+          }
           this.director.playScenes([{ name: 'moveOut' }, { name: 'toolsOut' }]).then(() => {
             this.$emit('update:piece', null)
+            this.$emit('update:straightPath', [])
             this.lastPiece = false
             this.clearCapture()
             this.clearMarkdown()
@@ -228,6 +254,10 @@ export default {
     left: 0px;
     top: 0px;
     overflow: hidden;
+    &.straight-path{
+      width: 100%;
+      height: 100%;
+    }
     .background{
       position: absolute;
       width: 100%;
@@ -235,6 +265,7 @@ export default {
       left: 0;
       top: 0;
       background-size: cover;
+      background-color: #fff;
     }
     .piece-main{
       width: 100%;
