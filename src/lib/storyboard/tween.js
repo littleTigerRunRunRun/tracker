@@ -42,6 +42,7 @@ export class Tween {
     this._tweenId = tweenId++
     this.tick = tick
     this.target = target
+    this.repeat = repeat
     this.oneTurnDuration = duration
     this.duration = duration * (repeat || 1)
     this.delay = delay
@@ -61,6 +62,10 @@ export class Tween {
     this.filters = filters // onUpdate的轻量化处理
 
     this.tickId = this.tick.add(this.update.bind(this))
+  }
+  setDuration(duration) {
+    this.oneTurnDuration = duration
+    this.duration = duration * (this.repeat || 1)
   }
   _defaultSetMapFunc = (key, value) => {
     this.target[key] = value
@@ -89,7 +94,7 @@ export class Tween {
   // 设置去向但是并不直接开始
   to(to, duration, delay, ease) {
     if (to) this._to = to
-    if (duration) this.duration = duration
+    if (duration) this.setDuration(duration)
     if (delay) this.delay = delay
     if (ease) this.ease = ease
     if (!to) {
@@ -126,6 +131,11 @@ export class Tween {
   }
   pause() {
     this.pausing = true
+    return this
+  }
+  stop() {
+    this.activate = false
+    return this
   }
   frameMove = 0
   prevFrame() {

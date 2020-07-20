@@ -34,14 +34,14 @@ export default class MainScene {
     this.renderer = new WebGLRenderer()
     this.renderer.setPixelRatio(window.devicePixelRatio)
     this.renderer.setSize(bound.width, bound.height)
-    this.renderer.setClearColor(new Color(0xEEEEEE))
+    this.renderer.setClearColor(new Color(0xFFFFFF))
     this.container.appendChild(this.renderer.domElement)
 
     this.scene = new Scene()
     this.scene.fog = new Fog(0x000000, 1, 1000)
 
     this.camera = new PerspectiveCamera(60, bound.width / bound.height, 0.1, 1000)
-    this.camera.position.set(-400, 300, 500)
+    this.camera.position.set(-200, 200, 300)
     this.camera.lookAt(this.scene.position)
 
     this.scene.add(new AmbientLight(0x222222))
@@ -84,9 +84,13 @@ export default class MainScene {
     this.composer.addPass(new RenderPass(this.scene, this.camera))
 
     // 点阵后处理
-    const dotScreen = new ShaderPass(DotScreenShader)
-    dotScreen.uniforms.scale.value = 4
-    this.composer.addPass(dotScreen)
+    // const dotScreen = new ShaderPass(DotScreenShader)
+    // dotScreen.uniforms.scale.value = 4
+    // this.composer.addPass(dotScreen)
+
+    const colorShift = new ShaderPass(RGBShiftShader)
+    colorShift.uniforms.amount.value = 0.0015
+    this.composer.addPass(colorShift)
   }
 
   update = this.updateFunc.bind(this)
