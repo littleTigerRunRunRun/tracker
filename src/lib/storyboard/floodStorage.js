@@ -26,6 +26,9 @@ class FloodAttr {
 
     this.tween.from(from).to(to).start()
   }
+  destroy() {
+    this.tween.destroy()
+  }
 }
 
 export default class FloodStorage {
@@ -53,7 +56,9 @@ export default class FloodStorage {
     }
   }
 
-  createTimeline() {
-
+  destroy() {
+    for (const key in this._attrs) {
+      this._attrs[key].destroy()
+    }
   }
 }

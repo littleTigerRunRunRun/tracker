@@ -187,6 +187,10 @@ export class Tween {
     this.callbackFunc = func
     return this
   }
+  destroy() {
+    this.stop()
+    // and?
+  }
 }
 
 export class Timeline {
