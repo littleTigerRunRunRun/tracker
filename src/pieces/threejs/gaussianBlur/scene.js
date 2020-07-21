@@ -6,8 +6,9 @@ import {
 import { EffectComposer } from '@/lib/postprocessing/EffectComposer'
 import { RenderPass } from '@/lib/postprocessing/RenderPass'
 import { ShaderPass } from '@/lib/postprocessing/ShaderPass'
-import { DotScreenShader } from '@/lib/shaders/DotScreenShader'
-import { RGBShiftShader } from '@/lib/shaders/RGBShiftShader'
+// import { DotScreenShader } from '@/lib/shaders/DotScreenShader'
+// import { RGBShiftShader } from '@/lib/shaders/RGBShiftShader'
+import { GaussianBlurShader } from './index'
 
 export default class MainScene {
   constructor({ container }) {
@@ -23,9 +24,13 @@ export default class MainScene {
 
   onResize = this.onResizeFunc.bind(this)
   onResizeFunc() {
-    this.refresh
-    this.camera.aspect = window.innerWidth / window.innerHeight
+    const bound = this.container.getBoundingClientRect()
+
+    this.camera.aspect = bound.width / bound.height
     this.camera.updateProjectionMatrix()
+
+    this.renderer.setSize(bound.width, bound.height)
+    this.composer.setSize(bound.width, bound.height)
   }
 
   initScenes() {
@@ -83,14 +88,9 @@ export default class MainScene {
     this.composer = new EffectComposer(this.renderer)
     this.composer.addPass(new RenderPass(this.scene, this.camera))
 
-    // 点阵后处理
-    // const dotScreen = new ShaderPass(DotScreenShader)
-    // dotScreen.uniforms.scale.value = 4
-    // this.composer.addPass(dotScreen)
-
-    const colorShift = new ShaderPass(RGBShiftShader)
-    colorShift.uniforms.amount.value = 0.0015
-    this.composer.addPass(colorShift)
+    const gaussianBlur = new ShaderPass(GaussianBlurShader)
+    // colorShift.uniforms.amount.value = 0.0015
+    this.composer.addPass(gaussianBlur)
   }
 
   update = this.updateFunc.bind(this)
