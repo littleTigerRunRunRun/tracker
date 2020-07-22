@@ -63,7 +63,7 @@ class Action extends IdObject {
   // 将可能包含了prop的对象数组中的prop取值并完成assign
   assignObjects(array, temporaryData, index) {
     let assignObj = {}
-    const valueGotArray = array.map((prop) => {
+    array.map((prop) => {
       // console.log(prop, temporaryData)
       if (temporaryData && temporaryData[prop]) {
         assignObj = Object.assign(assignObj, temporaryData[prop])
@@ -339,7 +339,7 @@ export default class Director {
       this.props[name] = new Prop({
         name,
         value,
-        type: getPropType(value),
+        type: this.getPropType(value),
         temporary: true // 临时标记
       })
     }
