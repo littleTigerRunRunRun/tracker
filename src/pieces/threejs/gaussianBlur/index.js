@@ -1,10 +1,14 @@
+import {
+  Vector2
+} from '@/lib/three.module.js'
+
 var GaussianBlurShader = {
-  defines: {
-    KERNEL_RADIUS: 3,
-    SIGMA: 3
-  },
   uniforms: {
-    tDiffuse: { value: null }
+    tDiffuse: { value: null },
+    tSize: { value: new Vector2(1.0, 1.0) },
+    direction: { value: new Vector2(1.0, 0.0) },
+    kernelRadius: { value: 2 },
+    sigma: { value: 2.0 }
   },
   vertexShader: `
     varying vec2 vUv;
@@ -16,6 +20,7 @@ var GaussianBlurShader = {
   `,
   fragmentShader: `
     #define inverse_sqrt_2p 0.39894228
+    #define f2 2.0
     #define f1 1.0
     #define f0 0.0
     #define i1 1
@@ -23,25 +28,33 @@ var GaussianBlurShader = {
     uniform sampler2D tDiffuse;
     uniform vec2 tSize;
     uniform vec2 direction;
+    uniform int kernelRadius;
+    uniform float sigma;
 
     varying vec2 vUv;
 
     // 生成一个x位置的一维正态分布值
-    float oneDimensionalGaussian (in float x, in float sigma) {
-      return inverse_sqrt_2p / sigma * exp((-x * x) / (2.0 * sigma * sigma));
+    float oneDimensionalGaussian (in float x) {
+      return inverse_sqrt_2p / sigma * exp((-x * x) / (f2 * sigma * sigma));
     }
     
     void main() {
       vec2 unitSize = f1 / tSize;
-      float sigma = float(SIGMA);
-      float weightSum = oneDimensionalGaussian(f0, sigma);
-      vec3 diffuseSUm = texture2D( tDiffuse, vUv).rgb * weightSum;
+      float weightSum = oneDimensionalGaussian(f0);
+      vec3 diffuseSum = texture2D( tDiffuse, vUv).rgb * weightSum;
 
-      for (int i = i1; i < KERNEL_RADIUS; i++ ) {
-
+      // 这里其实是从-(kernelRadius - 1) kernelRadius - 1
+      for (int i = i1; i < kernelRadius; i++ ) {
+        float x = float(i);
+        float w = oneDimensionalGaussian(x);
+        vec2 offset = direction * x * unitSize;
+        vec3 sampler1 = texture2D(tDiffuse, vUv + offset).rgb;
+        vec3 sampler2 = texture2D(tDiffuse, vUv - offset).rgb;
+        diffuseSum += (sampler1 + sampler2) * w;
+        weightSum += w * f2;
       }
 
-    	gl_FragColor = texture2D( tDiffuse, vUv );
+    	gl_FragColor = vec4(diffuseSum / weightSum, 1.0);
     }
   `
 }

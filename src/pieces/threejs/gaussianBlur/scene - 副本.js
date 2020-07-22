@@ -1,5 +1,5 @@
 import {
-  WebGLRenderer, PerspectiveCamera, OrthographicCamera, Scene, Color, AxisHelper, Fog, Vector2, TextureLoader,
+  WebGLRenderer, PerspectiveCamera, Scene, Color, AxisHelper, Fog, Vector2,
   AmbientLight, DirectionalLight, SpotLight,
   Object3D, BoxGeometry, SphereBufferGeometry, PlaneBufferGeometry, MeshPhongMaterial, MeshLambertMaterial, MeshBasicMaterial, Mesh
 } from '@/lib/three.module.js'
@@ -49,10 +49,9 @@ export default class MainScene {
     this.scene = new Scene()
     this.scene.fog = new Fog(0x000000, 1, 1000)
 
-    const aspect = this.width / this.height
-    this.camera = new OrthographicCamera(-aspect, aspect, 1, -1, 0, 1)
-    // this.camera.position.set(0, 20, 0)
-    // this.camera.lookAt(this.scene.position)
+    this.camera = new PerspectiveCamera(60, bound.width / bound.height, 0.1, 1000)
+    this.camera.position.set(-200, 200, 300)
+    this.camera.lookAt(this.scene.position)
 
     this.scene.add(new AmbientLight(0x222222))
 
@@ -75,16 +74,17 @@ export default class MainScene {
     this.main = new Object3D()
     this.scene.add(this.main)
 
-    const texture = new TextureLoader().load('/public/img/night.jpg')
-    const geometry = new PlaneBufferGeometry(2 * this.width / this.height, 2)
-    const material = new MeshBasicMaterial({
-      map: texture
-    })
+    const geometry = new BoxGeometry()
+    const material = new MeshPhongMaterial({ color: 0xffffff })
 
-    const mesh = new Mesh(geometry, material)
-    // mesh.rotation.x = Math.PI * -0.5
-
-    this.main.add(mesh)
+    for (let i = 0; i < 10; i++) {
+      const mesh = new Mesh(geometry, material)
+      mesh.position.set(0.5 - Math.random(), 0.5 - Math.random(), 0.5 - Math.random()).normalize()
+      mesh.position.multiplyScalar(Math.random() * 200)
+      mesh.rotation.set(Math.random() * 2, Math.random() * 2, Math.random() * 2)
+      mesh.scale.x = mesh.scale.y = mesh.scale.z = Math.random() * 50
+      this.main.add(mesh)
+    }
   }
 
   addComposer() {
@@ -92,26 +92,20 @@ export default class MainScene {
     this.composer = new EffectComposer(this.renderer)
     this.composer.addPass(new RenderPass(this.scene, this.camera))
 
-    const kernelRadius = 50
-    const sigma = 50
-
     const gaussianBlurHorizontal = new ShaderPass(GaussianBlurShader)
     gaussianBlurHorizontal.uniforms.tSize.value = new Vector2(this.width, this.height)
     gaussianBlurHorizontal.uniforms.direction.value = new Vector2(1.0, 0.0)
-    gaussianBlurHorizontal.uniforms.kernelRadius.value = kernelRadius
-    gaussianBlurHorizontal.uniforms.sigma.value = sigma
     this.composer.addPass(gaussianBlurHorizontal)
 
-    const gaussianBlurVertical = new ShaderPass(GaussianBlurShader)
-    gaussianBlurVertical.uniforms.tSize.value = new Vector2(this.width, this.height)
-    gaussianBlurVertical.uniforms.direction.value = new Vector2(0.0, 1.0)
-    gaussianBlurVertical.uniforms.kernelRadius.value = kernelRadius
-    gaussianBlurVertical.uniforms.sigma.value = sigma
-    this.composer.addPass(gaussianBlurVertical)
+    // const gaussianBlurVertical = new ShaderPass(GaussianBlurShader)
+    // gaussianBlurVertical.uniforms.tSize.value = new Vector2(this.width, this.height)
+    // gaussianBlurVertical.uniforms.direction.value = new Vector2(0.0, 1.0)
+    // this.composer.addPass(gaussianBlurVertical)
   }
 
   update = this.updateFunc.bind(this)
   updateFunc() {
+    this.main.rotation.y += 0.005
     // this.renderer.render(this.scene, this.camera)
     this.composer.render()
 
