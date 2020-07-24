@@ -24,7 +24,11 @@ class FloodAttr {
     to[this.key] = newValue
     if (this.speed) this.tween.setDuration(Math.abs(newValue - this.target[this.key]) / this.speed * 1000)
 
-    this.tween.from(from).to(to).start()
+    return new Promise((resolve) => {
+      this.tween.from(from).to(to).start().callback(() => {
+        resolve()
+      })
+    })
   }
   destroy() {
     this.tween.destroy()
@@ -54,6 +58,14 @@ export default class FloodStorage {
       }
       Object.defineProperties(this, hijack)
     }
+  }
+
+  setValue(obj) {
+    const array = []
+    for (const key in obj) {
+      array.push(this._attrs[key].setValue(obj[key]))
+    }
+    return Promise.all(array)
   }
 
   destroy() {

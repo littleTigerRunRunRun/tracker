@@ -13,11 +13,11 @@
         :is="comp"
         v-if="comp"
         ref="target"
+        v-bind="config.obj"
+        @config="registerConfig"
       />
     </div>
-    <div class="decorators">
-      <div class="water-spray" />
-    </div>
+    <!--截图相关内容-->
     <div v-show="capture.activate" class="capture" :class="{ activate: capture.activate }">
       <div v-show="capture.src" ref="captureImage" class="capture-image">
         <div ref="captureImageContent" class="image-content">
@@ -42,6 +42,11 @@
       </div>
       <div class="capture-hide" />
     </div>
+    <!---配置表-->
+    <config-panel
+      v-show="config.activate"
+      :form="config.obj"
+    />
     <!--右上角的按钮群-->
     <div
       class="button-group"
@@ -68,9 +73,13 @@ import { saveCapture } from './api'
 import director from './storyboard'
 // import html2canvas from 'html2canvas'
 import domtoimage from 'dom-to-image'
+import configPanel from './configPanel'
 
 export default {
   name: 'ViewPiece',
+  components: {
+    configPanel
+  },
   props: {
     piece: {
       type: Object,
@@ -102,6 +111,10 @@ export default {
       },
       markdown: {
         activate: false
+      },
+      config: {
+        activate: false,
+        obj: {}
       }
     }
   },
@@ -122,6 +135,7 @@ export default {
     this.director = null
   },
   methods: {
+    // 根据路由直接读取组件而不是通过接口查询
     showPieceStraight() {
       this.comp = () => import(`../../pieces/${this.straightPath[1]}/${this.straightPath[2]}/entry.vue`)
 
@@ -134,6 +148,7 @@ export default {
         })
       })
     },
+    // 从列表打开的过程处理
     view() {
       this.comp = () => import(`../../pieces/${this.piece.data.categoryName}/${this.piece.data.name}/entry.vue`)
       this.lastPiece = true
@@ -148,6 +163,7 @@ export default {
         })
       })
     },
+    // 工具栏响应
     handleButtonClick(code) {
       switch (code) {
         case 'close': {
@@ -196,6 +212,7 @@ export default {
         }
       }
     },
+    // 取消截图保存
     handleCancel() {
       this.capture.imageDisabled = true
       this.director.playScenes('captureCancel').then(() => {
@@ -203,6 +220,7 @@ export default {
         this.clearCapture()
       })
     },
+    // 奥村截图
     handleSave() {
       const bound = this.$refs.captureImage.getBoundingClientRect()
       this.director.addProp('imageShrinkBound', {
@@ -221,6 +239,7 @@ export default {
         this.clearCapture()
       })
     },
+    // 清空截图相关
     clearCapture() {
       this.capture.activate = false
       this.capture.src = ''
@@ -229,9 +248,11 @@ export default {
       this.director.resetCharator('captureImage')
       this.director.resetCharator('captureImageContent')
     },
+    // 清空文档相关
     clearMarkdown() {
       this.markdown.activate = false
     },
+    // 添加动画对象
     addCharactors() {
       this.director.addCharactors({
         main: this.$refs.main,
@@ -241,174 +262,19 @@ export default {
         captureImage: this.$refs.captureImage,
         captureImageContent: this.$refs.captureImageContent
       })
+    },
+    // 注册配置表
+    registerConfig(config) {
+      const obj = {}
+      for (const key in config) {
+        obj[key] = typeof config[key].default === 'function' ? config[key].default() : config[key].default
+      }
+      this.config.obj = obj
     }
   }
 }
 </script>
 
 <style lang="scss">
-  .view-piece{
-    position: fixed;
-    z-index: 11;
-    left: 0px;
-    top: 0px;
-    overflow: hidden;
-    &.straight-path{
-      width: 100%;
-      height: 100%;
-    }
-    .background{
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      left: 0;
-      top: 0;
-      background-size: cover;
-      background-color: #fff;
-    }
-    .piece-main{
-      width: 100%;
-      height: 100%;
-      position: relative;
-      // background-image: url('../../assets/view.jpg');
-    }
-    .capture{
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      &.activate{
-        pointer-events: auto;
-      }
-      .capture-image{
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        border: 2px solid #fff;
-        box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.4);
-        overflow: hidden;
-        transform-origin: 50% 50%;
-        backface-visibility: hidden;
-        background-color: #fff;
-        .image-content{
-          width: 100%;
-          height: 100%;
-          position: relative;
-          opacity: 1;
-        }
-        img {
-          width: 100%;
-          height: 100%;
-        }
-        .button-done, .button-clear {
-          position: absolute;
-          bottom: 4px;
-          background-color: #999;
-          border-radius: 0px;
-          width: 32px;
-          height: 32px;
-          min-width: 0px;
-          margin: 0;
-          &:before, .md-ripple, .md-ripple-wave{
-            border-radius: 0px !important;
-          }
-          i{
-            color: #fff;
-          }
-        }
-        .button-done {
-          right: 40px;
-        }
-        .button-clear {
-          right: 4px;
-        }
-      }
-      .capture-range{
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        pointer-events: none;
-        div{
-          position: absolute;
-          width: 30px;
-          height: 30px;
-        }
-        .range-left-top{
-          left: 40px;
-          top: 40px;
-          border-top: 4px solid #fff;
-          border-left: 4px solid #fff;
-          clip-path: polygon(0% 100%, 0% 0%, 100% 0%);
-        }
-        .range-right-top{
-          right: 40px;
-          top: 40px;
-          border-top: 4px solid #fff;
-          border-right: 4px solid #fff;
-          clip-path: polygon(0% 0%, 100% 0%, 100% 100%);
-        }
-        .range-left-bottom{
-          left: 40px;
-          bottom: 40px;
-          border-bottom: 4px solid #fff;
-          border-left: 4px solid #fff;
-          clip-path: polygon(0% 0%, 0% 100%, 100% 100%);
-        }
-        .range-right-bottom{
-          right: 40px;
-          bottom: 40px;
-          border-bottom: 4px solid #fff;
-          border-right: 4px solid #fff;
-          clip-path: polygon(0% 100%, 100% 10%, 100% 100%);
-        }
-      }
-      .capture-shock{
-        position: absolute;
-        width: calc(100% - 22px);
-        height: calc(100% - 22px);
-        left: 11px;
-        top: 11px;
-        pointer-events: none;
-        div {
-          position: absolute;
-          width: 100%;
-          height: 0;
-          background-color: #000;
-        }
-        .shock-top {
-          top: 0;
-        }
-        .shock-bottom {
-          bottom: 0;
-        }
-      }
-    }
-    .button-group{
-      position: absolute;
-      width: 100%;
-      right: 0px;
-      top: 8px;
-      .md-button{
-        transition: none !important;
-        &:before, .md-ripple, .md-ripple-wave{
-          border-radius: 0px !important;
-        }
-        position: absolute;
-        right: -44px;
-        cursor: pointer;
-        color: #fff;
-        background-color: #999;
-        opacity: 0.6;
-        border-radius: 0px;
-        margin: 0px;
-        transform: rotate(90deg);
-        i{
-          color: #fff;
-        }
-      }
-    }
-  }
+  @import './style.scss';
 </style>

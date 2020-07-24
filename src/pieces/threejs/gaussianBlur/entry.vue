@@ -5,17 +5,19 @@
 </template>
 
 <script>
+import props from './config'
 import Scene from './scene.js'
 
 export default {
   name: 'GaussianBlur',
-  props: {},
+  props,
   data() {
     return {
       scene: null
     }
   },
   mounted() {
+    this.$emit('config', props)
   },
   update() {
     console.log('udpate')

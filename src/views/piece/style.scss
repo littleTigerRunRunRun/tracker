@@ -1,0 +1,164 @@
+.view-piece{
+  position: fixed;
+  z-index: 11;
+  left: 0px;
+  top: 0px;
+  overflow: hidden;
+  &.straight-path{
+    width: 100%;
+    height: 100%;
+  }
+  .background{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background-size: cover;
+    background-color: #fff;
+  }
+  .piece-main{
+    width: 100%;
+    height: 100%;
+    position: relative;
+    // background-image: url('../../assets/view.jpg');
+  }
+  .capture{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    &.activate{
+      pointer-events: auto;
+    }
+    .capture-image{
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 2px solid #fff;
+      box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+      transform-origin: 50% 50%;
+      backface-visibility: hidden;
+      background-color: #fff;
+      .image-content{
+        width: 100%;
+        height: 100%;
+        position: relative;
+        opacity: 1;
+      }
+      img {
+        width: 100%;
+        height: 100%;
+      }
+      .button-done, .button-clear {
+        position: absolute;
+        bottom: 4px;
+        background-color: #999;
+        border-radius: 0px;
+        width: 32px;
+        height: 32px;
+        min-width: 0px;
+        margin: 0;
+        &:before, .md-ripple, .md-ripple-wave{
+          border-radius: 0px !important;
+        }
+        i{
+          color: #fff;
+        }
+      }
+      .button-done {
+        right: 40px;
+      }
+      .button-clear {
+        right: 4px;
+      }
+    }
+    .capture-range{
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      pointer-events: none;
+      div{
+        position: absolute;
+        width: 30px;
+        height: 30px;
+      }
+      .range-left-top{
+        left: 40px;
+        top: 40px;
+        border-top: 4px solid #fff;
+        border-left: 4px solid #fff;
+        clip-path: polygon(0% 100%, 0% 0%, 100% 0%);
+      }
+      .range-right-top{
+        right: 40px;
+        top: 40px;
+        border-top: 4px solid #fff;
+        border-right: 4px solid #fff;
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%);
+      }
+      .range-left-bottom{
+        left: 40px;
+        bottom: 40px;
+        border-bottom: 4px solid #fff;
+        border-left: 4px solid #fff;
+        clip-path: polygon(0% 0%, 0% 100%, 100% 100%);
+      }
+      .range-right-bottom{
+        right: 40px;
+        bottom: 40px;
+        border-bottom: 4px solid #fff;
+        border-right: 4px solid #fff;
+        clip-path: polygon(0% 100%, 100% 10%, 100% 100%);
+      }
+    }
+    .capture-shock{
+      position: absolute;
+      width: calc(100% - 22px);
+      height: calc(100% - 22px);
+      left: 11px;
+      top: 11px;
+      pointer-events: none;
+      div {
+        position: absolute;
+        width: 100%;
+        height: 0;
+        background-color: #000;
+      }
+      .shock-top {
+        top: 0;
+      }
+      .shock-bottom {
+        bottom: 0;
+      }
+    }
+  }
+  .button-group{
+    position: absolute;
+    width: 100%;
+    right: 0px;
+    top: 8px;
+    .md-button{
+      transition: none !important;
+      &:before, .md-ripple, .md-ripple-wave{
+        border-radius: 0px !important;
+      }
+      position: absolute;
+      right: -44px;
+      cursor: pointer;
+      color: #fff;
+      background-color: #999;
+      opacity: 0.6;
+      border-radius: 0px;
+      margin: 0px;
+      transform: rotate(90deg);
+      i{
+        color: #fff;
+      }
+    }
+  }
+}
