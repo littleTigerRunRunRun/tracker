@@ -137,6 +137,15 @@
       }
     }
   }
+  .config-panel{
+    position: absolute;
+    height: 100%;
+    top: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    box-shadow:
+      -2px 0 7px rgba(0, 0, 0, 0.2),
+      -1px 0 4px rgba(0, 0, 0, 0.4);
+  }
   .button-group{
     position: absolute;
     width: 100%;

@@ -23,7 +23,8 @@ const director = new Director({
       { name: 'captureRanges', type: 'dom', masses: true, length: 4 },
       { name: 'captureShocks', type: 'dom', masses: true, length: 2 },
       { name: 'captureImage', type: 'dom', engrave: ['width', 'height', 'left', 'bottom', 'rotate'] }, // engrave on one's mind
-      { name: 'captureImageContent', type: 'dom', engrave: ['opacity'] }
+      { name: 'captureImageContent', type: 'dom', engrave: ['opacity'] },
+      { name: 'config' }
     ],
     // 道具，这里指会被调用到的关键数据
     props: [
@@ -270,6 +271,21 @@ const director = new Director({
               ease: 'linear',
               from: ['toolsRight'],
               to: [{ right: 8 }]
+            }
+          ]
+        }
+      ],
+      configIn: [
+        {
+          charactors: 'config',
+          desc: '点击设置按钮，设置面板从右侧淡入推出',
+          actionClips: [
+            {
+              delay: 0,
+              duration: 200,
+              ease: 'easeOut',
+              from: [{ opacity: 0, right: -480 }],
+              to: [{ opacity: 1, right: 0 }]
             }
           ]
         }

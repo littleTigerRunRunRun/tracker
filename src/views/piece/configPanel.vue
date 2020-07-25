@@ -1,6 +1,6 @@
 <template>
   <div class="config-panel">
-    <md-field :class="getValidationClass('firstName')">
+    <md-field>
       <label for="first-name">First Name</label>
     </md-field>
   </div>
@@ -20,6 +20,7 @@ export default {
 
 <style lang="scss">
   .config-panel{
-
+    color: #fff;
+    padding: 0 16px;
   }
 </style>

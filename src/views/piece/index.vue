@@ -44,8 +44,13 @@
     </div>
     <!---配置表-->
     <config-panel
-      v-show="config.activate"
+      class="config-panel"
       :form="config.obj"
+      :style="{
+        right: `${config.right}px`,
+        width: `${config.width}px`,
+        opacity: config.opacity
+      }"
     />
     <!--右上角的按钮群-->
     <div
@@ -113,8 +118,10 @@ export default {
         activate: false
       },
       config: {
-        activate: false,
-        obj: {}
+        obj: {},
+        width: 480,
+        right: -480,
+        opacity: 0
       }
     }
   },
@@ -198,7 +205,9 @@ export default {
           break
         }
         case 'config': {
-          this.director.playScenes([{ name: 'toolsOut' }])
+          this.director.playScenes([{ name: 'toolsOut' }, { name: 'configIn', delay: 100 }]).then(() => {
+            // this.config.activate = true
+          })
           break
         }
         case 'markdown': {
@@ -260,7 +269,8 @@ export default {
         captureRanges: [this.$refs.rlt, this.$refs.rrt, this.$refs.rlb, this.$refs.rrb],
         captureShocks: [this.$refs.cst, this.$refs.csb],
         captureImage: this.$refs.captureImage,
-        captureImageContent: this.$refs.captureImageContent
+        captureImageContent: this.$refs.captureImageContent,
+        config: this.config
       })
     },
     // 注册配置表
