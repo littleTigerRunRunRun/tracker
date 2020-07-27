@@ -11,8 +11,9 @@ import { ShaderPass } from '@/lib/postprocessing/ShaderPass'
 import { GaussianBlurShader } from './index'
 
 export default class MainScene {
-  constructor({ container }) {
+  constructor({ container, params }) {
     this.container = container
+    this.params = params
 
     this.initScenes()
     this.addSceneThings()
@@ -40,7 +41,9 @@ export default class MainScene {
     this.width = bound.width
     this.height = bound.height
 
-    this.renderer = new WebGLRenderer()
+    this.renderer = new WebGLRenderer({
+      preserveDrawingBuffer: true
+    })
     this.renderer.setPixelRatio(window.devicePixelRatio)
     this.renderer.setSize(bound.width, bound.height)
     this.renderer.setClearColor(new Color(0xFFFFFF))
@@ -71,17 +74,26 @@ export default class MainScene {
     this.container.appendChild(this.renderer.domElement)
   }
 
+  changeParams(key, value) {
+    if (key === 'image') {
+      this.material.map = new TextureLoader().load(value)
+    } else {
+      this.gaussianBlurHorizontal.uniforms[key].value = value
+      this.gaussianBlurVertical.uniforms[key].value = value
+    }
+  }
+
   addSceneThings() {
     this.main = new Object3D()
     this.scene.add(this.main)
 
-    const texture = new TextureLoader().load('/public/img/night.jpg')
+    const texture = new TextureLoader().load(this.params.image)
     const geometry = new PlaneBufferGeometry(2 * this.width / this.height, 2)
-    const material = new MeshBasicMaterial({
+    this.material = new MeshBasicMaterial({
       map: texture
     })
 
-    const mesh = new Mesh(geometry, material)
+    const mesh = new Mesh(geometry, this.material)
     // mesh.rotation.x = Math.PI * -0.5
 
     this.main.add(mesh)
@@ -92,22 +104,19 @@ export default class MainScene {
     this.composer = new EffectComposer(this.renderer)
     this.composer.addPass(new RenderPass(this.scene, this.camera))
 
-    const kernelRadius = 50
-    const sigma = 50
+    this.gaussianBlurHorizontal = new ShaderPass(GaussianBlurShader)
+    this.gaussianBlurHorizontal.uniforms.tSize.value = new Vector2(this.width, this.height)
+    this.gaussianBlurHorizontal.uniforms.direction.value = new Vector2(1.0, 0.0)
+    this.gaussianBlurHorizontal.uniforms.kernelRadius.value = this.params.kernelRadius
+    this.gaussianBlurHorizontal.uniforms.sigma.value = this.params.sigma
+    this.composer.addPass(this.gaussianBlurHorizontal)
 
-    const gaussianBlurHorizontal = new ShaderPass(GaussianBlurShader)
-    gaussianBlurHorizontal.uniforms.tSize.value = new Vector2(this.width, this.height)
-    gaussianBlurHorizontal.uniforms.direction.value = new Vector2(1.0, 0.0)
-    gaussianBlurHorizontal.uniforms.kernelRadius.value = kernelRadius
-    gaussianBlurHorizontal.uniforms.sigma.value = sigma
-    this.composer.addPass(gaussianBlurHorizontal)
-
-    const gaussianBlurVertical = new ShaderPass(GaussianBlurShader)
-    gaussianBlurVertical.uniforms.tSize.value = new Vector2(this.width, this.height)
-    gaussianBlurVertical.uniforms.direction.value = new Vector2(0.0, 1.0)
-    gaussianBlurVertical.uniforms.kernelRadius.value = kernelRadius
-    gaussianBlurVertical.uniforms.sigma.value = sigma
-    this.composer.addPass(gaussianBlurVertical)
+    this.gaussianBlurVertical = new ShaderPass(GaussianBlurShader)
+    this.gaussianBlurVertical.uniforms.tSize.value = new Vector2(this.width, this.height)
+    this.gaussianBlurVertical.uniforms.direction.value = new Vector2(0.0, 1.0)
+    this.gaussianBlurVertical.uniforms.kernelRadius.value = this.params.kernelRadius
+    this.gaussianBlurVertical.uniforms.sigma.value = this.params.sigma
+    this.composer.addPass(this.gaussianBlurVertical)
   }
 
   update = this.updateFunc.bind(this)

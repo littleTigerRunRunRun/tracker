@@ -151,23 +151,26 @@
     width: 100%;
     right: 0px;
     top: 8px;
-    .md-button{
-      transition: none !important;
-      &:before, .md-ripple, .md-ripple-wave{
-        border-radius: 0px !important;
-      }
-      position: absolute;
-      right: -44px;
-      cursor: pointer;
-      color: #fff;
+    .rect-button{
       background-color: #999;
-      opacity: 0.6;
-      border-radius: 0px;
-      margin: 0px;
-      transform: rotate(90deg);
-      i{
-        color: #fff;
-      }
+    }
+  }
+  
+  .rect-button{
+    transition: none !important;
+    &:before, .md-ripple, .md-ripple-wave{
+      border-radius: 0px !important;
+    }
+    position: absolute;
+    right: -44px;
+    cursor: pointer;
+    color: #fff;
+    opacity: 0.6;
+    border-radius: 0px;
+    margin: 0px;
+    transform: rotate(90deg);
+    i{
+      color: #fff;
     }
   }
 }

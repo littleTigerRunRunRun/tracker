@@ -289,6 +289,21 @@ const director = new Director({
             }
           ]
         }
+      ],
+      configOut: [
+        {
+          charactors: 'config',
+          desc: '点击设置面板的关闭按钮，设置面板向右侧淡出',
+          actionClips: [
+            {
+              delay: 0,
+              duration: 200,
+              ease: 'easeOut',
+              from: [{ opacity: 1, right: 0 }],
+              to: [{ opacity: 0, right: -400 }]
+            }
+          ]
+        }
       ]
     }
   }

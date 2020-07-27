@@ -143,20 +143,32 @@ class PieceController extends Controller {
     const body = ctx.request.body
     const src = body.src.replace(/^data:image\/\w+;base64,/, '')
     const dataBuffer = Buffer.from(src, 'base64')
-    const pieces = this.getPieces(body.categoryId)
-    
-    const piece = pieces.list.find((item) => item.id === body.id)
-
+    let categoryId = body.categoryId
+    if (!categoryId) {
+      let cates = this.getCategory()
+      let cate = cates.list.find((item) => item.name === body.categoryName)
+      if (cate) { categoryId = cate.id }
+      else {
+        ctx.body = {
+          message: '未传入正确的类别id或者name',
+          code: 400,
+          data: null
+        }
+        return
+      }
+    }
+    const pieces = this.getPieces(categoryId)
+    const piece = pieces.list.find((item) => item.id === body.id || item.name === body.name )
     if (!piece) {
       ctx.body = {
         message: '不存在的作品id',
-        code: 500,
+        code: 400,
         data: null
       }
     } else {
-      const fileName = body.id + '.jpg'
+      const fileName = body.id + '.png'
       piece.capture = 'http://127.0.0.1:7001/public/img/capture/' + fileName
-      this.writePieces(body.categoryId, pieces)
+      this.writePieces(categoryId, pieces)
       fs.writeFile(path.resolve(__dirname, '../public/img/capture/' + fileName), dataBuffer, function(err) {
         if(err){
           console.error(err)

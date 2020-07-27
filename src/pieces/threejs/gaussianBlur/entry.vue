@@ -16,7 +16,19 @@ export default {
       scene: null
     }
   },
+  watch: {
+    kernelRadius(val) {
+      this.scene.changeParams('kernelRadius', val)
+    },
+    sigma(val) {
+      this.scene.changeParams('sigma', val)
+    },
+    image(val) {
+      this.scene.changeParams('image', val)
+    }
+  },
   mounted() {
+    console.log(this)
     this.$emit('config', props)
   },
   update() {
@@ -31,7 +43,7 @@ export default {
   methods: {
     onEnterEnd() {
       // 完全进入且动画结束的钩子
-      this.scene = new Scene({ container: this.$refs.container })
+      this.scene = new Scene({ container: this.$refs.container, params: { image: this.image, kernelRadius: this.kernelRadius, sigma: this.sigma }})
     }
   }
 }

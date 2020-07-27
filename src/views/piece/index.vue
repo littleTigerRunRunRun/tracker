@@ -13,7 +13,7 @@
         :is="comp"
         v-if="comp"
         ref="target"
-        v-bind="config.obj"
+        v-bind="config.values"
         @config="registerConfig"
       />
     </div>
@@ -45,12 +45,14 @@
     <!---配置表-->
     <config-panel
       class="config-panel"
-      :form="config.obj"
+      :form="config.form"
+      :values="config.values"
       :style="{
         right: `${config.right}px`,
         width: `${config.width}px`,
         opacity: config.opacity
       }"
+      @close="closeConfig"
     />
     <!--右上角的按钮群-->
     <div
@@ -60,7 +62,7 @@
         v-for="(button, bindex) in buttons"
         :key="`button${bindex}`"
         ref="tools"
-        class="md-icon-button"
+        class="md-icon-button rect-button"
         :disabled="
           (capture.activate && button.code === 'screenshot') ||
             (markdown.activate && button.code === 'markdown')
@@ -78,7 +80,7 @@ import { saveCapture } from './api'
 import director from './storyboard'
 // import html2canvas from 'html2canvas'
 import domtoimage from 'dom-to-image'
-import configPanel from './configPanel'
+import configPanel from './configPanel/index.vue'
 
 export default {
   name: 'ViewPiece',
@@ -118,7 +120,8 @@ export default {
         activate: false
       },
       config: {
-        obj: {},
+        values: {},
+        form: {},
         width: 480,
         right: -480,
         opacity: 0
@@ -191,6 +194,7 @@ export default {
           this.capture.activate = true
           this.director.playScenes([{ name: 'toolsOut' }, { name: 'captureRangeIn', delay: 200 }, { name: 'captureShock', delay: 600 }]).then(() => {
             domtoimage.toPng(this.$refs.comp).then((src) => {
+              // console.log(src)
               this.capture.src = src
               this.$nextTick(() => {
                 const { width, height } = this.$refs.captureImage.getBoundingClientRect()
@@ -238,7 +242,15 @@ export default {
         left: bound.left + (bound.width - 20) / 2,
         bottom: bound.height / 2 + 10
       })
-      saveCapture({ src: this.capture.src, id: this.piece.data.id, categoryId: this.piece.data.categoryId }).then((data) => {
+      const params = {}
+      if (this.piece) {
+        params.id = this.piece.data.id
+        params.categoryId = this.piece.data.categoryId
+      } else {
+        params.name = this.straightPath[2]
+        params.categoryName = this.straightPath[1]
+      }
+      saveCapture(Object.assign({ src: this.capture.src }, params)).then((data) => {
         // console.log(data)
         this.$emit('pieceRefresh')
       })
@@ -275,11 +287,17 @@ export default {
     },
     // 注册配置表
     registerConfig(config) {
-      const obj = {}
+      const values = {}
+      const form = {}
       for (const key in config) {
-        obj[key] = typeof config[key].default === 'function' ? config[key].default() : config[key].default
+        form[key] = config[key].form
+        values[key] = typeof config[key].default === 'function' ? config[key].default() : config[key].default
       }
-      this.config.obj = obj
+      this.config.values = values
+      this.config.form = form
+    },
+    closeConfig() {
+      this.director.playScenes([{ name: 'toolsIn', delay: 100 }, { name: 'configOut' }])
     }
   }
 }
