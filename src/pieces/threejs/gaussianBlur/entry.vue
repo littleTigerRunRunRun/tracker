@@ -18,13 +18,13 @@ export default {
   },
   watch: {
     kernelRadius(val) {
-      this.scene.changeParams('kernelRadius', val)
+      if (this.scene) this.scene.changeParams('kernelRadius', val)
     },
     sigma(val) {
-      this.scene.changeParams('sigma', val)
+      if (this.scene) this.scene.changeParams('sigma', val)
     },
     image(val) {
-      this.scene.changeParams('image', val)
+      if (this.scene) this.scene.changeParams('image', val)
     }
   },
   mounted() {
@@ -48,7 +48,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
   .tracker-piece-entry{
     position: relative;
     width: 100%;

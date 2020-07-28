@@ -32,7 +32,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
   .tracker-piece-entry{
     position: relative;
     width: 100%;

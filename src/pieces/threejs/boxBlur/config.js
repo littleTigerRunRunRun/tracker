@@ -39,16 +39,5 @@ export default {
       max: 100,
       step: 1
     }
-  },
-  sigma: {
-    type: [String, Number], // vue-material的表单有问题，所以传来的数字可能是字符串类型
-    default: 1,
-    form: {
-      des: '模糊发散度',
-      type: 'number',
-      min: 1,
-      max: 100,
-      step: 1
-    }
   }
 }
