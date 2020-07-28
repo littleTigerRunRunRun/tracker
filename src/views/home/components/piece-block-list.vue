@@ -89,6 +89,7 @@ export default {
     width: 100%;
     transform-style:preserve-3d;
     perspective:800px;
+    margin-top: 20px;
     &.md-size-25{
       min-width: 0;
       max-width: none;
@@ -100,7 +101,7 @@ export default {
       position: relative;
       opacity: 0;
     }
-    &:not(:first-of-type) {
+    &:not(:nth-child(4n + 1)) {
       margin-left: 20px;
     }
     &.piece-gather{

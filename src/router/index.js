@@ -18,7 +18,3 @@ export const pages = {
     component: About
   }
 }
-
-class History {
-
-}

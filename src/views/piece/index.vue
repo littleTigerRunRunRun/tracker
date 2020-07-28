@@ -87,6 +87,7 @@ export default {
   components: {
     configPanel
   },
+  inject: ['router'],
   props: {
     piece: {
       type: Object,
@@ -160,6 +161,7 @@ export default {
     },
     // 从列表打开的过程处理
     view() {
+      this.router.replace(['piece', this.piece.data.categoryName, this.piece.data.name])
       this.comp = () => import(`../../pieces/${this.piece.data.categoryName}/${this.piece.data.name}/entry.vue`)
       this.lastPiece = true
 
@@ -182,6 +184,7 @@ export default {
             this.director.addProp('startBound', { left: rect.left, top: rect.top, width: rect.width / window.innerWidth * 100, height: rect.height / window.innerHeight * 100 })
           }
           this.director.playScenes([{ name: 'moveOut' }, { name: 'toolsOut' }]).then(() => {
+            this.router.replace(['home'])
             this.$emit('update:piece', null)
             this.$emit('update:straightPath', [])
             this.lastPiece = false

@@ -4,7 +4,9 @@
       class="md-icon-button rect-button"
       @click.native="$emit('close')"
     >
-      <md-icon>close</md-icon>
+      <md-icon style="transform=origin: 50% 50%; transform: rotate(-90deg);">
+        arrow_back
+      </md-icon>
     </md-button>
     <md-field
       v-for="(column, key) in form"

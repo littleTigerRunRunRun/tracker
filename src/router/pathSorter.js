@@ -3,20 +3,37 @@
 // page级别 / = /home, /game, /about
 // 作品 /piece/[CateName]/[PieceName]，例如threejs分类下面的颜色替换项目colorReplace： /piece/threejs/colorReplace
 class PathSorter {
+  constructor() {
+    this._path = location.href
+    this.sort()
+    this.replace()
+  }
+
   _path = '/'
   get path() { return this._path }
-  set path(path) {
-    this._path = path
-    this.sort()
-  }
 
   _paths = []
   get paths() { return this._paths }
 
   sort() {
-    const paths = this._path.split('?')[0].split('/').slice(1)
+    let paths = this._path.split('?')[0].split('#')
+    this.origin = location.origin
+    paths = paths[1].split('/').slice(1)
     if (!paths[0]) paths[0] = 'home'
     this._paths = paths
+  }
+
+  replace(paths) {
+    if (paths) this._paths = paths
+    let href = `${this.origin}/#`
+    if (this._paths.length === 0) href += '/'
+    else {
+      for (const path of this._paths) {
+        href += `/${path}`
+      }
+    }
+
+    location.replace(href)
   }
 }
 

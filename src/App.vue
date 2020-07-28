@@ -31,7 +31,8 @@ export default {
   provide() {
     return {
       handleViewPiece: this.handleViewPiece,
-      piecesRefreshEvent: this.piecesRefreshEvent
+      piecesRefreshEvent: this.piecesRefreshEvent,
+      router: sorter
     }
   },
   data() {
@@ -46,7 +47,6 @@ export default {
     }
   },
   created() {
-    sorter.path = window.location.pathname
     this.checkRouter()
   },
   mounted() {

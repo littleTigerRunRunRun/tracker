@@ -28,11 +28,10 @@ export default {
     }
   },
   mounted() {
-    console.log(this)
     this.$emit('config', props)
   },
   update() {
-    console.log('udpate')
+    // console.log('udpate')
   },
   beforeDestroy() {
     if (this.scene) {
