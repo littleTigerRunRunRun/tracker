@@ -18,9 +18,13 @@ class PathSorter {
   sort() {
     let paths = this._path.split('?')[0].split('#')
     this.origin = location.origin
-    paths = paths[1].split('/').slice(1)
-    if (!paths[0]) paths[0] = 'home'
-    this._paths = paths
+    if (paths.length === 1) {
+      this._paths = ['home']
+    } else {
+      paths = paths[1].split('/').slice(1)
+      if (!paths[0]) paths[0] = 'home'
+      this._paths = paths
+    }
   }
 
   replace(paths) {

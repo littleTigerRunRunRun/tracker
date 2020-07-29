@@ -18,10 +18,8 @@ var BoxBlurShader = {
     }
   `,
   fragmentShader: `
-    #define inverse_sqrt_2p 0.39894228
     #define f2 2.0
     #define f1 1.0
-    #define f0 0.0
     #define i1 1
 
     uniform sampler2D tDiffuse;
@@ -50,7 +48,7 @@ var BoxBlurShader = {
           weightSum += weightUnit * f2;
         }
   
-        gl_FragColor = vec4(diffuseSum / weightSum, 1.0);
+        gl_FragColor = vec4(diffuseSum / weightSum, f1);
       }
     }
   `
