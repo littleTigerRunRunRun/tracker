@@ -5,12 +5,16 @@
       @click.native="$emit('close')"
     >
       <md-icon style="transform=origin: 50% 50%; transform: rotate(-90deg);">
-        arrow_back
+        reply
       </md-icon>
     </md-button>
     <md-field
       v-for="(column, key) in form"
       :key="`column${key}`"
+      :class="{
+        'md-has-value': column.type === 'stage',
+        'is-stage': column.type === 'stage'
+      }"
     >
       <label for="first-name">{{ column.des }}</label>
       <md-input v-if="column.type === 'input'" :id="key" v-model="values[key]" :name="key" />
@@ -20,6 +24,19 @@
           {{ option.name }}
         </md-option>
       </md-select>
+      <md-steppers v-if="column.type === 'stage'" :md-active-step.sync="values[key]" md-vertical>
+        <md-step
+          v-for="(stage, index) in column.stages"
+          :id="`${index}`"
+          :key="`stage${index}`"
+          :md-label="stage.name"
+          md-description=""
+          :md-done="stage.value"
+          :md-editable="false"
+          :md-active="false"
+          @click.native="setStage(column.stages, key, index)"
+        />
+      </md-steppers>
     </md-field>
   </div>
 </template>
@@ -38,6 +55,14 @@ export default {
     }
   },
   mounted() {
+  },
+  methods: {
+    setStage(stages, key, index) {
+      this.values[key] = index
+      for (let i = 0; i < stages.length; i++) {
+        stages[i].value = i <= index
+      }
+    }
   }
 }
 </script>
@@ -56,6 +81,18 @@ export default {
         &:before{
           background-color: transparent !important;
         }
+      }
+    }
+    .is-stage{
+      margin-bottom: 0px;
+      &:after{
+        display: none;
+      }
+      .md-stepper{
+        cursor: pointer;
+      }
+      .md-stepper-content.md-active{
+        display: none;
       }
     }
   }
