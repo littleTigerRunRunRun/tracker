@@ -50,7 +50,7 @@ export default class MainScene {
     this.container.appendChild(this.renderer.domElement)
 
     this.scene = new Scene()
-    this.scene.fog = new Fog(0x000000, 1, 1000)
+    // this.scene.fog = new Fog(0x000000, 1, 1000)
 
     const aspect = this.width / this.height
     this.camera = new OrthographicCamera(-aspect, aspect, 1, -1, 0, 1)

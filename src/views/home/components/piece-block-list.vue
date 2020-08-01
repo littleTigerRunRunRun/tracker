@@ -142,11 +142,14 @@ export default {
           1px 1px 3px rgba(0, 0, 0, 0.05),
           1px 2px 5px rgba(0, 0, 0, 0.05),
           1px 2px 7px 2px rgba(0, 0, 0, 0.05);
-      }
-      .common-content{
-        .content-block{
-          bottom: 0px;
-          background-color: rgba(0, 0, 0, 0.6);
+        .common-content{
+          .content-block{
+            background-color: rgba(0, 0, 0, 0.6);
+            transform: translate(0, 0);
+            .desc{
+              opacity: 0.6;
+            }
+          }
         }
       }
     }
@@ -185,12 +188,12 @@ export default {
         }
         .content-block{
           position: absolute;
-          padding: 0 10px;
-          bottom: -36px;
+          padding: 6px 10px;
+          bottom: 0px;
           width: 100%;
-          height: 68px;
-          background-color: rgba(0, 0, 0, 0.1);
-          transition: bottom 0.3s, background-color 0.3s;
+          background-color: rgba(0, 0, 0, 0);
+          transition: transform 0.3s, background-color 0.3s;
+          transform: translate(0, calc(100% - 40px));
           .text-content{
             position: relative;
             color: #fff;
@@ -198,8 +201,7 @@ export default {
             display: inline-block;
           }
           .title{
-            height: 32px;
-            line-height: 32px;
+            line-height: 28px;
             font-size: 16px;
             color: #fff;
             font-weight: bold;
@@ -208,10 +210,10 @@ export default {
           }
           .desc{
             font-size: 12px;
-            height: 14px;
             line-height: 14px;
             text-shadow: 0 0 4px #000;
-            opacity: 0.4;
+            opacity: 0;
+            transition: opacity 0.3s;
           }
           .label{
             text-shadow: 0 0 4px #000;
