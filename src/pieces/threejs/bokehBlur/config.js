@@ -9,15 +9,24 @@ export default {
       ]
     }
   },
-  radius: {
-    type: [String, Number], // vue-material的表单有问题，所以传来的数字可能是字符串类型
-    default: 0,
+  focus: {
+    type: [String, Number],
+    default: 1.0,
     form: {
-      des: '模糊半径',
+      des: '景深',
       type: 'number',
-      min: 0,
-      max: 100,
-      step: 1
+      step: 0.1
+    }
+  },
+  aperture: {
+    type: [String, Number],
+    default: 1.0,
+    form: {
+      des: '光圈',
+      type: 'number',
+      step: 0.1,
+      min: 0.1,
+      max: 10
     }
   }
 }
