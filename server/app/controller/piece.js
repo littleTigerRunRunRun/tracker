@@ -78,6 +78,7 @@ class PieceController extends Controller {
       desc: piece.desc,
       upperName: piece.name[0].toUpperCase() + piece.name.slice(1)
     })
+    this.copyTemplate('config.js', catePath + '/' + piece.name, {})
     // 创建doc.md，也就是文档入口
     // 创建config.js,也就是配置入口
     // 我们要对vue/js/css类型的项目做不同的配置响应

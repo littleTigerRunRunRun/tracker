@@ -13,14 +13,17 @@
 </template>
 
 <script>
+import props from './config'
+
 export default {
   name: '<% upperName %>',
-  props: {},
+  props,
   data() {
     return {
     }
   },
   mounted() {
+    this.$emit('config', props)
   },
   beforeDestroy() {
   },
