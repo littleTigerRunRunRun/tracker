@@ -196,7 +196,7 @@ export default {
         case 'screenshot': {
           this.capture.activate = true
           this.director.playScenes([{ name: 'toolsOut' }, { name: 'captureRangeIn', delay: 200 }, { name: 'captureShock', delay: 600 }]).then(() => {
-            domtoimage.toPng(this.$refs.comp).then((src) => {
+            domtoimage.toJpeg(this.$refs.comp, { quality: 0.8 }).then((src) => {
               // console.log(src)
               this.capture.src = src
               this.$nextTick(() => {

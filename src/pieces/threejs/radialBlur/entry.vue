@@ -9,7 +9,7 @@ import props from './config'
 import Scene from './scene.js'
 
 export default {
-  name: 'KawaseBlur',
+  name: 'RadialBlur',
   props,
   data() {
     return {
@@ -22,16 +22,11 @@ export default {
     },
     image(val) {
       if (this.scene) this.scene.changeParams('image', val)
-    },
-    stage(val) {
-      if (this.scene) this.scene.changeParams('stage', val)
     }
   },
   mounted() {
     this.$emit('config', props)
-    this.$nextTick(() => {
-      this.scene = new Scene({ container: this.$refs.container, params: { image: this.image, radius: this.radius }})
-    })
+    this.scene = new Scene({ container: this.$refs.container, params: { image: this.image, radius: this.radius }})
   },
   beforeDestroy() {
     if (this.scene) {

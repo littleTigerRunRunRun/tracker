@@ -18,16 +18,16 @@ var BoxBlurShader = {
     }
   `,
   fragmentShader: `
-    #define f2 2.0
-    #define f1 1.0
-    #define i1 1
-
     uniform sampler2D tDiffuse;
     uniform vec2 tSize;
     uniform vec2 direction;
     uniform int kernelRadius;
 
     varying vec2 vUv;
+
+    const float f2 = 2.0;
+    const float f1 = 1.0;
+    const int i1 = 1;
     
     void main() {
       if (kernelRadius == 0) {

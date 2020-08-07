@@ -80,12 +80,10 @@ export default class MainScene {
         this.material.map = new TextureLoader().load(value)
         break
       case 'radius':
-        this.kawaseBlur1.uniforms.radius.value = value
-        this.kawaseBlur2.uniforms.radius.value = value * 2
-        this.kawaseBlur3.uniforms.radius.value = value * 3
-        this.kawaseBlur4.uniforms.radius.value = value * 4
-        this.kawaseBlur5.uniforms.radius.value = value * 5
-        this.kawaseBlur6.uniforms.radius.value = value * 6
+        for (const blur of this.blurs) blur.uniforms.radius.value = value * 2
+        break
+      case 'stage':
+        for (let i = 0; i < this.blurs.length; i++) this.blurs[i].enabled = !!(i < value)
         break
     }
   }
@@ -112,35 +110,15 @@ export default class MainScene {
     this.composer.addPass(new RenderPass(this.scene, this.camera))
     console.log(this.params.radius)
 
-    this.kawaseBlur1 = new ShaderPass(KawaseBlurShader)
-    this.kawaseBlur1.uniforms.tSize.value = new Vector2(this.width, this.height)
-    this.kawaseBlur1.uniforms.radius.value = this.params.radius * 1.0
-    this.composer.addPass(this.kawaseBlur1)
-
-    this.kawaseBlur2 = new ShaderPass(KawaseBlurShader)
-    this.kawaseBlur2.uniforms.tSize.value = new Vector2(this.width, this.height)
-    this.kawaseBlur2.uniforms.radius.value = this.params.radius * 2.0
-    this.composer.addPass(this.kawaseBlur2)
-
-    this.kawaseBlur3 = new ShaderPass(KawaseBlurShader)
-    this.kawaseBlur3.uniforms.tSize.value = new Vector2(this.width, this.height)
-    this.kawaseBlur3.uniforms.radius.value = this.params.radius * 3.0
-    this.composer.addPass(this.kawaseBlur3)
-
-    this.kawaseBlur4 = new ShaderPass(KawaseBlurShader)
-    this.kawaseBlur4.uniforms.tSize.value = new Vector2(this.width, this.height)
-    this.kawaseBlur4.uniforms.radius.value = this.params.radius * 4.0
-    this.composer.addPass(this.kawaseBlur4)
-
-    this.kawaseBlur5 = new ShaderPass(KawaseBlurShader)
-    this.kawaseBlur5.uniforms.tSize.value = new Vector2(this.width, this.height)
-    this.kawaseBlur5.uniforms.radius.value = this.params.radius * 5.0
-    this.composer.addPass(this.kawaseBlur5)
-
-    this.kawaseBlur6 = new ShaderPass(KawaseBlurShader)
-    this.kawaseBlur6.uniforms.tSize.value = new Vector2(this.width, this.height)
-    this.kawaseBlur6.uniforms.radius.value = this.params.radius * 6.0
-    this.composer.addPass(this.kawaseBlur6)
+    this.blurs = []
+    for (let i = 0; i < 8; i++) {
+      const kawaseBlur = new ShaderPass(KawaseBlurShader)
+      kawaseBlur.uniforms.tSize.value = new Vector2(this.width, this.height)
+      kawaseBlur.uniforms.radius.value = this.params.radius * 1.0
+      this.composer.addPass(kawaseBlur)
+      if (i > 0) kawaseBlur.enabled = false
+      this.blurs.push(kawaseBlur)
+    }
   }
 
   update = this.updateFunc.bind(this)

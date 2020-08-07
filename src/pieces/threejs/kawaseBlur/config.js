@@ -39,5 +39,51 @@ export default {
       max: 100,
       step: 1
     }
+  },
+  stage: {
+    type: [String, Number],
+    default: 0,
+    form: {
+      des: '阶段',
+      type: 'stage',
+      stages: [
+        {
+          name: '原图',
+          value: true
+        },
+        {
+          name: '第一次模糊',
+          value: true
+        },
+        {
+          name: '第二次模糊',
+          value: false
+        },
+        {
+          name: '第三次模糊',
+          value: false
+        },
+        {
+          name: '第四次模糊',
+          value: false
+        },
+        {
+          name: '第五次模糊',
+          value: false
+        },
+        {
+          name: '第六次模糊',
+          value: false
+        },
+        {
+          name: '第七次模糊',
+          value: false
+        },
+        {
+          name: '第八次模糊',
+          value: false
+        }
+      ]
+    }
   }
 }

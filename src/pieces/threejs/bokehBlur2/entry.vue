@@ -6,10 +6,10 @@
 
 <script>
 import props from './config'
-import Scene from './scene.js'
+import Scene from './scene'
 
 export default {
-  name: 'KawaseBlur',
+  name: 'BokehBlur',
   props,
   data() {
     return {
@@ -17,21 +17,20 @@ export default {
     }
   },
   watch: {
-    radius(val) {
-      if (this.scene) this.scene.changeParams('radius', val)
+    focus(value) {
+      this.scene.changeParams('focus', value)
     },
-    image(val) {
-      if (this.scene) this.scene.changeParams('image', val)
-    },
-    stage(val) {
-      if (this.scene) this.scene.changeParams('stage', val)
+    aperture(value) {
+      this.scene.changeParams('aperture', value)
     }
   },
   mounted() {
     this.$emit('config', props)
     this.$nextTick(() => {
-      this.scene = new Scene({ container: this.$refs.container, params: { image: this.image, radius: this.radius }})
+      this.scene = new Scene({ container: this.$refs.container, params: {}})
     })
+  },
+  update() {
   },
   beforeDestroy() {
     if (this.scene) {

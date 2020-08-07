@@ -167,7 +167,7 @@ class PieceController extends Controller {
         data: null
       }
     } else {
-      const fileName = body.id + '.png'
+      const fileName = piece.id + '.png'
       piece.capture = 'http://127.0.0.1:7001/public/img/capture/' + fileName
       this.writePieces(categoryId, pieces)
       fs.writeFile(path.resolve(__dirname, '../public/img/capture/' + fileName), dataBuffer, function(err) {

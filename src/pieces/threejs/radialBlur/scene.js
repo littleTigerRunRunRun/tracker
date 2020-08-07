@@ -8,7 +8,7 @@ import { RenderPass } from '@/lib/postprocessing/RenderPass'
 import { ShaderPass } from '@/lib/postprocessing/ShaderPass'
 // import { DotScreenShader } from '@/lib/shaders/DotScreenShader'
 // import { RGBShiftShader } from '@/lib/shaders/RGBShiftShader'
-import { UpDownKawaseBlurShader } from './index'
+import { RadiulBlurShader } from './index'
 
 export default class MainScene {
   constructor({ container, params }) {
@@ -46,22 +46,22 @@ export default class MainScene {
     })
     this.renderer.setPixelRatio(window.devicePixelRatio)
     this.renderer.setSize(bound.width, bound.height)
-    this.renderer.setClearColor(new Color(0x000000))
+    this.renderer.setClearColor(new Color(0xFFFFFF))
     this.container.appendChild(this.renderer.domElement)
 
     this.scene = new Scene()
-    // this.scene.fog = new Fog(0x000000, 1, 1000)
+    this.scene.fog = new Fog(0x000000, 1, 1000)
 
     const aspect = this.width / this.height
     this.camera = new OrthographicCamera(-aspect, aspect, 1, -1, 0, 1)
     // this.camera.position.set(0, 20, 0)
     // this.camera.lookAt(this.scene.position)
 
-    // this.scene.add(new AmbientLight(0x222222))
+    this.scene.add(new AmbientLight(0x222222))
 
-    // const light = new DirectionalLight(0xffffff)
-    // light.position.set(10, 10, 10)
-    // this.scene.add(light)
+    const light = new DirectionalLight(0xffffff)
+    light.position.set(10, 10, 10)
+    this.scene.add(light)
 
     // const axes = new AxisHelper(20)
     // this.scene.add(axes)
@@ -80,14 +80,7 @@ export default class MainScene {
         this.material.map = new TextureLoader().load(value)
         break
       case 'radius':
-        for (const blur of this.blurs) blur.uniforms.radius.value = value
-        break
-      case 'stage':
-        for (let i = 0; i < this.blurs.length; i++) {
-          const blur = this.blurs[i]
-          if (i < value) blur.enabled = true
-          else blur.enabled = false
-        }
+        for (const blur of this.blurs) blur.uniforms.radius.value = value * 2
         break
     }
   }
@@ -97,8 +90,6 @@ export default class MainScene {
     this.scene.add(this.main)
 
     const texture = new TextureLoader().load(this.params.image)
-    texture.wrapS = null
-    texture.wrapT = null
     const geometry = new PlaneBufferGeometry(2 * this.width / this.height, 2)
     this.material = new MeshBasicMaterial({
       map: texture
@@ -116,26 +107,11 @@ export default class MainScene {
     this.composer.addPass(new RenderPass(this.scene, this.camera))
 
     this.blurs = []
-    for (let i = 0; i < 4; i++) {
-      const kawaseBlur = new ShaderPass(UpDownKawaseBlurShader)
-      kawaseBlur.uniforms.tSize.value = new Vector2(this.width, this.height)
-      kawaseBlur.uniforms.radius.value = this.params.radius * 1.0
-      kawaseBlur.uniforms.samplerRate.value = 2.0
-      kawaseBlur.uniforms.direction.value = 1.0
-      if (i >= this.params.stage) kawaseBlur.enabled = false
-      this.composer.addPass(kawaseBlur)
-      this.blurs.push(kawaseBlur)
-    }
-    for (let i = 4; i < 8; i++) {
-      const kawaseBlur = new ShaderPass(UpDownKawaseBlurShader)
-      kawaseBlur.uniforms.tSize.value = new Vector2(this.width, this.height)
-      kawaseBlur.uniforms.radius.value = this.params.radius * 1.0
-      kawaseBlur.uniforms.samplerRate.value = 0.5
-      kawaseBlur.uniforms.direction.value = -1.0
-      if (i >= this.params.stage) kawaseBlur.enabled = false
-      this.composer.addPass(kawaseBlur)
-      this.blurs.push(kawaseBlur)
-    }
+    const radialBlur = new ShaderPass(RadiulBlurShader)
+    radialBlur.uniforms.tSize.value = new Vector2(this.width, this.height)
+    radialBlur.uniforms.radius.value = this.params.radius * 1.0
+    this.composer.addPass(radialBlur)
+    this.blurs.push(radialBlur)
   }
 
   update = this.updateFunc.bind(this)
