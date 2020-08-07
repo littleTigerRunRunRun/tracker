@@ -1,14 +1,16 @@
 <template>
   <div class="tracker-piece-entry">
-    <!-- 这里开始后续都可以清理 -->
-    <div ref="title" class="tracker-piece-title">
-      autoConfig自动表单文件生成测试
-    </div>
-    <div ref="content" class="tracker-piece-container">
-      <div class="start">
-        测试是否能够正常生成表单文件
-      </div>
-    </div>
+    <div class="block" style="background-color: rgba(25, 0, 0);" />
+    <div class="block" style="background-color: rgba(25, 0, 0);" />
+    <div class="block" style="background-color: rgba(25, 0, 0);" />
+    <br>
+    <div class="block" style="background-color: rgba(25, 0, 0);" />
+    <div class="block" style="background-color: rgba(25, 0, 0);" />
+    <div class="block" style="background-color: rgba(25, 0, 0);" />
+    <br>
+    <div class="block" style="background-color: rgba(25, 0, 0);" />
+    <div class="block" style="background-color: rgba(25, 0, 0);" />
+    <div class="block" style="background-color: rgba(25, 0, 0);" />
   </div>
 </template>
 
@@ -40,28 +42,13 @@ export default {
     position: relative;
     width: 100%;
     height: 100%;
+    font-size: 0px;
+    line-height: 0px;
     /* 这里开始后续都可以清理 */
-    padding: 56px 8px 8px 8px;
-    .tracker-piece-title{
-      position: absolute;
-      top: 8px;
-      left: 16px;
-      height: 40px;
-      line-height: 40px;
-      color: #fff;
-      font-size: 24px;
-      text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
-    }
-    .tracker-piece-container{
-      position: relative;
-      width: 100%;
-      height: 100%;
-      left: 0px;
-      background-color: rgba(255, 255, 255, 0.8);
-      padding: 16px;
-      .start{
-        font-size: 20px;
-      }
+    .block{
+      width: 100px;
+      height: 100px;
+      display: inline-block;
     }
   }
 </style>

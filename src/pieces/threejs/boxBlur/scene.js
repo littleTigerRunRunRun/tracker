@@ -77,9 +77,12 @@ export default class MainScene {
   changeParams(key, value) {
     if (key === 'image') {
       this.material.map = new TextureLoader().load(value)
-    } else {
-      this.boxBlurHorizontal.uniforms[key].value = value
-      this.boxBlurVertical.uniforms[key].value = value
+    } else if (key === 'kernelRadius') {
+      for (const blur of this.blurs) blur.uniforms[key].value = value
+    } else if (key === 'stage') {
+      for (let i = 0; i < this.blurs.length; i++) {
+        this.blurs[i].enabled = !!(i < value * 2)
+      }
     }
   }
 
@@ -104,17 +107,24 @@ export default class MainScene {
     this.composer = new EffectComposer(this.renderer)
     this.composer.addPass(new RenderPass(this.scene, this.camera))
 
-    this.boxBlurHorizontal = new ShaderPass(BoxBlurShader)
-    this.boxBlurHorizontal.uniforms.tSize.value = new Vector2(this.width, this.height)
-    this.boxBlurHorizontal.uniforms.direction.value = new Vector2(1.0, 0.0)
-    this.boxBlurHorizontal.uniforms.kernelRadius.value = this.params.kernelRadius
-    this.composer.addPass(this.boxBlurHorizontal)
+    this.blurs = []
+    for (let i = 0; i < 5; i++) {
+      const boxBlurHorizontal = new ShaderPass(BoxBlurShader)
+      boxBlurHorizontal.uniforms.tSize.value = new Vector2(this.width, this.height)
+      boxBlurHorizontal.uniforms.direction.value = new Vector2(1.0, 0.0)
+      boxBlurHorizontal.uniforms.kernelRadius.value = this.params.kernelRadius
+      this.composer.addPass(boxBlurHorizontal)
+      if (i > 0) boxBlurHorizontal.enabled = false
+      this.blurs.push(boxBlurHorizontal)
 
-    this.boxBlurVertical = new ShaderPass(BoxBlurShader)
-    this.boxBlurVertical.uniforms.tSize.value = new Vector2(this.width, this.height)
-    this.boxBlurVertical.uniforms.direction.value = new Vector2(0.0, 1.0)
-    this.boxBlurVertical.uniforms.kernelRadius.value = this.params.kernelRadius
-    this.composer.addPass(this.boxBlurVertical)
+      const boxBlurVertical = new ShaderPass(BoxBlurShader)
+      boxBlurVertical.uniforms.tSize.value = new Vector2(this.width, this.height)
+      boxBlurVertical.uniforms.direction.value = new Vector2(0.0, 1.0)
+      boxBlurVertical.uniforms.kernelRadius.value = this.params.kernelRadius
+      this.composer.addPass(boxBlurVertical)
+      if (i > 0) boxBlurVertical.enabled = false
+      this.blurs.push(boxBlurVertical)
+    }
   }
 
   update = this.updateFunc.bind(this)

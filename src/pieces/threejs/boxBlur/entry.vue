@@ -22,6 +22,9 @@ export default {
     },
     image(val) {
       if (this.scene) this.scene.changeParams('image', val)
+    },
+    stage(val) {
+      if (this.scene) this.scene.changeParams('stage', val)
     }
   },
   mounted() {
