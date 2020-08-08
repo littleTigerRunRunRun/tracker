@@ -80,7 +80,7 @@ export default class MainScene {
         this.material.map = new TextureLoader().load(value)
         break
       case 'radius':
-        for (const blur of this.blurs) blur.uniforms.radius.value = value * 2
+        for (let i = 0; i < this.blurs.length; i++) this.blurs[i].uniforms.radius.value = value * (i + 1.0)
         break
       case 'stage':
         for (let i = 0; i < this.blurs.length; i++) this.blurs[i].enabled = !!(i < value)
@@ -114,7 +114,7 @@ export default class MainScene {
     for (let i = 0; i < 8; i++) {
       const kawaseBlur = new ShaderPass(KawaseBlurShader)
       kawaseBlur.uniforms.tSize.value = new Vector2(this.width, this.height)
-      kawaseBlur.uniforms.radius.value = this.params.radius * 1.0
+      kawaseBlur.uniforms.radius.value = this.params.radius * (i + 1.0)
       this.composer.addPass(kawaseBlur)
       if (i > 0) kawaseBlur.enabled = false
       this.blurs.push(kawaseBlur)
