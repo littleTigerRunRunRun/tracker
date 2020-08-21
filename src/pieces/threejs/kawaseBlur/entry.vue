@@ -30,7 +30,7 @@ export default {
   mounted() {
     this.$emit('config', props)
     this.$nextTick(() => {
-      this.scene = new Scene({ container: this.$refs.container, params: { image: this.image, radius: this.radius }})
+      // this.scene = new Scene({ container: this.$refs.container, params: { image: this.image, radius: this.radius }})
     })
   },
   beforeDestroy() {
@@ -42,6 +42,7 @@ export default {
   methods: {
     onEnterEnd() {
       // 完全进入且动画结束的钩子
+      this.scene = new Scene({ container: this.$refs.container, params: { image: this.image, radius: this.radius }})
     }
   }
 }

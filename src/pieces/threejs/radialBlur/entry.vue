@@ -26,7 +26,7 @@ export default {
   },
   mounted() {
     this.$emit('config', props)
-    this.scene = new Scene({ container: this.$refs.container, params: { image: this.image, radius: this.radius }})
+    // this.scene = new Scene({ container: this.$refs.container, params: { image: this.image, radius: this.radius }})
   },
   beforeDestroy() {
     if (this.scene) {
@@ -37,6 +37,7 @@ export default {
   methods: {
     onEnterEnd() {
       // 完全进入且动画结束的钩子
+      this.scene = new Scene({ container: this.$refs.container, params: { image: this.image, radius: this.radius }})
     }
   }
 }
@@ -50,6 +51,10 @@ export default {
     .container{
       width: 100%;
       height: 100%;
+      canvas{
+        width: 100%;
+        height: 100%;
+      }
     }
   }
 </style>

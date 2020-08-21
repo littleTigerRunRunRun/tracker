@@ -27,7 +27,7 @@ export default {
   mounted() {
     this.$emit('config', props)
     this.$nextTick(() => {
-      this.scene = new Scene({ container: this.$refs.container, params: {}})
+      // this.scene = new Scene({ container: this.$refs.container, params: {}})
     })
   },
   update() {
@@ -41,6 +41,7 @@ export default {
   methods: {
     onEnterEnd() {
       // 完全进入且动画结束的钩子
+      this.scene = new Scene({ container: this.$refs.container, params: {}})
     }
   }
 }
