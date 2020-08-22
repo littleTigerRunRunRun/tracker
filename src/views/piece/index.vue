@@ -15,6 +15,7 @@
         ref="target"
         v-bind="config.values"
         @config="registerConfig"
+        @quality="setQuality"
       />
     </div>
     <!--截图相关内容-->
@@ -126,7 +127,8 @@ export default {
         width: 480,
         right: -480,
         opacity: 0
-      }
+      },
+      imageQuality: 0.8
     }
   },
   watch: {
@@ -196,7 +198,7 @@ export default {
         case 'screenshot': {
           this.capture.activate = true
           this.director.playScenes([{ name: 'toolsOut' }, { name: 'captureRangeIn', delay: 200 }, { name: 'captureShock', delay: 600 }]).then(() => {
-            domtoimage.toJpeg(this.$refs.comp, { quality: 0.8 }).then((src) => {
+            domtoimage.toJpeg(this.$refs.comp, { quality: this.imageQuality }).then((src) => {
               // console.log(src)
               this.capture.src = src
               this.$nextTick(() => {
@@ -301,6 +303,9 @@ export default {
     },
     closeConfig() {
       this.director.playScenes([{ name: 'toolsIn', delay: 100 }, { name: 'configOut' }])
+    },
+    setQuality(quality) {
+      this.imageQuality = quality
     }
   }
 }

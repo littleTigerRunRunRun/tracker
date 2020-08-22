@@ -84,6 +84,8 @@ export default class MainScene {
 
     const geometry = new PlaneBufferGeometry(2 * this.width / this.height, 2)
     this.material = new ShaderMaterial(background)
+    this.material.uniforms.u_resolution.value = new Vector2(this.width, this.height)
+    this.material.uniforms.u_cell.value = 20
     // console.log(this.material)
 
     const mesh = new Mesh(geometry, this.material)

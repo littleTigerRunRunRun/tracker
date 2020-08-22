@@ -51,6 +51,8 @@ export default {
 
 <style lang="scss">
   #tracker-piece {
+    width: 100%;
+    height: 100%;
     font-family: 'PingFang SC', 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -66,6 +68,9 @@ export default {
     .navigator{
       width: 240px;
       text-align: left;
+    }
+    &>.md-app{
+      height: calc(100% - 64px);
     }
   }
 </style>
