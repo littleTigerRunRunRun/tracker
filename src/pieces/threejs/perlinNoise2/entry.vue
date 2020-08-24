@@ -9,7 +9,7 @@ import props from './config'
 import Scene from './scene'
 
 export default {
-  name: 'PerlinNoise',
+  name: 'PerlinNoise2',
   props,
   data() {
     return {

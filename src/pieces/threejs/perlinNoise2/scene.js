@@ -31,7 +31,7 @@ for (let i = 0; i < 8; i++) {
   const angle = Math.PI * 2 / 8 * i
   gradient.push(new Vector2(Math.cos(angle), Math.sin(angle)))
 }
-console.log(gradient)
+// console.log(gradient)
 
 export default class MainScene {
   constructor({ container, params }) {
