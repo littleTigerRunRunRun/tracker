@@ -18,6 +18,7 @@ export default class MainScene {
     this.addComposer()
     window.addEventListener('resize', this.onResize)
 
+    this._startTime = Date.now()
     this.update()
   }
 
@@ -101,6 +102,7 @@ export default class MainScene {
   updateFunc() {
     // this.renderer.render(this.scene, this.camera)
     this.composer.render()
+    this.material.uniforms.u_time.value = (Date.now() - this._startTime) * 0.00005
 
     this._tick = requestAnimationFrame(this.update)
   }
