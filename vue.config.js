@@ -26,5 +26,9 @@ module.exports = {
     rule.use('html-loader').loader('html-loader')
     rule.use('markdown-loader').loader('markdown-loader')
     rule.end()
+
+    const rule2 = config.module.rule('glsl').test(/\.glsl$/)
+    rule2.use('glsl-shader-loader').loader('glsl-shader-loader')
+    rule2.end()
   }
 }

@@ -102,7 +102,7 @@ export default class MainScene {
   updateFunc() {
     // this.renderer.render(this.scene, this.camera)
     this.composer.render()
-    this.material.uniforms.u_time.value = (Date.now() - this._startTime) * 0.00005
+    this.material.uniforms.u_time.value = (Date.now() - this._startTime) * 0.001
 
     this._tick = requestAnimationFrame(this.update)
   }

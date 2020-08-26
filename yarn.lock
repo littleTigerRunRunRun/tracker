@@ -1464,7 +1464,7 @@ async-limiter@~1.0.0:
   resolved "https://registry.npm.taobao.org/async-limiter/download/async-limiter-1.0.1.tgz#dd379e94f0db8310b08291f9d64c3209766617fd"
   integrity sha1-3TeelPDbgxCwgpH51kwyCXZmF/0=
 
-async@^1.5.2:
+async@^1.4.2, async@^1.5.2:
   version "1.5.2"
   resolved "https://registry.npm.taobao.org/async/download/async-1.5.2.tgz?cache=0&sync_timestamp=1563385399810&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fasync%2Fdownload%2Fasync-1.5.2.tgz#ec6a61ae56480c0c3cb241c95618e20892f9672a"
   integrity sha1-7GphrlZIDAw8skHJVhjiCJL5Zyo=
@@ -2588,6 +2588,13 @@ css-what@2.1, css-what@^2.1.2:
   version "2.1.3"
   resolved "https://registry.npm.taobao.org/css-what/download/css-what-2.1.3.tgz#a6d7604573365fe74686c3f311c56513d88285f2"
   integrity sha1-ptdgRXM2X+dGhsPzEcVlE9iChfI=
+
+cssauron@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.npm.taobao.org/cssauron/download/cssauron-1.4.0.tgz#a6602dff7e04a8306dc0db9a551e92e8b5662ad8"
+  integrity sha1-pmAt/34EqDBtwNuaVR6S6LVmKtg=
+  dependencies:
+    through X.X.X
 
 cssesc@^0.1.0:
   version "0.1.0"
@@ -4052,6 +4059,22 @@ globule@^1.0.0:
     glob "~7.1.1"
     lodash "~4.17.10"
     minimatch "~3.0.2"
+
+glsl-man@^1.1.14:
+  version "1.1.14"
+  resolved "https://registry.npm.taobao.org/glsl-man/download/glsl-man-1.1.14.tgz#14acf7969d3cd9113cbff291ea1991a469022630"
+  integrity sha1-FKz3lp082RE8v/KR6hmRpGkCJjA=
+  dependencies:
+    cssauron "^1.4.0"
+    tree-traversal "^1.1.1"
+
+glsl-shader-loader@^0.1.6:
+  version "0.1.6"
+  resolved "https://registry.npm.taobao.org/glsl-shader-loader/download/glsl-shader-loader-0.1.6.tgz#82240cddfc0c09b71019bc813d8b14929823a8e8"
+  integrity sha1-giQM3fwMCbcQGbyBPYsUkpgjqOg=
+  dependencies:
+    glsl-man "^1.1.14"
+    loader-utils "^1.1.0"
 
 graceful-fs@^4.1.11, graceful-fs@^4.1.15, graceful-fs@^4.1.2, graceful-fs@^4.1.6:
   version "4.2.2"
@@ -8228,7 +8251,7 @@ through2@^2.0.0:
     readable-stream "~2.3.6"
     xtend "~4.0.1"
 
-through@^2.3.6:
+through@X.X.X, through@^2.3.6:
   version "2.3.8"
   resolved "https://registry.npm.taobao.org/through/download/through-2.3.8.tgz#0dd4c9ffaabc357960b1b724115d7e0e86a2e1f5"
   integrity sha1-DdTJ/6q8NXlgsbckEV1+Doai4fU=
@@ -8322,6 +8345,13 @@ tree-kill@^1.2.2:
   version "1.2.2"
   resolved "https://registry.npm.taobao.org/tree-kill/download/tree-kill-1.2.2.tgz#4ca09a9092c88b73a7cdc5e8a01b507b0790a0cc"
   integrity sha1-TKCakJLIi3OnzcXooBtQeweQoMw=
+
+tree-traversal@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.npm.taobao.org/tree-traversal/download/tree-traversal-1.1.1.tgz#71483b3cbe01c5c3214f5a58383baaa0cf1dccbe"
+  integrity sha1-cUg7PL4BxcMhT1pYODuqoM8dzL4=
+  dependencies:
+    async "^1.4.2"
 
 trim-newlines@^1.0.0:
   version "1.0.0"
