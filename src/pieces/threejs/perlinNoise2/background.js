@@ -62,7 +62,7 @@ export default {
     }
 
     float perlinNoise(float frequency, float amplitude) {
-      vec2 st = vUv * u_resolution / frequency;
+      vec2 st = (vUv + u_time) * u_resolution / frequency;
       ivec2 sti = ivec2(floor(st.x), floor(st.y));
       vec2 stf = vec2(st.x - float(sti.x), st.y - float(sti.y));
 
@@ -80,17 +80,21 @@ export default {
       float v = fade(stf.y);
 
       float value = lerp(lerp(noise11, noise12, u) * (f1 - v), lerp(noise21, noise22, u), v);
-      return clamp(sqrt(value + 0.05) * u_brightness, 0.0, f1) * amplitude;
+      return (value + 0.6) * amplitude;
+    }
+
+    float fbm() {
+      return
+        perlinNoise(524.0, 0.332) + 
+        perlinNoise(310.0, 0.265) +
+        perlinNoise(420.0, 0.212) +
+        perlinNoise(392.0, 0.205) +
+        perlinNoise(700.0, 0.14);
     }
  
     void main() {
-      float f = perlinNoise(8.0, 0.2);
-      f += perlinNoise(12.0, 0.2);
-      f += perlinNoise(24.0, 0.2);
-      f += perlinNoise(33.0, 0.3);
-      f += perlinNoise(55.0, 0.2);
-
-      gl_FragColor = vec4(f, f, f, 1.0);
+      float value = smoothstep(0.7, 0.9, fbm());
+      gl_FragColor = vec4(vec3(value), 1.0);
     }
   `
 }

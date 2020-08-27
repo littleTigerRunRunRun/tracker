@@ -109,7 +109,7 @@ export default class MainScene {
 
     const geometry = new PlaneBufferGeometry(2 * this.width / this.height, 2)
     background.uniforms.u_resolution.value = new Vector2(this.width, this.height)
-    background.uniforms.u_cell.value = 32
+    background.uniforms.u_cell.value = 64
     background.uniforms.u_permutation.value = permutation
     background.uniforms.u_gradient.value = gradient
     background.uniforms.u_brightness.value = 1.6

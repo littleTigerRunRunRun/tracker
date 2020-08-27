@@ -1,4 +1,4 @@
-#define SMOOTH_V(V,R)  { float p = position.y-.2; if(p < (V)) { float a = p/(V); R *= a *a ;  } }
+#define SMOOTH_V(V,R)  { float p = vUv.y - 0.2; if(p < (V)) { float a = p / (V); R *= a * a; } }
 
 uniform float u_time;
 
@@ -46,8 +46,8 @@ float noise(vec3 x) {
   vec3 p = floor(x); // 整数部分，用于求晶格
   vec3 f = fract(x); // 小数部分，用于求晶格内位置
   float wx = 1.0;
-  float wy = 108.0;
-  float wz = 1.0;
+  float wy = 57.0;
+  float wz = 400.0;
   float n = p.x * wx + p.y * wy + p.z * wz;
   float res = mix(
     mix(
@@ -94,7 +94,9 @@ float borealCloud(vec3 p) {
 
 vec3 smoothCloud(vec3 c, vec2 pos) {
 	c *= 0.75 - length(pos - 0.5) * 0.75;
-	float w = length(c);
+  float w = length(c);
+
+	// 这个vec3(w) * vec3(f1, 1.2, f1)可以说是从屏幕中心的一个径向渐变（偏绿色），然后和偏蓝色的原始值做了一个插值
 	c = mix(c * vec3(1.0, 1.2, 1.6), vec3(w) * vec3(f1, 1.2, f1), w * 1.25 - 0.25);
 	return clamp(c, f0, f1);
 }
@@ -109,8 +111,17 @@ void main() {
     //vec3(.0,.7,.7 ) * borealCloud(vec3(coord1*vec2(.6,.6)  , tm*0.23)) * .5 +
     vec3(0.1, 0.9, 0.7) * borealCloud(vec3(coord * vec2(f1, 0.7), u_time * 0.27)) * 0.9 +
     vec3(0.75, 0.3, 0.99) * borealCloud(vec3(coord * vec2(0.8, 0.6), u_time * 0.29)) * 0.5 +
-    vec3(f0, 0.99, 0.99)  * borealCloud(vec3(coord1 * vec2(0.9, 0.5), u_time * 0.20)) * 0.57
+    vec3(f0, 0.99, 0.99) * borealCloud(vec3(coord1 * vec2(0.9, 0.5), u_time * 0.20)) * 0.57
   );
+  
+  boreal = clamp(boreal + 0.1, f0, f1); // 提亮0.1
+  SMOOTH_V(0.5, boreal);
+  SMOOTH_V(0.35, boreal);
+  SMOOTH_V(0.27, boreal);
+
+  boreal = smoothCloud(boreal, vUv);
+  boreal = gammaCorrection(boreal, 1.3);
+  
   gl_FragColor = vec4(
     boreal, f1
   );

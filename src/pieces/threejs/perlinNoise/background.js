@@ -80,7 +80,7 @@ export default {
       float v = fade(stf.y);
 
       float value = lerp(lerp(noise11, noise12, u) * (f1 - v), lerp(noise21, noise22, u), v);
-      value = clamp(sqrt(value + 0.05) * u_brightness, 0.0, f1);
+      value = value + 0.6;
 
       gl_FragColor = vec4(value, value, value, 1.0);
     }
