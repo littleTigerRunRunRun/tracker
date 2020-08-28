@@ -101,6 +101,7 @@ vec3 smoothCloud(vec3 c, vec2 pos) {
 	return clamp(c, f0, f1);
 }
 
+// https://www.shadertoy.com/view/3slXDB
 void main() {
   vec2 coord = vec2((vUv.x - fp5) / vUv.y, f1 / (vUv.y + 0.2));
 	vec2 coord1 = coord - u_time * 0.0275;
