@@ -47,8 +47,7 @@ export default {
     const int i1 = 1;
     const float f1 = 1.0;
 
-    float randome(vec2 st) {
-      // + sin(u_time * 0.0001)
+    float random(vec2 st) {
       return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
     }
 
@@ -60,17 +59,21 @@ export default {
     float lerp(float v1, float v2, float t) {
       return v1 * (f1 - t) + v2 * t;
     }
+
+    vec2 getPointValue(ivec2 sti) {
+      sti += int(floor(u_time * 0.001));
+      return u_gradient[u_permutation[(sti.x + u_permutation[sti.y % i255]) % i255] % i7];
+    }
  
     void main() {
       vec2 st = vUv * u_resolution / u_cell + vec2(0.02, 0.02);
       ivec2 sti = ivec2(floor(st.x), floor(st.y));
       vec2 stf = vec2(st.x - float(sti.x), st.y - float(sti.y));
 
-      vec2 grad11 = u_gradient[u_permutation[(sti.x + u_permutation[sti.y % i255]) % i255] % i7];
-      vec2 grad12 = u_gradient[u_permutation[(sti.x + i1 + u_permutation[sti.y % i255]) % i255] % i7];
-      vec2 grad21 = u_gradient[u_permutation[(sti.x + u_permutation[(sti.y + i1) % i255]) % i255] % i7];
-      vec2 grad22 = u_gradient[u_permutation[(sti.x + i1 + u_permutation[(sti.y + i1) % i255]) % i255] % i7];
-
+      vec2 grad11 = getPointValue(sti);
+      vec2 grad12 = getPointValue(ivec2(sti.x + i1, sti.y));
+      vec2 grad21 = getPointValue(ivec2(sti.x, sti.y + i1));
+      vec2 grad22 = getPointValue(ivec2(sti.x + i1, sti.y + i1));
       float noise11 = dot(grad11, stf);
       float noise12 = dot(grad12, vec2(stf.x - f1, stf.y));
       float noise21 = dot(grad21, vec2(stf.x, stf.y - f1));
