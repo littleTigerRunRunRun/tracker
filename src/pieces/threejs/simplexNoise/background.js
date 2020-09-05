@@ -78,10 +78,10 @@ export default {
     }
 
     float fbm(vec3 stt) {
-      return 0.5333 * simplex3d(stt) +
-             0.2667 * simplex3d(stt * 2.0) +
-             0.1333 * simplex3d(stt * 4.0) +
-             0.0667 * simplex3d(stt * 8.0);
+      return 0.5333 * abs(simplex3d(stt)) +
+             0.2667 * abs(simplex3d(stt * 2.0)) +
+             0.1333 * abs(simplex3d(stt * 4.0)) +
+             0.0667 * abs(simplex3d(stt * 8.0));
     }
 
     void main() {
