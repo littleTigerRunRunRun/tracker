@@ -1,12 +1,15 @@
 import {
-  WebGLRenderer, PerspectiveCamera, OrthographicCamera, Scene, Color, AxisHelper, Fog, Vector2, TextureLoader,
+  WebGLRenderer, WebGLRenderTarget, PerspectiveCamera, OrthographicCamera, Scene, Color, AxisHelper, Fog, Vector2, TextureLoader,
+  RGBADepthPacking, NoBlending, NearestFilter,
   AmbientLight, DirectionalLight, SpotLight,
-  Object3D, BoxGeometry, SphereBufferGeometry, PlaneBufferGeometry, MeshPhongMaterial, MeshLambertMaterial, MeshBasicMaterial, ShaderMaterial, Mesh
+  Object3D, BoxGeometry, SphereBufferGeometry, PlaneBufferGeometry, MeshPhongMaterial, MeshLambertMaterial, MeshBasicMaterial, MeshDepthMaterial, ShaderMaterial, Mesh
 } from '@/lib/three.module.js'
 import { MapControls } from '@/lib/OrbitControls.js'
 import { EffectComposer } from '@/lib/postprocessing/EffectComposer'
+import { Pass } from '@/lib/postprocessing/Pass.js'
 import { RenderPass } from '@/lib/postprocessing/RenderPass'
-import { ShaderPass } from '@/lib/postprocessing/ShaderPass'
+// import { ShaderPass } from '@/lib/postprocessing/ShaderPass'
+import background from './background'
 
 export default class MainScene {
   constructor({ container, params }) {
@@ -31,7 +34,7 @@ export default class MainScene {
     this.camera.aspect = bound.width / bound.height
     this.camera.updateProjectionMatrix()
 
-    this.material.uniforms.u_resolution.value = new Vector2(bound.width, bound.height)
+    // this.material.uniforms.u_resolution.value = new Vector2(bound.width, bound.height)
 
     this.renderer.setSize(bound.width, bound.height)
     this.composer.setSize(bound.width, bound.height)
@@ -50,12 +53,26 @@ export default class MainScene {
     this.renderer.setClearColor(new Color(0xFFFFFF))
     this.container.appendChild(this.renderer.domElement)
 
+    this.renderTargetDepth = new WebGLRenderTarget(this.width, this.height, {
+      minFilter: NearestFilter,
+      magFilter: NearestFilter,
+      stencilBuffer: false
+    })
+    this.renderTargetDepth.texture.name = 'ssao.depth'
+
+    this.materialShader = new ShaderMaterial(background)
+    this.fsQuad = new Pass.FullScreenQuad(this.materialShader)
+
+    this.materialDepth = new MeshDepthMaterial()
+    this.materialDepth.depthPacking = RGBADepthPacking
+    this.materialDepth.blending = NoBlending
+
     this.scene = new Scene()
     // this.scene.fog = new Fog(0x000000, 1, 1000)
 
     const aspect = this.width / this.height
     this.camera = new PerspectiveCamera(75, this.width / this.height, 0.1, 1000)
-    this.camera.position.set(0, 400, 400)
+    this.camera.position.set(200, 200, 300)
     this.camera.lookAt(this.scene.position)
 
     this.scene.add(new AmbientLight(0x222222))
@@ -69,15 +86,13 @@ export default class MainScene {
 
     this.controls = new MapControls(this.camera, this.renderer.domElement)
 
-    // controls.addEventListener( 'change', render ); // call this only in static scenes (i.e., if there is no animation loop)
-
     this.controls.enableDamping = true // an animation loop is required when either damping or auto-rotation are enabled
     this.controls.dampingFactor = 0.05
 
     this.controls.screenSpacePanning = false
 
-    this.controls.minDistance = 10
-    this.controls.maxDistance = 1000
+    this.controls.minDistance = 1
+    this.controls.maxDistance = 10000
 
     this.controls.maxPolarAngle = Math.PI / 2
   }
@@ -102,12 +117,32 @@ export default class MainScene {
     planeMesh.rotation.x = Math.PI * -0.5
     this.main.add(planeMesh)
 
-    const boxGeo = new BoxGeometry(50, 200, 50)
-    const boxMat = new MeshBasicMaterial({ color: 0xbbbbbb }) // new ShaderMaterial(background)
-    const mesh = new Mesh(boxGeo, boxMat)
-    mesh.position.y = 100
+    const boxs = [
+      {
+        size: [20, 150, 200],
+        position: [0, 75, 90],
+        color: 0xbbbbbb
+      },
+      {
+        size: [200, 100, 20],
+        position: [110, 50, 0],
+        color: 0xbbbbbb
+      },
+      {
+        size: [40, 80, 40],
+        position: [80, 40, 80],
+        color: 0xdddddd
+      }
+    ]
 
-    this.main.add(mesh)
+    for (const box of boxs) {
+      const boxGeo = new BoxGeometry(...box.size)
+      const boxMat = new MeshBasicMaterial({ color: box.color }) // new ShaderMaterial(background)
+      const mesh = new Mesh(boxGeo, boxMat)
+      mesh.position.set(...box.position)
+
+      this.main.add(mesh)
+    }
   }
 
   addComposer() {
@@ -121,8 +156,16 @@ export default class MainScene {
 
   update = this.updateFunc.bind(this)
   updateFunc() {
-    // this.renderer.render(this.scene, this.camera)
-    this.composer.render()
+    this.scene.overrideMaterial = this.materialDepth
+    this.renderer.setRenderTarget(this.renderTargetDepth)
+    this.renderer.clear()
+    this.renderer.render(this.scene, this.camera)
+
+    this.renderer.clear()
+    this.scene.overrideMaterial = null
+    this.renderer.setRenderTarget(null)
+    this.fsQuad.render(this.renderer)
+    // this.composer.render()
 
     this._tick = requestAnimationFrame(this.update)
   }
