@@ -9,6 +9,15 @@ export default {
     },
     u_resolution: {
       value: new Vector2(1.0, 0.0)
+    },
+    tDepth: {
+      value: null
+    },
+    nearClip: {
+      value: 0.1
+    },
+    farClip: {
+      value: 2000.0
     }
   },
   vertexShader: `
@@ -20,48 +29,28 @@ export default {
     }
   `,
   fragmentShader: `
+    #include <common>
+    #include <packing>
+
     varying vec2 vUv;
+    uniform sampler2D tDepth;
+    uniform float nearClip;
+    uniform float farClip;
     uniform float u_time;
-  
-    const float f1 = 1.0;
-    const float f0 = 0.0;
-    const float PI = 3.1415926;
-    const float TWO_PI = 6.2831852;
 
-    float random (vec2 st) {
-      // + sin(u_time * 0.00002)
-      return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+    float getDepth( const in vec2 screenPosition ) {
+      return texture2D( tDepth, screenPosition ).x;
     }
 
-    float lerp(float v1, float v2, float t) {
-      return v1 * (f1 - t) + v2 * t;
+    float getViewZ( const in float depth ) {
+      return perspectiveDepthToViewZ( depth, nearClip, farClip );
     }
- 
+
     void main() {
-      // white noise
-      // gl_FragColor = vec4(vec3(random(vUv)), f1);
-
-      // block noise
-      // vec2 st = floor(vUv * 32.0);
-      // gl_FragColor = vec4(vec3(random(st)), f1);
-
-      // value noise
-      vec2 st = vUv * 32.0;
-      vec2 sti = floor(st);
-      vec2 stf = st - sti;
-
-      float r1 = random(sti);
-      float r2 = random(sti + vec2(f1, f0));
-      float r3 = random(sti + vec2(f0, f1));
-      float r4 = random(sti + vec2(f1, f1));
-
-      float value = lerp(
-        lerp(r1, r2, stf.x),
-        lerp(r3, r4, stf.x),
-        stf.y
-      );
-
-      gl_FragColor = vec4(vec3(value), f1);
+      // if (vUv.x < 0.5) gl_FragColor = vec4(1.0, 0.0, 0.5, 1.0);
+      // else
+      float value = getDepth(vUv) + 0.5;
+      gl_FragColor = vec4(value, value, value, 1.0);
     }
   `
 }

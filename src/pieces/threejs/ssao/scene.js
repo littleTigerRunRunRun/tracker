@@ -37,7 +37,7 @@ export default class MainScene {
     // this.material.uniforms.u_resolution.value = new Vector2(bound.width, bound.height)
 
     this.renderer.setSize(bound.width, bound.height)
-    this.composer.setSize(bound.width, bound.height)
+    // this.composer.setSize(bound.width, bound.height)
   }
 
   initScenes() {
@@ -60,18 +60,19 @@ export default class MainScene {
     })
     this.renderTargetDepth.texture.name = 'ssao.depth'
 
+    background.uniforms['tDepth'].value = this.renderTargetDepth.texture
     this.materialShader = new ShaderMaterial(background)
     this.fsQuad = new Pass.FullScreenQuad(this.materialShader)
 
     this.materialDepth = new MeshDepthMaterial()
-    this.materialDepth.depthPacking = RGBADepthPacking
+    // this.materialDepth.depthPacking = RGBADepthPacking
     this.materialDepth.blending = NoBlending
 
     this.scene = new Scene()
     // this.scene.fog = new Fog(0x000000, 1, 1000)
 
     const aspect = this.width / this.height
-    this.camera = new PerspectiveCamera(75, this.width / this.height, 0.1, 1000)
+    this.camera = new PerspectiveCamera(75, this.width / this.height, 0.1, 2000)
     this.camera.position.set(200, 200, 300)
     this.camera.lookAt(this.scene.position)
 
@@ -147,8 +148,8 @@ export default class MainScene {
 
   addComposer() {
     // 将画布内的内容绘制到RenderPass这个VBO里面，然后传递个下一个后处理
-    this.composer = new EffectComposer(this.renderer)
-    this.composer.addPass(new RenderPass(this.scene, this.camera))
+    // this.composer = new EffectComposer(this.renderer)
+    // this.composer.addPass(new RenderPass(this.scene, this.camera))
 
     // const boxBlurHorizontal = new ShaderPass(BoxBlurShader)
     // this.blurs.push(boxBlurHorizontal)
@@ -158,13 +159,18 @@ export default class MainScene {
   updateFunc() {
     this.scene.overrideMaterial = this.materialDepth
     this.renderer.setRenderTarget(this.renderTargetDepth)
+    this.renderer.setClearColor(0xffffff)
+    this.renderer.setClearAlpha(1.0)
     this.renderer.clear()
     this.renderer.render(this.scene, this.camera)
 
-    this.renderer.clear()
-    this.scene.overrideMaterial = null
     this.renderer.setRenderTarget(null)
+    this.scene.overrideMaterial = null
+    this.renderer.setClearColor(0x000000)
+    // this.renderer.setClearAlpha(1.0)
+    this.renderer.clear()
     this.fsQuad.render(this.renderer)
+
     // this.composer.render()
 
     this._tick = requestAnimationFrame(this.update)
