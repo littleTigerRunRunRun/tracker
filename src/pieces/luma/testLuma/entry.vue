@@ -9,7 +9,7 @@ import props from './config'
 import getLoop from './main.js'
 
 export default {
-  name: 'Lumagl',
+  name: 'TestLuma',
   props,
   data() {
     return {

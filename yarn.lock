@@ -5422,7 +5422,7 @@ marked@^0.7.0:
   resolved "https://registry.npm.taobao.org/marked/download/marked-0.7.0.tgz#b64201f051d271b1edc10a04d1ae9b74bb8e5c0e"
   integrity sha1-tkIB8FHScbHtwQoE0a6bdLuOXA4=
 
-math.gl@^3.2.1:
+math.gl@^3.2.1, math.gl@^3.2.2:
   version "3.2.2"
   resolved "https://registry.npm.taobao.org/math.gl/download/math.gl-3.2.2.tgz#d19e68b903b43ecbde677f8086a03b91fbab3c33"
   integrity sha1-0Z5ouQO0PsveZ3+AhqA7kfurPDM=

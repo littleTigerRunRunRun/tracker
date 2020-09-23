@@ -2,25 +2,28 @@
   <div class="tracker-piece-entry">
     <!-- 这里开始后续都可以清理 -->
     <div ref="title" class="tracker-piece-title">
-      test1平台合集生成测试
+      test2模板测试2
     </div>
     <div ref="content" class="tracker-piece-container">
       <div class="start">
-        测试生成的合集
+        
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import props from './config'
+
 export default {
-  name: 'Test1',
-  props: {},
+  name: 'Test2',
+  props,
   data() {
     return {
     }
   },
   mounted() {
+    this.$emit('config', props)
   },
   beforeDestroy() {
   },
@@ -32,7 +35,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
   .tracker-piece-entry{
     position: relative;
     width: 100%;

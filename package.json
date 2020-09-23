@@ -18,6 +18,7 @@
     "glsl-shader-loader": "^0.1.6",
     "gsap": "^3.3.4",
     "html2canvas": "^1.0.0-rc.5",
+    "math.gl": "^3.2.2",
     "node-sass": "^4.14.1",
     "pubsub-js": "^1.8.0",
     "sass-loader": "^7.2.0",

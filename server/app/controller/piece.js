@@ -3,6 +3,7 @@
 const Controller = require('egg').Controller
 const fs = require('fs')
 const path = require('path')
+const templates = require('../template/index')
 
 // 主序文件目录
 const mainDirection = function (file) {
@@ -72,13 +73,24 @@ class PieceController extends Controller {
     if (!fs.existsSync(catePath)) this.mkdir(catePath)
     this.mkdir(catePath + '/' + piece.name)
     // 创建项目入口entry.vue，里面会有快速启动设置（二次生成）
-    this.copyTemplate('entry.vue', catePath + '/' + piece.name, {
-      name: piece.name,
-      title: piece.title,
-      desc: piece.desc,
-      upperName: piece.name[0].toUpperCase() + piece.name.slice(1)
-    })
-    this.copyTemplate('config.js', catePath + '/' + piece.name, {})
+    let tempName = cateName
+    let template = templates[tempName]
+    if (!template) {
+      template = templates.common
+      tempName = 'common'
+    }
+
+    for (let file of template) {
+      this.copyTemplate(file.file, tempName, catePath + '/' + piece.name, file.insert ? file.insert(piece) : {})
+    }
+    
+    // this.copyTemplate('entry.vue', catePath + '/' + piece.name, {
+    //   name: piece.name,
+    //   title: piece.title,
+    //   desc: piece.desc,
+    //   upperName: piece.name[0].toUpperCase() + piece.name.slice(1)
+    // })
+    // this.copyTemplate('config.js', catePath + '/' + piece.name, {})
     // 创建doc.md，也就是文档入口
     // 创建config.js,也就是配置入口
     // 我们要对vue/js/css类型的项目做不同的配置响应
@@ -89,8 +101,8 @@ class PieceController extends Controller {
     }
   }
   // 虽然有copy的专门方法，不过为了方便做插值我们还是这样吧
-  copyTemplate(sourceName, piecePath, templateDeals) {
-    fs.readFile(path.resolve(__dirname, '../template/' + sourceName), (err, data) => {
+  copyTemplate(sourceName, tempName, piecePath, templateDeals) {
+    fs.readFile(path.resolve(__dirname, '../template/' + tempName + '/' + sourceName), (err, data) => {
       if (err) throw new Error('something wrong was happended');
       let str = data.toString()
       if (templateDeals) {
