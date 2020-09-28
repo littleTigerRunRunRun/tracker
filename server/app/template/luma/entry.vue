@@ -18,7 +18,10 @@ export default {
   mounted() {
     this.$emit('config', props)
     this.loop = getLoop()
-    this.loop.start({ canvas: this.$refs.canvas })
+    this.loop.start({
+      canvas: this.$refs.canvas,
+      preserveDrawingBuffer: true
+    })
   },
   beforeDestroy() {
     this.loop = null
