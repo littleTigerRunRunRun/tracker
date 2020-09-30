@@ -33,5 +33,23 @@ module.exports = {
         }
       }
     }
+  ],
+  moveMountain: [
+    {
+      file: 'config.js',
+      insert: null
+    },
+    {
+      file: 'main.js',
+      insert: null
+    },
+    {
+      file: 'entry.vue',
+      insert: function(piece) {
+        return {
+          upperName: piece.name[0].toUpperCase() + piece.name.slice(1)
+        }
+      }
+    }
   ]
 }
