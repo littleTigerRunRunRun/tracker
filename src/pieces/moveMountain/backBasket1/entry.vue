@@ -6,7 +6,7 @@
 
 <script>
 import props from './config'
-import getLoop from './main.js'
+import getScene from './main.js'
 
 export default {
   name: 'BackBasket1',
@@ -17,14 +17,15 @@ export default {
   },
   mounted() {
     this.$emit('config', props)
-    // this.loop = getLoop()
-    // this.loop.start({
-    //   canvas: this.$refs.canvas,
-    //   preserveDrawingBuffer: true
-    // })
+    this.scene = getScene({
+      canvas: this.$refs.canvas,
+      preserveDrawingBuffer: true
+    })
+    this.scene.start()
   },
   beforeDestroy() {
-    this.loop = null
+    this.scene.destroy()
+    this.scene = null
   },
   methods: {
     onEnterEnd() {
