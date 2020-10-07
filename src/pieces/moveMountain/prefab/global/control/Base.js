@@ -6,29 +6,46 @@
 // right-hold and move horizontally: move left and right
 // left-right-all-hold move vertically top and down
 // left-right-all-hold move horizontally left and right
-import { Matrix4, Vector2 } from 'math.gl'
+import { Matrix4, Vector2, Vector3 } from 'math.gl'
+import { commonAtan } from '../utils'
 
-const vec1 = new Vector2(1, 2)
-const vec2 = new Vector2(2, 3)
-console.log(vec1)
+console.log(Vector3)
 
+// left = 1
+// right = 3
+// so left + right  1 means left holding  3 means right holding  4 means all holding
 const holdMode = {
-  left: () => {
+  0: () => {},
+  1: ({ eye, center, viewMatrix, viewMatrixData, delt }) => {
+    viewMatrixData.pitch += delt.y
+    viewMatrixData.pitch = Math.min(viewMatrixData.pitch, Math.PI * 0.5)
+    viewMatrixData.bearing += delt.x
+
+    viewMatrix.lookAt({
+      eye: [
+        Math.sin(viewMatrixData.bearing) * Math.cos(viewMatrixData.pitch) * viewMatrixData.length,
+        Math.sin(viewMatrixData.pitch) * viewMatrixData.length,
+        Math.cos(viewMatrixData.bearing) * Math.cos(viewMatrixData.pitch) * viewMatrixData.length
+      ],
+      center
+    })
+
+    console.log(viewMatrix)
+  },
+  3: (matrix, deltPosition) => {
 
   },
-  right: () => {
-
-  },
-  both: () => {
+  4: (matrix, deltPosition) => {
 
   }
 }
 
 export default class BaseControl {
-  constructor({ damping = 0.6, moveEdge = 0.2 }) {
+  constructor({ damping = 0.6, moveEdge = 0.2, sensitivity = 1.0 }) {
     console.log(damping, moveEdge)
     this.damping = damping
     this.moveEdge = moveEdge
+    this.sensitivity = sensitivity * 0.0001
   }
 
   bind(target) {
@@ -38,9 +55,15 @@ export default class BaseControl {
     target.addEventListener('mousemove', this.onMouseMove)
     document.body.addEventListener('mouseup', this.onMouseEnd)
   }
-
-  setEye(eye, target = [0, 0, 0]) {
-
+  // target = [0, 0, 0]
+  setEye({ eye, center }) {
+    this.eye = eye
+    this.center = center
+    this.viewMatrix = new Matrix4().lookAt({ eye, center })
+    this.viewMatrixData.length = Math.hypot(...eye)
+    this.viewMatrixData.pitch = commonAtan(Math.hypot(eye[0], eye[2]), eye[1])
+    this.viewMatrixData.bearing = commonAtan(eye[2], eye[0])
+    console.log(this.viewMatrixData.bearing)
   }
 
   leftHolding = 0
@@ -73,13 +96,15 @@ export default class BaseControl {
   // 所以加力造成的加速回和摩擦力在某一个位置达到一个平衡
   // f = ma
   // 另一方面，从静止到移动，还要克服的是比滑动摩擦力更大的静摩擦力，这里我们认为速度小于某个值就无法移动起来
-  viewMatrix = new Matrix4()
+  viewMatrix = null
+  viewMatrixData = {}
   acceleration = new Vector2()
   velocity = new Vector2()
   force = new Vector2()
-  position = new Vector2()
+  lastType = 0
   tick = (delt) => {
-    // console.log(delt)
+    if (this.velocity.x === 0 && this.velocity.y === 0 && !this.moving) return
+
     const ax = this.force.x - this.velocity.x * this.damping // / this.mess 本来应该有这个mess但是被简化了
     const ay = this.force.y - this.velocity.y * this.damping
     this.velocity.add([ax, ay])
@@ -87,8 +112,15 @@ export default class BaseControl {
     if (Math.abs(this.velocity.x) < this.moveEdge) this.velocity.x = 0 // 物体克服静摩擦力所需要的最小速度，哈这个其实是不对的，但是简化成了这样一个模型
     if (Math.abs(this.velocity.y) < this.moveEdge) this.velocity.y = 0
 
-    this.position.add(this.velocity.clone().multiplyScalar(delt) * 0.001)
-    // this.holdMode(this.viewMatrix)
+    // (this.viewMatrix)
+    if (this.lastType !== this.leftHolding + this.rightHolding && this.leftHolding + this.rightHolding) this.lastType = this.leftHolding + this.rightHolding
+    holdMode[this.lastType]({
+      eye: this.eye,
+      center: this.center,
+      viewMatrix: this.viewMatrix,
+      viewMatrixData: this.viewMatrixData,
+      delt: this.velocity.clone().multiplyScalar(delt * this.sensitivity)
+    })
     this.force.set(0, 0)
   }
 
