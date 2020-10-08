@@ -71,13 +71,12 @@ export default class Scene {
         })
       })
     }
-    console.log(models)
 
     // mvp = model view projection
     const viewMatrix = new Matrix4().lookAt({ eye: this.eysPosition, center: this.centerPosition })
     this.control.setEye({ eye: this.eysPosition, center: this.centerPosition })
 
-    const projectionMatrix = new Matrix4().perspective({ fov: Math.PI * 0.33, aspect, near: 1, far: 20.0 })
+    const projectionMatrix = new Matrix4().perspective({ fov: Math.PI * 0.33, aspect, near: 1, far: 1000.0 })
 
     return { models, viewMatrix, projectionMatrix }
   }

@@ -17,8 +17,7 @@ const control = {
   type: 'base', // default is base
   params: {
     damping: 0.15,
-    moveEdge: 0.3,
-    sensitivity: 1.0
+    moveEdge: 0.3
   }
 }
 
