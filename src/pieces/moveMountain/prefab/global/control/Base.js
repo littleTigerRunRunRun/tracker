@@ -19,7 +19,7 @@ const holdMode = {
     viewMatrixData.pitch += delt.y * (sensitivity.leftY || 1)
     if (range.leftY) viewMatrixData.pitch = clamp(viewMatrixData.pitch, ...range.leftY)
 
-    viewMatrixData.bearing += delt.x * (sensitivity.leftX || 1)
+    viewMatrixData.bearing -= delt.x * (sensitivity.leftX || 1)
     if (range.leftX) viewMatrixData.bearing = clamp(viewMatrixData.bearing, ...range.leftX)
   },
   3: ({ eye, center, viewMatrix, viewMatrixData, sensitivity, range, delt }) => {

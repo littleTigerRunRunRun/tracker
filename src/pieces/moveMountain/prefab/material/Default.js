@@ -1,6 +1,6 @@
 export default class DefaultMaterial {
   // 基色
-  _baseColor = 0xffffff
+  _baseColor = [0.0, 0.0, 0.0]
   get baseColor() { return this._baseColor }
   set baseColor(color) {
     this._baseColor = color
@@ -14,7 +14,7 @@ export default class DefaultMaterial {
   }
 
   constructor({
-    baseColor = 0xffffff,
+    baseColor = [0.0, 0.0, 0.0],
     metallic = 0
   }) {
     this.baseColor = baseColor

@@ -4,11 +4,12 @@ import { Matrix4 } from 'math.gl'
 import Control from './global/control/Base'
 
 export default class Scene {
-  constructor({ props, eysPosition = [0, 0, 10], centerPosition = [0, 0, 0], models, control }) {
+  constructor({ props, models, lights, eysPosition = [0, 0, 10], centerPosition = [0, 0, 0], control }) {
     this.props = props
     this.eysPosition = eysPosition
     this.centerPosition = centerPosition
     this.models = models
+    this.lights = lights
     this.control = new Control(control.params)
 
     this.loop = new AnimationLoop({
@@ -25,7 +26,10 @@ export default class Scene {
     return obj
   }
 
+  _lastAspect = 1
   onInitialize = ({ gl, aspect }) => {
+    this._lastAspect = aspect
+
     const vs = `
       attribute vec3 positions;
       attribute vec3 normals;
