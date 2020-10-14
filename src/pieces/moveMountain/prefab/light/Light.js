@@ -11,7 +11,16 @@ export default class Light {
     this._color = val
   }
 
-  constructor({ intensity, color }) {
+  // 外部要使用时直接获取数据的get方法
+  get light() {
+    return {
+      color: this.color,
+      intensity: this.intensity
+    }
+  }
+
+  constructor({ intensity, color, type }) {
+    this.type = type || 'base'
     this._intensity = intensity
     this._color = color
   }

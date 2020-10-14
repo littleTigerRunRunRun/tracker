@@ -84,8 +84,8 @@ export default class BaseControl {
     this.center = [].concat(center)
     this.viewMatrix = new Matrix4().lookAt({ eye, center })
     this.viewMatrixData.length = Math.hypot(...eye)
-    this.viewMatrixData.pitch = commonAtan(Math.hypot(eye[0], eye[2]), eye[1])
-    this.viewMatrixData.bearing = commonAtan(eye[2], eye[0])
+    this.viewMatrixData.pitch = commonAtan(eye[1], Math.hypot(eye[0], eye[2]))
+    this.viewMatrixData.bearing = commonAtan(eye[0], eye[2])
     this.viewMatrixData.translate = [0, 0, 0]
     this.viewMatrixData.eye = [].concat(eye)
     this.viewMatrixData.center = [].concat(center)

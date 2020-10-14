@@ -1,3 +1,5 @@
+// 我们假定材质是这样的一组描述：
+// 入射光打到一个表面，发生镜面发射和漫反射
 export default class DefaultMaterial {
   // 基色
   _baseColor = [0.0, 0.0, 0.0]
