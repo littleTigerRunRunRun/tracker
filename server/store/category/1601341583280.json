@@ -1,1 +1,1 @@
-{"type":"piece","list":[{"id":1601342024403,"name":"backBasket1","desc":"空洞无物的世界，提供了最基本的测试空间","title":"尘之篇一：空洞之间","type":"piece"}]}
+{"type":"piece","list":[{"id":1602730814931,"name":"backBasket2","desc":"能够高性能渲染光源的着色方式","title":"基础演示：延迟着色","type":"piece"},{"id":1601342024403,"name":"backBasket1","desc":"空洞无物的世界，提供了最基本的测试空间","title":"基础演示：常规着色","type":"piece","capture":"http://127.0.0.1:7001/public/img/capture/1601342024403.png"}]}
