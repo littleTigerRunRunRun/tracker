@@ -46,7 +46,7 @@ export default function() {
             float sh = smoothstep(0.15, 0.35, l);
 
             // m1 * m1 * m2就有简单的日食效果了
-            float m = m1 * m1 * m2; //* (s1 * s2 * s3 * (f1 - l)) * sh;
+            float m = m1 * m1 * m2; // * (s1 * s2 * s3 * (f1 - l)) * sh;
 
             float value = m;
             vec3 col = mix(BLACK_COL, 0.5 + 0.5 * cos(u_time * 0.001 + uv.xyx * 3.0 + vec3(f0, 2.0, 4.0)), m);

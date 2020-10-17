@@ -28,7 +28,7 @@ export default function() {
             vec3 blue = pow(COLOR, uv.yyy);
             vec3 orange = f1 - blue;
             vec3 sky = blue * pow(orange, vec3(8.0)) * 16.0; // pow(orange, vec3(8.0))
-            gl_FragColor = vec4(pow(sky, vec3(0.4545)), f1);
+            gl_FragColor = vec4(pow(sky, vec3(0.4545)), f1); // vec4(pow(sky, vec3(0.4545)), f1);
           }
         `,
         modules: [constantValue]

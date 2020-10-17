@@ -24,6 +24,11 @@ export default function() {
 
           varying vec2 v_uv;
 
+          // 一个平滑的线性差值方法
+          float fade(float t) {
+            return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
+          }
+
           void main(void) {
             vec2 uv = (v_uv - 0.5) * 2.0 * u_resolution / min(u_resolution.x, u_resolution.y);
             float t = v_uv .x + u_time * 0.00001;
@@ -71,12 +76,16 @@ export default function() {
             vec3 c7 = vec3(2.0, 1.0, 1.0);
             vec3 d7 = vec3(0.0, 0.25, 0.25);
             vec3 color7 = cosInter(t, a7, b7, c7, d7);
+            // vec3 a7 = vec3(1.0, 1.0, 1.0);
+            // vec3 b7 = vec3(0.0, 0.0, 0.0);
+            // vec3 color7 = mix(a7, b7, vec3(fade(v_uv.x)));
 
             vec3 a8 = vec3(0.5, 0.5, 0.5);
             vec3 b8 = vec3(0.5, 0.5, 0.5);
             vec3 c8 = vec3(1.0, 1.0, 1.0);
             vec3 d8 = vec3(0.0, 0.33, 0.67);
             vec3 color8 = cosInter(t, a8, b8, c8, d8);
+            // vec3 color8 = mix(a7, b7, vec3(v_uv.x));
 
             vec4 color = vec4(color1, f1);
             if (v_uv.y > 0.125) color = vec4(color2, f1);
