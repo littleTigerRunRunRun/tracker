@@ -6,6 +6,19 @@ export default function(gl) {
     width: gl.drawingBufferWidth,
     height: gl.drawingBufferHeight,
     attachments: {
+      [GL.COLOR_ATTACHMENT0]: new Texture2D(gl, {
+        format: GL.RGBA,
+        type: GL.UNSIGNED_BYTE,
+        width: gl.drawingBufferWidth,
+        height: gl.drawingBufferHeight,
+        mipmaps: false,
+        parameters: {
+          [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
+          [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+          [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+          [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+        }
+      }),
       [GL.DEPTH_ATTACHMENT]: new Texture2D(gl, {
         format: GL.DEPTH_COMPONENT16,
         type: GL.UNSIGNED_SHORT,

@@ -39,26 +39,6 @@ const control = {
   }
 }
 
-const vs = `
-  attribute vec3 positions;
-  attribute vec3 normals;
-
-  uniform mat4 u_modelMatrix;
-  uniform mat4 u_viewMatrix;
-  uniform mat4 u_projectionMatrix;
-
-  void main() {
-    gl_Position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * vec4(positions, f1);
-  }
-`
-const fs = `
-  uniform vec3 u_material_base_color;
-
-  void main() {
-    gl_FragColor = vec4(u_material_base_color, f1);
-  }
-`
-
 export default function getScene(props) {
   return new DS({
     env: 'dev',
@@ -67,10 +47,10 @@ export default function getScene(props) {
     lights,
     eyesPosition: [-6, 6, 8],
     control,
-    vs,
-    fs,
     framebuffers: [
-      'depth' // 这意味着有
+      // 'depth',
+      // 'normals',
+      'depth_normals'
     ]
   })
 }
