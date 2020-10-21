@@ -35,11 +35,8 @@ out vec4 fragColor;
 
 void main() {
   switch (u_drawMode) {
-    // 绘制模式：深度
-    case 1: fragColor = vec4(u_materialBaseColor, f1); break;
-    // 绘制模式：法向量
-    case 2: fragColor = vec4(v_normals * fhalf + fhalf, f1); break;
-    case 3: fragColor = vec4(v_normals * fhalf + fhalf, f1); break;
+    // 标准内容
+    case 1: fragColor = vec4(v_normals * fhalf + fhalf, f1); break;
   }
 }
 `
@@ -68,7 +65,7 @@ void main() {
   // fragColor = vec4(texture2D(u_normals, v_uv).xyz, f1);
   if (v_uv.x < 0.5 && v_uv.y < 0.5) {
     float depth = pow(texture2D(u_depth, v_uv * f2).r, 8.0); 
-    fragColor = vec4(vec3(depth), f1);
+    fragColor = vec4(depth, depth, depth, f1);
   } else if (v_uv.x > 0.5 && v_uv.y < 0.5) {
     fragColor = vec4(texture2D(u_normals, vec2(v_uv.x * f2 - f1, v_uv.y * f2)).xyz, f1);
   }
@@ -76,14 +73,14 @@ void main() {
 `
 
 export default class Scene {
-  constructor({ props, models, lights, eyesPosition = [0, 0, 10], centerPosition = [0, 0, 0], control, framebuffers }) {
+  constructor({ props, models, lights, eyesPosition = [0, 0, 10], centerPosition = [0, 0, 0], control, framebuffer }) {
     this.props = props
     this.eyesPosition = eyesPosition
     this.centerPosition = centerPosition
     this.models = models
     this.lightsModule = combineLight(lights)
     this.control = new Control(control.params)
-    this.framebuffers = framebuffers
+    this.framebuffer = framebuffer
 
     this.loop = new AnimationLoop({
       onInitialize: this.onInitialize,
@@ -110,7 +107,8 @@ export default class Scene {
       // depthFunc: gl.LEQUAL
     })
 
-    const framebuffers = createBuffer(this.framebuffers, gl)
+    const framebuffer = createBuffer(this.framebuffer, gl)
+    console.log(framebuffer)
 
     const quad = new Model(gl, {
       id: 'quad_program',
@@ -153,7 +151,7 @@ export default class Scene {
     // const vertex = models[0].model.program.vs.handle
     // console.log(gl.getShaderSource(vertex))
 
-    return { models, viewMatrix, projectionMatrix, framebuffers, quad }
+    return { models, viewMatrix, projectionMatrix, framebuffer, quad }
   }
 
   onResize({ aspect, projectionMatrix }) {
@@ -165,7 +163,7 @@ export default class Scene {
   lastTime = 0
   onRender = (params) => {
     // console.log(params)
-    const { gl, models, viewMatrix, projectionMatrix, aspect, tick, time, framebuffers, quad } = params
+    const { gl, models, viewMatrix, projectionMatrix, aspect, tick, time, framebuffer, quad } = params
     const delt = time - this.lastTime
     this.lastTime = time
 
@@ -177,10 +175,7 @@ export default class Scene {
     this.control.tick(delt)
 
     // clear framebuffer
-    for (const key in framebuffers) {
-      const framebuffer = framebuffers[key]
-      clear(gl, { color: [0, 0, 0, 1], depth: true, framebuffer: framebuffer.buffer })
-    }
+    clear(gl, { color: [0, 0, 0, 1], depth: true, framebuffer: framebuffer.buffer })
 
     models.map(({ model, position, rotation, modelMatrix }) => {
       modelMatrix
@@ -195,22 +190,16 @@ export default class Scene {
         u_view_pos: this.control.viewMatrixData.eye || this.eyesPosition
       })
 
-      for (const key in framebuffers) {
-        const framebuffer = framebuffers[key]
-        model.setUniforms({
-          u_drawMode: framebuffer.index
-        })
-        model.draw({ framebuffer: framebuffer.buffer })
-      }
+      model.setUniforms({
+        u_drawMode: framebuffer.index
+      })
+      model.draw({ framebuffer: framebuffer.buffer })
     })
 
     clear(gl, { color: [0, 0, 0, 1], depth: true })
 
     const uniforms = {}
-    for (const key in framebuffers) {
-      const framebuffer = framebuffers[key]
-      framebuffer.addUniform(uniforms, framebuffer.buffer)
-    }
+    framebuffer.addUniform(uniforms, framebuffer.buffer)
     quad.setUniforms(uniforms)
 
     quad.draw()

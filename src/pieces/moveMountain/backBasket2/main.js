@@ -47,10 +47,6 @@ export default function getScene(props) {
     lights,
     eyesPosition: [-6, 6, 8],
     control,
-    framebuffers: [
-      // 'depth',
-      // 'normals',
-      'depth_normals'
-    ]
+    framebuffer: 'standard'
   })
 }

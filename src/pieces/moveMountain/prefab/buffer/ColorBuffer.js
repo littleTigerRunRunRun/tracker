@@ -19,6 +19,32 @@ export default function(gl) {
           [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
         }
       }),
+      [GL.COLOR_ATTACHMENT1]: new Texture2D(gl, {
+        format: GL.RGBA,
+        type: GL.UNSIGNED_BYTE,
+        width: gl.drawingBufferWidth,
+        height: gl.drawingBufferHeight,
+        mipmaps: false,
+        parameters: {
+          [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
+          [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+          [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+          [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+        }
+      }),
+      [GL.COLOR_ATTACHMENT2]: new Texture2D(gl, {
+        format: GL.RGBA,
+        type: GL.UNSIGNED_BYTE,
+        width: gl.drawingBufferWidth,
+        height: gl.drawingBufferHeight,
+        mipmaps: false,
+        parameters: {
+          [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
+          [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+          [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+          [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+        }
+      }),
       [GL.DEPTH_ATTACHMENT]: new Texture2D(gl, {
         format: GL.DEPTH_COMPONENT16,
         type: GL.UNSIGNED_SHORT,
