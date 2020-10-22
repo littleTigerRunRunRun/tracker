@@ -2,9 +2,12 @@ import { AnimationLoop, Model } from '@luma.gl/engine'
 import { clear } from '@luma.gl/webgl'
 import { constantValue } from '../common/modules/constant'
 import PathGeometry from './PathGeometry.js'
+import { shapeSolver, polygonToSvgString } from './shapePointSolver'
 
 export default class ShaperCreator {
-  constructor({ canvas, points }) {
+  constructor(params) {
+    const { canvas, showSvg } = params
+
     this.loop = new AnimationLoop({
       onInitialize: this.onInitialize,
       onRender: this.onRender
@@ -14,7 +17,8 @@ export default class ShaperCreator {
       preserveDrawingBuffer: true
     })
     this.canvas = canvas
-    this.points = points
+    this.points = shapeSolver(params)
+    if (showSvg) console.log(polygonToSvgString(this.points))
   }
 
   onInitialize = ({ gl, canvas }) => {
@@ -25,8 +29,7 @@ export default class ShaperCreator {
   }
 
   onRender = ({ gl }) => {
-    if (this.needUpdate) {
-      console.log('render')
+    if (this.needUpdate && this.model) {
       clear(gl, { color: [0, 0, 0, 0] })
 
       this.model.uniforms.u_resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight]
@@ -60,5 +63,12 @@ export default class ShaperCreator {
       geometry: new PathGeometry(this.points)
     })
     this.needUpdate = true
+  }
+
+  destory() {
+    this.model.delete()
+    this.model = null
+    this.loop.delete()
+    this.loop = null
   }
 }
