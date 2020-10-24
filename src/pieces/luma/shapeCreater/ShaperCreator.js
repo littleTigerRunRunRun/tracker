@@ -2,7 +2,9 @@ import { AnimationLoop, Model } from '@luma.gl/engine'
 import { clear } from '@luma.gl/webgl'
 import { constantValue } from '../common/modules/constant'
 import PathGeometry from './PathGeometry.js'
-import { shapeSolver, polygonToSvgString } from './shapePointSolver'
+import { shapeSolver, polygonToSvgString } from './shapeSolver'
+
+console.log('dd')
 
 export default class ShaperCreator {
   constructor(params) {

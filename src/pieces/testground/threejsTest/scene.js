@@ -22,8 +22,8 @@ export default class MainScene {
     const gl = this.renderer.getContext()
     const fragment = this.cube.material.program.fragmentShader
     const vertex = this.cube.material.program.vertexShader
-    // console.log(gl.getShaderSource(vertex))
-    console.log(this.cube.material.program)
+    console.log(gl.getShaderSource(fragment))
+    // console.log(this.cube.material.program)
 
     this.update()
   }
