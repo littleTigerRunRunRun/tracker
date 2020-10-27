@@ -1,15 +1,28 @@
 import { AnimationLoop, Model } from '@luma.gl/engine'
-import { clear } from '@luma.gl/webgl'
+import { setParameters } from '@luma.gl/gltools'
+// import { fxaa } from '@luma.gl/shadertools'
+
 import { constantValue } from '../common/modules/constant'
 import PathGeometry from './PathGeometry.js'
 import { shapeSolver, polygonToSvgString } from './shapeSolver'
-
-console.log('dd')
+import HelperLine from './HelperLine.js'
+import { Pipe, Pass } from './pipe/index.js'
+// console.log(fxaa)
 
 export default class ShaperCreator {
   constructor(params) {
-    const { canvas, showSvg } = params
+    const { canvas, showSvg, type, shape, style } = params
+    const points = shapeSolver({ type, shape })
 
+    this.canvas = canvas
+    this.geometry = new PathGeometry({ points, style })
+    this.showNormal = true // 是否显示几何图形的法线
+    if (showSvg) console.log(polygonToSvgString(points))
+
+    this.initLoop(canvas)
+  }
+
+  initLoop(canvas) {
     this.loop = new AnimationLoop({
       onInitialize: this.onInitialize,
       onRender: this.onRender
@@ -18,58 +31,100 @@ export default class ShaperCreator {
       canvas,
       preserveDrawingBuffer: true
     })
-    this.canvas = canvas
-    this.points = shapeSolver(params)
-    if (showSvg) console.log(polygonToSvgString(this.points))
   }
 
   onInitialize = ({ gl, canvas }) => {
+    setParameters(gl, {
+      blend: true,
+      blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE]
+    })
+
     this.gl = gl
     this.canvas = canvas
-    this.createModel()
+    this.initPipe(gl)
     return {}
   }
 
   onRender = ({ gl }) => {
-    if (this.needUpdate && this.model) {
-      clear(gl, { color: [0, 0, 0, 0] })
-
-      this.model.uniforms.u_resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight]
-      this.model.draw()
-      this.needUpdate = false
+    if (this.needUpdate) {
+      this.pipe.render()
     }
   }
 
-  createModel() {
-    this.model = new Model(this.gl, {
-      uniforms: {
-        u_resolution: [100, 100]
+  // 初始化本例需要使用的逻辑管道
+  initPipe() {
+    this.geometryPass = new Pass({
+      pointers: {
+        geometry: this.geometry
       },
-      vs: `
-        attribute vec3 positions;
+      onInitialize: ({ gl, geometry }) => {
+        const helper = new HelperLine(gl, { lines: geometry.helperLines }) //
 
-        uniform vec2 u_resolution;
+        const shapeModel = new Model(gl, {
+          uniforms: {
+            u_resolution: [100, 100]
+          },
+          vs: `
+            attribute vec2 positions;
+            attribute vec4 color;
+    
+            uniform vec2 u_resolution;
+            varying vec4 v_color;
+    
+            void main() {
+              v_color = color;
+              gl_Position = vec4(positions / u_resolution * f2 * -1.0 + vec2(f1), f0, f1);
+            }
+          `,
+          fs: `
+            precision highp float;
+    
+            varying vec4 v_color;
+    
+            void main(void) {
+              gl_FragColor = vec4(v_color);
+            }
+          `,
+          modules: [constantValue],
+          geometry
+        })
 
-        void main() {
-          gl_Position = vec4(positions.xy / u_resolution * f2 * -1.0 + vec2(f1), positions.z, f1);
-        }
-      `,
-      fs: `
-        precision highp float;
+        this.needUpdate = true
 
-        void main(void) {
-          gl_FragColor = vec4(f1, f0, f0, f1);
-        }
-      `,
-      modules: [constantValue],
-      geometry: new PathGeometry(this.points)
+        return { helper, shapeModel }
+      },
+      onRender: ({ gl, helper, shapeModel }) => {
+        shapeModel.uniforms.u_resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight]
+        shapeModel.draw()
+
+        // this.helper.uniforms.u_resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight]
+        if (this.showNormal) helper.draw()
+
+        this.needUpdate = false
+      },
+      onDestroy: ({ shapeModel }) => {
+        shapeModel.delete()
+      },
+      // onOutput,
+      target: null
     })
-    this.needUpdate = true
+
+    // this.txaaPass = new Pass({
+
+    // })
+
+    this.pipe = new Pipe({
+      gl: this.gl,
+      stages: [
+        [
+          { pass: this.geometryPass }
+        ]
+      ]
+    })
   }
 
-  destory() {
-    this.model.delete()
-    this.model = null
+  destroy() {
+    this.pipe.destroy()
     this.loop.delete()
     this.loop = null
   }

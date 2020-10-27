@@ -211,8 +211,16 @@ export default class GLColor {
     }
   }
 
+  get normalize3() {
+    return this.getNormalize(3)
+  }
+
+  get normalize4() {
+    return this.getNormalize(4)
+  }
+
   getNormalize(channleNum = 4) {
-    return [this.r / 255, this.g / 255, this.b / 255, this.a].slice(0, channleNum)
+    return [this.r / 255, this.g / 255, this.b / 255, parseFloat(this.a)].slice(0, channleNum)
   }
 
   // 这里的familyColor的含义，是颜色族群，即获取一个Hue值的不同亮度饱和度和亮度的同族颜色

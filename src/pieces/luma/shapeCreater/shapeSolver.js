@@ -27,6 +27,7 @@ export function shapeSolver({ type = 'custom', shape = {}}) {
 
 export function polygonToSvgString(points) {
   let str = ''
+  console.log(points)
   points.map((point, index) => {
     if (index === 0) str += `M${point[0]},${point[1]} `
     else str += `L${point[0]},${point[1]} `
