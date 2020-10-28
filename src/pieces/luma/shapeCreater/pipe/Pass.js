@@ -4,7 +4,7 @@ export class Pass {
   constructor({
     onInitialize = () => {},
     onRender = () => {},
-    onOutput = () => {},
+    onOutput = () => { return {} },
     onDestroy = () => {},
     pointers = {},
     clear = {},
@@ -26,14 +26,13 @@ export class Pass {
     this.initThings = this.onInitialize(Object.assign({ gl }, this.pointers))
   }
 
-  render(gl, extraUniforms) {
+  render({ gl, extraUniforms, time }) {
     const { depth = true, stencil = false, color = [0, 0, 0, 0] } = this.clear
     clear(gl, { color, depth, stencil, framebuffer: this.target })
 
-    this.onRender(Object.assign({ extraUniforms, gl }, this.initThings, this.pointers))
+    this.onRender(Object.assign({ extraUniforms, gl, time, target: this.target }, this.initThings, this.pointers))
 
-    if (this.onOutput) this.onOutput()
-    else this.output = this.target
+    this.output = this.onOutput({ target: this.target }) || {}
   }
 
   destroy() {

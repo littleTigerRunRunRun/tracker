@@ -116,7 +116,7 @@ function splitTriangle(points, style = {}) {
   }
 }
 
-export default class PathGeometry extends Geometry {
+export class PathGeometry extends Geometry {
   constructor({ points, style }) {
     const { indices, positions, normals, colors, helperLines, bound } = splitTriangle(points, style)
     // console.log(indices, positions, normals, colors, helperLines, bound)

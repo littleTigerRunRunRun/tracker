@@ -1,13 +1,15 @@
 import { AnimationLoop, Model } from '@luma.gl/engine'
 import { setParameters } from '@luma.gl/gltools'
-// import { fxaa } from '@luma.gl/shadertools'
+import { fxaa } from '@luma.gl/shadertools'
+// import { brightnessContrast } from '@luma.gl/shadertools'
+// console.log(brightnessContrast)
 
 import { constantValue } from '../common/modules/constant'
-import PathGeometry from './PathGeometry.js'
+import { PathGeometry } from './PathGeometry.js'
 import { shapeSolver, polygonToSvgString } from './shapeSolver'
-import HelperLine from './HelperLine.js'
-import { Pipe, Pass } from './pipe/index.js'
-// console.log(fxaa)
+import { HelperLine } from './HelperLine.js'
+import { Pipe, Pass, ShaderPass } from './pipe/index.js'
+import createHandyBuffer from '../../moveMountain/prefab/buffer/HandyBuffer'
 
 export default class ShaperCreator {
   constructor(params) {
@@ -35,7 +37,6 @@ export default class ShaperCreator {
 
   onInitialize = ({ gl, canvas }) => {
     setParameters(gl, {
-      blend: true,
       blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE]
     })
 
@@ -45,9 +46,9 @@ export default class ShaperCreator {
     return {}
   }
 
-  onRender = ({ gl }) => {
+  onRender = ({ gl, time, extraUniform }) => {
     if (this.needUpdate) {
-      this.pipe.render()
+      this.pipe.render({ time })
     }
   }
 
@@ -64,25 +65,27 @@ export default class ShaperCreator {
           uniforms: {
             u_resolution: [100, 100]
           },
-          vs: `
-            attribute vec2 positions;
-            attribute vec4 color;
+          vs: `#version 300 es
+            layout (location = 0) in vec2 positions;
+            layout (location = 1) in vec4 color;
     
             uniform vec2 u_resolution;
-            varying vec4 v_color;
+
+            out vec4 v_color;
     
             void main() {
               v_color = color;
               gl_Position = vec4(positions / u_resolution * f2 * -1.0 + vec2(f1), f0, f1);
             }
           `,
-          fs: `
-            precision highp float;
+          fs: `#version 300 es
     
-            varying vec4 v_color;
+            in vec4 v_color;
+
+            layout (location = 0) out vec4 colorValue;
     
-            void main(void) {
-              gl_FragColor = vec4(v_color);
+            void main() {
+              colorValue = v_color;
             }
           `,
           modules: [constantValue],
@@ -93,31 +96,66 @@ export default class ShaperCreator {
 
         return { helper, shapeModel }
       },
-      onRender: ({ gl, helper, shapeModel }) => {
+      onRender: ({ gl, helper, shapeModel, target }) => {
+        setParameters(gl, {
+          blend: true
+        })
         shapeModel.uniforms.u_resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight]
-        shapeModel.draw()
+        shapeModel.draw({ framebuffer: target })
 
         // this.helper.uniforms.u_resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight]
-        if (this.showNormal) helper.draw()
+        if (this.showNormal) helper.draw({ framebuffer: target })
 
         this.needUpdate = false
       },
       onDestroy: ({ shapeModel }) => {
         shapeModel.delete()
       },
-      // onOutput,
-      target: null
+      onOutput: ({ target }) => {
+        return {
+          t_geo: target.color
+        }
+      },
+      target: createHandyBuffer(this.gl)
     })
 
-    // this.txaaPass = new Pass({
+    this.txaaPass = new ShaderPass({
+      fs: `#version 300 es
+      
+        uniform sampler2D t_geo;
+        uniform vec2 u_resolution;
 
-    // })
+        in vec2 v_uv;
+
+        out vec4 fragColor;
+
+        void main() {
+          fragColor = fxaa_sampleColor(t_geo, u_resolution, v_uv);
+          // fragColor = texture2D(t_geo, v_uv);
+        }
+      `,
+      modules: [fxaa],
+      render({ gl, time, extraUniforms, model }) {
+        setParameters(gl, {
+          blend: false
+        })
+        // const fragment = model.program.fs.handle
+        // console.log(gl.getShaderSource(fragment))
+
+        model.uniforms.u_resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight]
+        model.draw()
+      },
+      target: null
+    })
 
     this.pipe = new Pipe({
       gl: this.gl,
       stages: [
         [
-          { pass: this.geometryPass }
+          { pass: this.geometryPass, output: ['t_geo'] }
+        ],
+        [
+          { pass: this.txaaPass, input: ['t_geo'] }
         ]
       ]
     })

@@ -43,7 +43,7 @@
 
 <script>
 import props from './config'
-import ShaperCreator from './ShaperCreator'
+import ShapeCreator from './ShapeCreator'
 
 export default {
   name: 'ShapeCreater',
@@ -55,7 +55,7 @@ export default {
   mounted() {
     this.$emit('config', props)
 
-    this.sc0 = new ShaperCreator({
+    this.sc0 = new ShapeCreator({
       canvas: this.$refs.c0,
       type: 'regularPolygon',
       shape: {
@@ -70,62 +70,62 @@ export default {
       }
     })
 
-    this.sc1 = new ShaperCreator({
-      canvas: this.$refs.c1,
-      type: 'regularPolygon',
-      shape: {
-        side: 4,
-        radius: 80,
-        center: [100, 100],
-        start: Math.PI / 4
-      },
-      style: {
-        fill: 'rgba(255, 0, 0, 0.2)',
-        stroke: 'rgba(0, 60, 120, 0.8)',
-        strokeWidth: 8
-      }
-    })
+    // this.sc1 = new ShapeCreator({
+    //   canvas: this.$refs.c1,
+    //   type: 'regularPolygon',
+    //   shape: {
+    //     side: 4,
+    //     radius: 80,
+    //     center: [100, 100],
+    //     start: Math.PI / 4
+    //   },
+    //   style: {
+    //     fill: 'rgba(255, 0, 0, 0.2)',
+    //     stroke: 'rgba(0, 60, 120, 0.8)',
+    //     strokeWidth: 8
+    //   }
+    // })
 
-    this.sc2 = new ShaperCreator({
-      canvas: this.$refs.c2,
-      type: 'regularPolygon',
-      shape: {
-        side: 5,
-        radius: 80,
-        center: [100, 100]
-      },
-      style: {
-        fill: 'rgba(40, 80, 255, 0.5)',
-        stroke: 'rgba(255, 0, 0, 1)',
-        strokeWidth: 2
-      }
-    })
+    // this.sc2 = new ShapeCreator({
+    //   canvas: this.$refs.c2,
+    //   type: 'regularPolygon',
+    //   shape: {
+    //     side: 5,
+    //     radius: 80,
+    //     center: [100, 100]
+    //   },
+    //   style: {
+    //     fill: 'rgba(40, 80, 255, 0.5)',
+    //     stroke: 'rgba(255, 0, 0, 1)',
+    //     strokeWidth: 2
+    //   }
+    // })
 
-    this.sc3 = new ShaperCreator({
-      canvas: this.$refs.c3,
-      type: 'circle',
-      // showSvg: true,
-      shape: {
-        accuracy: 1, // 曲线细分程度
-        radius: 55,
-        center: [100, 100]
-      },
-      style: {
-        stroke: '#333',
-        strokeWidth: 0.25
-      }
-    })
+    // this.sc3 = new ShapeCreator({
+    //   canvas: this.$refs.c3,
+    //   type: 'circle',
+    //   // showSvg: true,
+    //   shape: {
+    //     accuracy: 1, // 曲线细分程度
+    //     radius: 55,
+    //     center: [100, 100]
+    //   },
+    //   style: {
+    //     stroke: '#333',
+    //     strokeWidth: 0.25
+    //   }
+    // })
   },
   beforeDestroy() {
     if (this.sc1) {
       this.sc0.destroy()
       this.sc0 = null
-      this.sc1.destroy()
-      this.sc1 = null
-      this.sc2.destroy()
-      this.sc2 = null
-      this.sc3.destroy()
-      this.sc3 = null
+      // this.sc1.destroy()
+      // this.sc1 = null
+      // this.sc2.destroy()
+      // this.sc2 = null
+      // this.sc3.destroy()
+      // this.sc3 = null
     }
   },
   methods: {

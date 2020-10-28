@@ -21,18 +21,17 @@ export class Pipe {
   }
 
   // 运行
-  render() {
+  render({ time }) {
     for (const stage of this.stages) {
       for (const pass of stage) {
-        const uniforms = {}
+        const extraUniforms = {}
         if (pass.input && pass.input.length > 0) {
           for (const name of pass.input) {
-            uniforms[name] = this.pools[name]
+            extraUniforms[name] = this.pools[name]
           }
         }
-        pass.pass.render(this.gl, uniforms)
-        if (pass.output) this.pools[pass.output] = pass.pass.output
-        if (pass.outputs) Object.assign(this.pools, pass.outputs(pass.output))
+        pass.pass.render({ gl: this.gl, extraUniforms, time })
+        if (pass.output) Object.assign(this.pools, pass.pass.output)
       }
     }
   }

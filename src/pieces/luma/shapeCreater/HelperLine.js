@@ -16,7 +16,7 @@ function getVector2Vertical(x, y) {
   }
 }
 
-export default class HelperLine extends Model {
+export class HelperLine extends Model {
   constructor(gl, { lines, modules = [], width = 2, length = 10, startcolor = [0, 0.5, 0, 0], endcolor = [0, 1, 0, 1] }) {
     const positions = []
     // const indices = []
