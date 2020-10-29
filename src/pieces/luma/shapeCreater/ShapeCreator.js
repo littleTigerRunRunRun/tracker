@@ -104,12 +104,11 @@ export default class ShaperCreator {
         setParameters(gl, {
           blend: true
         })
-        const rate = 1
-        shapeModel.uniforms.u_resolution = [gl.drawingBufferWidth * rate, gl.drawingBufferHeight * rate]
+        shapeModel.uniforms.u_resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight]
         shapeModel.draw({ framebuffer: target })
 
         if (this.showNormal) {
-          helper.uniforms.u_resolution = [gl.drawingBufferWidth * rate, gl.drawingBufferHeight * rate]
+          helper.uniforms.u_resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight]
           helper.draw({ framebuffer: target })
         }
 
@@ -155,7 +154,8 @@ export default class ShaperCreator {
 
         console.log(extraUniforms)
 
-        model.uniforms.u_resolution = [4, 4]
+        // model.uniforms.u_resolution = [1, 1]
+        console.log(model.uniforms)
         model.draw()
       },
       target: null

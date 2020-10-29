@@ -6,7 +6,7 @@ export class RectProcessModel extends Model {
       vs: is2 ? `#version 300 es
         layout (location = 0) in vec3 positions;
 
-        uniforms vec2 u_resolution;
+        uniform vec2 u_resolution;
 
         out vec2 v_uv;
         
@@ -17,7 +17,7 @@ export class RectProcessModel extends Model {
       ` : `
         attribute vec3 positions;
 
-        uniforms vec2 u_resolution;
+        uniform vec2 u_resolution;
 
         varying vec2 v_uv;
 
