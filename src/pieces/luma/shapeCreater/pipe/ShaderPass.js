@@ -3,7 +3,7 @@ import { RectProcessModel } from '../../common/models/RectProcessModel'
 import { constantValue } from '../../common/modules/constant'
 
 export class ShaderPass extends Pass {
-  constructor({ fs, modules = [], render = () => {}, onOutput, target, clear }) {
+  constructor({ fs, modules = [], defines = {}, render = () => {}, onOutput, target, clear }) {
     super({
       pointers: {
         render
@@ -12,6 +12,7 @@ export class ShaderPass extends Pass {
         const model = new RectProcessModel(gl, {
           is2: true,
           fs,
+          defines,
           modules: [constantValue].concat(modules)
         })
         return { model }

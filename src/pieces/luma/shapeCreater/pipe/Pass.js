@@ -32,7 +32,7 @@ export class Pass {
 
     this.onRender(Object.assign({ extraUniforms, gl, time, target: this.target }, this.initThings, this.pointers))
 
-    this.output = this.onOutput({ target: this.target }) || {}
+    this.output = this.onOutput(Object.assign({ gl, target: this.target }, this.initThings, this.pointers)) || {}
   }
 
   destroy() {

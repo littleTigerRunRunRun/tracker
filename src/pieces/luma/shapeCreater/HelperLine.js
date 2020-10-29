@@ -17,7 +17,7 @@ function getVector2Vertical(x, y) {
 }
 
 export class HelperLine extends Model {
-  constructor(gl, { lines, modules = [], width = 2, length = 10, startcolor = [0, 0.5, 0, 0], endcolor = [0, 1, 0, 1] }) {
+  constructor(gl, { lines, modules = [], width = 2, length = 10, startcolor = [0.5, 0, 0, 0], endcolor = [0, 1, 0, 1] }) {
     const positions = []
     // const indices = []
     const colors = []
@@ -38,8 +38,8 @@ export class HelperLine extends Model {
       positions.push(...[points[2], points[3]])
       positions.push(...[points[6], points[7]])
       positions.push(...[points[2], points[3]])
-      positions.push(...[points[6], points[7]])
       positions.push(...[points[4], points[5]])
+      positions.push(...[points[6], points[7]])
 
       colors.push(...startcolor)
       colors.push(...endcolor)

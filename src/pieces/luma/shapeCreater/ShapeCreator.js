@@ -1,6 +1,7 @@
 import { AnimationLoop, Model } from '@luma.gl/engine'
 import { setParameters } from '@luma.gl/gltools'
 import { fxaa } from '@luma.gl/shadertools'
+import GL from '@luma.gl/constants'
 // import { brightnessContrast } from '@luma.gl/shadertools'
 // console.log(brightnessContrast)
 
@@ -30,6 +31,7 @@ export default class ShaperCreator {
       onRender: this.onRender
     })
     this.loop.start({
+      webgl2: true,
       canvas,
       preserveDrawingBuffer: true
     })
@@ -54,9 +56,11 @@ export default class ShaperCreator {
 
   // 初始化本例需要使用的逻辑管道
   initPipe() {
+    const { buffer, blit } = createHandyBuffer(this.gl)
     this.geometryPass = new Pass({
       pointers: {
-        geometry: this.geometry
+        geometry: this.geometry,
+        blit
       },
       onInitialize: ({ gl, geometry }) => {
         const helper = new HelperLine(gl, { lines: geometry.helperLines }) //
@@ -100,25 +104,32 @@ export default class ShaperCreator {
         setParameters(gl, {
           blend: true
         })
-        shapeModel.uniforms.u_resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight]
+        const rate = 1
+        shapeModel.uniforms.u_resolution = [gl.drawingBufferWidth * rate, gl.drawingBufferHeight * rate]
         shapeModel.draw({ framebuffer: target })
 
-        // this.helper.uniforms.u_resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight]
-        if (this.showNormal) helper.draw({ framebuffer: target })
+        if (this.showNormal) {
+          helper.uniforms.u_resolution = [gl.drawingBufferWidth * rate, gl.drawingBufferHeight * rate]
+          helper.draw({ framebuffer: target })
+        }
 
         this.needUpdate = false
       },
       onDestroy: ({ shapeModel }) => {
         shapeModel.delete()
       },
-      onOutput: ({ target }) => {
+      onOutput: ({ blit }) => {
+        const color = blit({ attachment: GL.COLOR_ATTACHMENT0 })
+
         return {
-          t_geo: target.color
+          t_geo: color
         }
       },
-      target: createHandyBuffer(this.gl)
+      clear: { color: [1, 1, 1, 1] },
+      target: buffer
     })
 
+    fxaa.fs = fxaa.fs.replace('#define FXAA_QUALITY_PRESET 29', '#define FXAA_QUALITY_PRESET 39')
     this.txaaPass = new ShaderPass({
       fs: `#version 300 es
       
@@ -130,8 +141,8 @@ export default class ShaperCreator {
         out vec4 fragColor;
 
         void main() {
-          fragColor = fxaa_sampleColor(t_geo, u_resolution, v_uv);
-          // fragColor = texture2D(t_geo, v_uv);
+          // fragColor = fxaa_sampleColor(t_geo, u_resolution, v_uv);
+          fragColor = texture2D(t_geo, v_uv);
         }
       `,
       modules: [fxaa],
@@ -142,7 +153,9 @@ export default class ShaperCreator {
         // const fragment = model.program.fs.handle
         // console.log(gl.getShaderSource(fragment))
 
-        model.uniforms.u_resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight]
+        console.log(extraUniforms)
+
+        model.uniforms.u_resolution = [4, 4]
         model.draw()
       },
       target: null
@@ -150,6 +163,9 @@ export default class ShaperCreator {
 
     this.pipe = new Pipe({
       gl: this.gl,
+      // textures: {
+      //   t_geo: '/public/t_geo.png'
+      // },
       stages: [
         [
           { pass: this.geometryPass, output: ['t_geo'] }
