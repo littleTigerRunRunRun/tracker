@@ -1,25 +1,26 @@
 import { AnimationLoop, Model } from '@luma.gl/engine'
 import { setParameters } from '@luma.gl/gltools'
-import { fxaa } from '@luma.gl/shadertools'
 import GL from '@luma.gl/constants'
 // import { brightnessContrast } from '@luma.gl/shadertools'
 // console.log(brightnessContrast)
 
-import { constantValue } from '../common/modules/constant'
+import { constantValue } from '@/pieces/luma/common/modules/constant'
+import createHandyBuffer from '@/pieces/moveMountain/prefab/buffer/HandyBuffer'
+
+import { Pipe, Pass, ShaderPass } from '../pipe/index.js'
+
 import { PathGeometry } from './PathGeometry.js'
 import { shapeSolver, polygonToSvgString } from './shapeSolver'
 import { HelperLine } from './HelperLine.js'
-import { Pipe, Pass, ShaderPass } from './pipe/index.js'
-import createHandyBuffer from '../../moveMountain/prefab/buffer/HandyBuffer'
 
 export default class ShaperCreator {
   constructor(params) {
-    const { canvas, showSvg, type, shape, style } = params
+    const { canvas, showSvg, type, shape, style, showNormal = false } = params
     const points = shapeSolver({ type, shape })
 
     this.canvas = canvas
     this.geometry = new PathGeometry({ points, style })
-    this.showNormal = true // 是否显示几何图形的法线
+    this.showNormal = showNormal // 是否显示几何图形的法线
     if (showSvg) console.log(polygonToSvgString(points))
 
     this.initLoop(canvas)
@@ -29,10 +30,15 @@ export default class ShaperCreator {
     this.loop = new AnimationLoop({
       onInitialize: this.onInitialize,
       onRender: this.onRender
+      // useDevicePixels: true
     })
     this.loop.start({
       webgl2: true,
       canvas,
+      antialias: true,
+      width: 400,
+      height: 400,
+      // premultipliedAlpha: false,
       preserveDrawingBuffer: true
     })
   }
@@ -43,20 +49,19 @@ export default class ShaperCreator {
     })
 
     this.gl = gl
+    gl.viewport(0, 0, 400, 400)
     this.canvas = canvas
     this.initPipe(gl)
     return {}
   }
 
   onRender = ({ gl, time, extraUniform }) => {
-    if (this.needUpdate) {
-      this.pipe.render({ time })
-    }
+    this.pipe.render({ time })
   }
 
   // 初始化本例需要使用的逻辑管道
   initPipe() {
-    const { buffer, blit } = createHandyBuffer(this.gl)
+    const { buffer, blit } = createHandyBuffer(this.gl, 8)
     this.geometryPass = new Pass({
       pointers: {
         geometry: this.geometry,
@@ -96,8 +101,6 @@ export default class ShaperCreator {
           geometry
         })
 
-        this.needUpdate = true
-
         return { helper, shapeModel }
       },
       onRender: ({ gl, helper, shapeModel, target }) => {
@@ -111,8 +114,6 @@ export default class ShaperCreator {
           helper.uniforms.u_resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight]
           helper.draw({ framebuffer: target })
         }
-
-        this.needUpdate = false
       },
       onDestroy: ({ shapeModel }) => {
         shapeModel.delete()
@@ -128,8 +129,7 @@ export default class ShaperCreator {
       target: buffer
     })
 
-    fxaa.fs = fxaa.fs.replace('#define FXAA_QUALITY_PRESET 29', '#define FXAA_QUALITY_PRESET 39')
-    this.txaaPass = new ShaderPass({
+    this.blurPass = new ShaderPass({
       fs: `#version 300 es
       
         uniform sampler2D t_geo;
@@ -139,12 +139,40 @@ export default class ShaperCreator {
 
         out vec4 fragColor;
 
+        const float inverse_sqrt_2p = 0.39894228;
+        const float sigma = 2.0;
+        const int kernelRadius = 2;
+
+        // 生成一个x位置的一维正态分布值
+        float oneDimensionalGaussian (in float x) {
+          return inverse_sqrt_2p / sigma * exp((-x * x) / (f2 * sigma * sigma));
+        }
+
+        vec4 gaussianBlur(sampler2D tImage, vec2 uv) {
+          vec2 direction = vec2(0.0, 1.0);
+          vec2 unitSize = f1 / u_resolution;
+          float weightSum = oneDimensionalGaussian(f0);
+          vec3 diffuseSum = texture2D(tImage, uv).rgb * weightSum;
+    
+          // 这里其实是从-(kernelRadius - 1) kernelRadius - 1
+          for (int i = 1; i < kernelRadius; i++ ) {
+            float x = float(i);
+            float w = oneDimensionalGaussian(x);
+            vec2 offset = direction * x * unitSize;
+            vec3 sampler1 = texture2D(tImage, uv + offset).rgb;
+            vec3 sampler2 = texture2D(tImage, uv - offset).rgb;
+            diffuseSum += (sampler1 + sampler2) * w;
+            weightSum += w * f2;
+          }
+    
+          return vec4(diffuseSum / weightSum, 1.0);
+        }
+
         void main() {
           // fragColor = fxaa_sampleColor(t_geo, u_resolution, v_uv);
-          fragColor = texture2D(t_geo, v_uv);
+          fragColor = texture2D(t_geo, v_uv); // gaussianBlur(t_geo, v_uv);
         }
       `,
-      modules: [fxaa],
       render({ gl, time, extraUniforms, model }) {
         setParameters(gl, {
           blend: false
@@ -152,10 +180,7 @@ export default class ShaperCreator {
         // const fragment = model.program.fs.handle
         // console.log(gl.getShaderSource(fragment))
 
-        console.log(extraUniforms)
-
-        // model.uniforms.u_resolution = [1, 1]
-        console.log(model.uniforms)
+        model.uniforms.u_resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight]
         model.draw()
       },
       target: null
@@ -163,15 +188,16 @@ export default class ShaperCreator {
 
     this.pipe = new Pipe({
       gl: this.gl,
+      autoUpdate: false,
       // textures: {
-      //   t_geo: '/public/t_geo.png'
+      //   t_geo: '/public/t_circle.png'
       // },
       stages: [
         [
           { pass: this.geometryPass, output: ['t_geo'] }
         ],
         [
-          { pass: this.txaaPass, input: ['t_geo'] }
+          { pass: this.blurPass, input: ['t_geo'] }
         ]
       ]
     })

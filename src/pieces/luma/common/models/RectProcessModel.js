@@ -11,7 +11,7 @@ export class RectProcessModel extends Model {
         out vec2 v_uv;
         
         void main() {
-          v_uv = positions.xy / u_resolution * fhalf + fhalf;
+          v_uv = positions.xy * fhalf + fhalf;
           gl_Position = vec4(positions, f1);
         }
       ` : `
@@ -22,7 +22,7 @@ export class RectProcessModel extends Model {
         varying vec2 v_uv;
 
         void main() {
-          v_uv = positions.xy / u_resolution * fhalf + fhalf;
+          v_uv = positions.xy * fhalf + fhalf;
           gl_Position = vec4(positions, f1);
         }
       `,

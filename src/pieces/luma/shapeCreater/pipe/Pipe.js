@@ -1,13 +1,15 @@
-import { Texture2D } from '@luma.gl/webgl'
+import { Texture2D, loadImage } from '@luma.gl/webgl'
 
 /*
   虽然我们认为图形学中，从application、geometry、rasterization、pixel process到merge是一个完整的pipeline，但是在应用中我们
   可以将pipeline作为一个pass来看待，然后用pass组成一个应用层面上的管道，这里为了和Pipeline区分，命名为pipe
   */
 export class Pipe {
-  constructor({ gl, stages, textures }) {
+  constructor({ gl, stages, textures, autoUpdate }) {
     this.stages = stages
     this.gl = gl
+    this.autoUpdate = autoUpdate
+    this.needUpdate = true
     this.init()
     this.createTextures(textures)
   }
@@ -23,28 +25,39 @@ export class Pipe {
     }
   }
 
-  createTextures(textures) {
+  createTextures(textures = {}) {
+    const resources = []
     for (const key in textures) {
-      const texture = new Texture2D(this.gl, {
-        data: textures[key]
-      })
+      const promise = loadImage(textures[key])
+      const texture = new Texture2D(this.gl, { data: promise })
       this.pools[key] = texture
-      console.log(texture)
+      resources.push({ key, promise })
     }
+    if (resources.length === 0) {
+      this.assetsReady = true
+      return
+    }
+    Promise.all(resources.map((item) => item.promise))
+      .then((datas) => {
+        this.assetsReady = true
+      })
   }
 
   // 运行
   render({ time }) {
-    for (const stage of this.stages) {
-      for (const pass of stage) {
-        const extraUniforms = {}
-        if (pass.input && pass.input.length > 0) {
-          for (const name of pass.input) {
-            extraUniforms[name] = this.pools[name]
+    if (this.needUpdate && this.assetsReady) {
+      if (!this.autoUpdate) this.needUpdate = false
+      for (const stage of this.stages) {
+        for (const pass of stage) {
+          const extraUniforms = {}
+          if (pass.input && pass.input.length > 0) {
+            for (const name of pass.input) {
+              extraUniforms[name] = this.pools[name]
+            }
           }
+          pass.pass.render({ gl: this.gl, extraUniforms, time })
+          if (pass.output) Object.assign(this.pools, pass.pass.output)
         }
-        pass.pass.render({ gl: this.gl, extraUniforms, time })
-        if (pass.output) Object.assign(this.pools, pass.pass.output)
       }
     }
   }

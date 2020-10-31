@@ -1,6 +1,6 @@
 import { Model } from '@luma.gl/engine'
 import { Buffer } from '@luma.gl/webgl'
-import { constantValue } from '../common/modules/constant'
+import { constantValue } from '@/pieces/luma/common/modules/constant'
 // import GL from '@luma.gl/constants'
 // console.log(GL)
 

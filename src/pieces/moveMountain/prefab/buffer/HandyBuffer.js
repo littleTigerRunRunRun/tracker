@@ -4,7 +4,7 @@ import { blit } from '@luma.gl/webgl'
 
 const rate = 1
 
-export default function(gl) {
+export default function(gl, samples = 0) {
   // get the samplers value of an format
   // const canvas = document.createElement('canvas')
   // const gl = canvas.getContext('webgl2')
@@ -14,7 +14,7 @@ export default function(gl) {
     width: gl.drawingBufferWidth,
     height: gl.drawingBufferHeight,
     attachments: {
-      [GL.COLOR_ATTACHMENT0]: new Renderbuffer(gl, { format: GL.RGBA8, width: gl.drawingBufferWidth, height: gl.drawingBufferHeight, samples: 8 })
+      [GL.COLOR_ATTACHMENT0]: new Renderbuffer(gl, { format: GL.RGBA8, width: gl.drawingBufferWidth, height: gl.drawingBufferHeight, samples })
       // [GL.COLOR_ATTACHMENT1]: new Texture2D(gl, {
       //   format: GL.RGBA,
       //   type: GL.UNSIGNED_BYTE,

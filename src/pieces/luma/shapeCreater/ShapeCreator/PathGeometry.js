@@ -1,25 +1,10 @@
 /* eslint-disable no-this-before-super */
 import { Geometry } from '@luma.gl/engine'
 import Color from '@/lib/color.js'
+import { ColorDescriber } from '../ColorDescriber'
 
-// 分割形状并且生成边框
-function splitTriangle(points, style = {}) {
-  const triangles = []
-  if (points.length < 3) return triangles
-
-  const positions = []
-  const indices = []
-  const normals = []
-  const colors = []
-  const bound = {
-    minx: 10000,
-    miny: 10000,
-    maxx: -10000,
-    maxy: -10000
-  }
-
-  const fill = new Color(style.fill || 'rgba(0, 0, 0, 0)').normalize4
-
+// 产生本体的三角形属性
+function splitTriangle({ positions, indices, normals, colors, bound, style, points, helperLines }) {
   const ps = points.map((item, index) => {
     positions.push(...item)
 
@@ -34,9 +19,7 @@ function splitTriangle(points, style = {}) {
     normal.push(0)
     normals.push(normal.map((val) => val / Math.sqrt(normalPow2)))
 
-    // 存入颜色
-    colors.push(...fill)
-
+    // 几何内容总包围盒更新
     bound.maxx = Math.max(bound.maxx, item[0])
     bound.minx = Math.min(bound.minx, item[0])
     bound.maxy = Math.max(bound.maxy, item[1])
@@ -46,6 +29,26 @@ function splitTriangle(points, style = {}) {
     arr.push(index)
     return arr
   })
+
+  bound.x = bound.minx
+  bound.y = bound.miny
+  bound.width = bound.maxx - bound.minx
+  bound.height = bound.maxy - bound.miny
+
+  // drop color
+  if (style.fill instanceof ColorDescriber) {
+    const linear = style.fill.layers[0]
+    console.log(bound, linear, positions)
+    for (let i = 0; i < positions.length; i += 2) {
+      console.log((positions[i] - bound.x) / bound.width, (positions[i + 1] - bound.y) / bound.height)
+    }
+    // 手动处理一下线性渐变
+  } else {
+    const fill = new Color(style.fill || 'rgba(0, 0, 0, 0)').normalize4
+    ps.map(() => {
+      colors.push(...fill)
+    })
+  }
 
   for (let i = 0; ps.length > 2; i++) {
     const p1 = ps[i]
@@ -61,8 +64,7 @@ function splitTriangle(points, style = {}) {
     if (!ps[i + 2] && ps.length > 2) i = 0
   }
 
-  // stroke 部分
-  const helperLines = []
+  // 绘制法线的辅助线
   normals.map((normal, index) => {
     // console.log(points[index], normal)
     helperLines.push([
@@ -70,7 +72,11 @@ function splitTriangle(points, style = {}) {
       normal
     ])
   })
+}
 
+// 产生本体描边的三角形属性
+function splitStroke({ positions, indices, normals, colors, bound, style, points, helperLines }) {
+  // stroke 部分
   const { stroke = 'rgba(0, 0, 0, 0)', strokeWidth = 1 } = style
   const strokeNormal = new Color(stroke).normalize4
   if (stroke && strokeNormal[3] > 0 && strokeWidth) {
@@ -105,6 +111,27 @@ function splitTriangle(points, style = {}) {
     colors.push(...strokeColors)
     indices.push(...strokeIndices)
   }
+}
+
+// 产生形状绘制所用的网格
+function createMesh(points, style = {}) {
+  const triangles = []
+  if (points.length < 3) return triangles
+
+  const positions = []
+  const indices = []
+  const normals = []
+  const colors = []
+  const bound = {
+    minx: 10000,
+    miny: 10000,
+    maxx: -10000,
+    maxy: -10000
+  }
+  const helperLines = []
+
+  splitTriangle({ positions, indices, normals, colors, bound, style, points, helperLines })
+  splitStroke({ positions, indices, normals, colors, bound, style, points, helperLines })
 
   return {
     indices,
@@ -118,7 +145,7 @@ function splitTriangle(points, style = {}) {
 
 export class PathGeometry extends Geometry {
   constructor({ points, style }) {
-    const { indices, positions, normals, colors, helperLines, bound } = splitTriangle(points, style)
+    const { indices, positions, normals, colors, helperLines, bound } = createMesh(points, style)
     // console.log(indices, positions, normals, colors, helperLines, bound)
 
     super({

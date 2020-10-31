@@ -1,9 +1,15 @@
 <template>
   <div class="tracker-piece-entry">
     <svg version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid meet" class="block" viewBox="0 0 200 200">
+      <defs>
+        <linearGradient id="linear_gradient_1" x1="0.5" y1="0" x2="0.5" y2="1">
+          <stop offset="20%" stop-color="#f00" stop-opacity="0.8" />
+          <stop offset="80%" stop-color="#000" stop-opacity="0" />
+        </linearGradient>
+      </defs>
       <path
         d="M100,20 L169.2820323027551,140 L30.717967697244916,140.00000000000003 Z"
-        fill="rgba(255, 0, 0, 0.2)"
+        fill="url('#linear_gradient_1')"
         stroke="rgba(0, 60, 120, 0.8)"
         stroke-width="8"
       />
@@ -33,8 +39,8 @@
         cy="100"
         r="55"
         fill="none"
-        stroke="#333"
-        stroke-width="0.25"
+        stroke="#000"
+        stroke-width="1"
       />
     </svg>
     <canvas ref="c3" class="block" />
@@ -43,7 +49,8 @@
 
 <script>
 import props from './config'
-import ShapeCreator from './ShapeCreator'
+import ShapeCreator from './ShapeCreator/index.js'
+import { ColorDescriber } from './ColorDescriber'
 
 export default {
   name: 'ShapeCreater',
@@ -64,57 +71,67 @@ export default {
         center: [100, 100]
       },
       style: {
+        fill: new ColorDescriber([
+          {
+            type: 'linear',
+            direction: 180,
+            limited: false, // 有限的，也就是说不往周边扩展
+            stops: [
+              { color: 'rgba(255, 0, 0, 0.8)', offset: 0.2 },
+              { colro: 'rgba(255, 255, 255, 1)', offset: 1 }
+            ]
+          }
+        ]),
+        stroke: 'rgba(0, 60, 120, 0.8)',
+        strokeWidth: 8
+      }
+    })
+
+    this.sc1 = new ShapeCreator({
+      canvas: this.$refs.c1,
+      type: 'regularPolygon',
+      shape: {
+        side: 4,
+        radius: 80,
+        center: [100, 100],
+        start: Math.PI / 4
+      },
+      style: {
         fill: 'rgba(255, 0, 0, 0.2)',
         stroke: 'rgba(0, 60, 120, 0.8)',
         strokeWidth: 8
       }
     })
 
-    // this.sc1 = new ShapeCreator({
-    //   canvas: this.$refs.c1,
-    //   type: 'regularPolygon',
-    //   shape: {
-    //     side: 4,
-    //     radius: 80,
-    //     center: [100, 100],
-    //     start: Math.PI / 4
-    //   },
-    //   style: {
-    //     fill: 'rgba(255, 0, 0, 0.2)',
-    //     stroke: 'rgba(0, 60, 120, 0.8)',
-    //     strokeWidth: 8
-    //   }
-    // })
+    this.sc2 = new ShapeCreator({
+      canvas: this.$refs.c2,
+      type: 'regularPolygon',
+      shape: {
+        side: 5,
+        radius: 80,
+        center: [100, 100]
+      },
+      style: {
+        fill: 'rgba(40, 80, 255, 0.5)',
+        stroke: 'rgba(255, 0, 0, 1)',
+        strokeWidth: 2
+      }
+    })
 
-    // this.sc2 = new ShapeCreator({
-    //   canvas: this.$refs.c2,
-    //   type: 'regularPolygon',
-    //   shape: {
-    //     side: 5,
-    //     radius: 80,
-    //     center: [100, 100]
-    //   },
-    //   style: {
-    //     fill: 'rgba(40, 80, 255, 0.5)',
-    //     stroke: 'rgba(255, 0, 0, 1)',
-    //     strokeWidth: 2
-    //   }
-    // })
-
-    // this.sc3 = new ShapeCreator({
-    //   canvas: this.$refs.c3,
-    //   type: 'circle',
-    //   // showSvg: true,
-    //   shape: {
-    //     accuracy: 1, // 曲线细分程度
-    //     radius: 55,
-    //     center: [100, 100]
-    //   },
-    //   style: {
-    //     stroke: '#333',
-    //     strokeWidth: 0.25
-    //   }
-    // })
+    this.sc3 = new ShapeCreator({
+      canvas: this.$refs.c3,
+      type: 'circle',
+      // showSvg: true,
+      shape: {
+        accuracy: 4, // 曲线细分程度
+        radius: 55,
+        center: [100, 100]
+      },
+      style: {
+        stroke: '#000',
+        strokeWidth: 1
+      }
+    })
   },
   beforeDestroy() {
     if (this.sc1) {
