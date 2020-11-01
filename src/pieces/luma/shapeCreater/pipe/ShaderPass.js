@@ -1,6 +1,5 @@
 import { Pass } from './Pass'
-import { RectProcessModel } from '../../common/models/RectProcessModel'
-import { constantValue } from '../../common/modules/constant'
+import { RectProcessModel } from '@/pieces/luma/common/models/RectProcessModel'
 
 export class ShaderPass extends Pass {
   constructor({ fs, modules = [], defines = {}, render = () => {}, onOutput, target, clear }) {
@@ -12,8 +11,7 @@ export class ShaderPass extends Pass {
         const model = new RectProcessModel(gl, {
           is2: true,
           fs,
-          defines,
-          modules: [constantValue].concat(modules)
+          defines
         })
         return { model }
       },

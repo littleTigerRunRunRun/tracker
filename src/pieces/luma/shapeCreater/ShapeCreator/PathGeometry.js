@@ -4,7 +4,7 @@ import Color from '@/lib/color.js'
 import { ColorDescriber } from '../ColorDescriber'
 
 // 产生本体的三角形属性
-function splitTriangle({ positions, indices, normals, colors, bound, style, points, helperLines }) {
+function splitTriangle({ gl, positions, indices, normals, colors, bound, style, points, helperLines }) {
   const ps = points.map((item, index) => {
     positions.push(...item)
 
@@ -37,12 +37,13 @@ function splitTriangle({ positions, indices, normals, colors, bound, style, poin
 
   // drop color
   if (style.fill instanceof ColorDescriber) {
-    const linear = style.fill.layers[0]
-    console.log(bound, linear, positions)
+    console.log(bound, positions)
     for (let i = 0; i < positions.length; i += 2) {
-      console.log((positions[i] - bound.x) / bound.width, (positions[i + 1] - bound.y) / bound.height)
+      // 我们约定了fill的textureIndex为0
+      colors.push(...[0, (positions[i] - bound.x) / bound.width, (positions[i + 1] - bound.y) / bound.height])
     }
     // 手动处理一下线性渐变
+    style.fill.render(gl)
   } else {
     const fill = new Color(style.fill || 'rgba(0, 0, 0, 0)').normalize4
     ps.map(() => {
@@ -75,7 +76,7 @@ function splitTriangle({ positions, indices, normals, colors, bound, style, poin
 }
 
 // 产生本体描边的三角形属性
-function splitStroke({ positions, indices, normals, colors, bound, style, points, helperLines }) {
+function splitStroke({ gl, positions, indices, normals, colors, bound, style, points, helperLines }) {
   // stroke 部分
   const { stroke = 'rgba(0, 0, 0, 0)', strokeWidth = 1 } = style
   const strokeNormal = new Color(stroke).normalize4
@@ -114,7 +115,7 @@ function splitStroke({ positions, indices, normals, colors, bound, style, points
 }
 
 // 产生形状绘制所用的网格
-function createMesh(points, style = {}) {
+function createMesh(gl, points, style = {}) {
   const triangles = []
   if (points.length < 3) return triangles
 
@@ -130,8 +131,8 @@ function createMesh(points, style = {}) {
   }
   const helperLines = []
 
-  splitTriangle({ positions, indices, normals, colors, bound, style, points, helperLines })
-  splitStroke({ positions, indices, normals, colors, bound, style, points, helperLines })
+  splitTriangle({ gl, positions, indices, normals, colors, bound, style, points, helperLines })
+  splitStroke({ gl, positions, indices, normals, colors, bound, style, points, helperLines })
 
   return {
     indices,
@@ -144,8 +145,8 @@ function createMesh(points, style = {}) {
 }
 
 export class PathGeometry extends Geometry {
-  constructor({ points, style }) {
-    const { indices, positions, normals, colors, helperLines, bound } = createMesh(points, style)
+  constructor({ gl, points, style }) {
+    const { indices, positions, normals, colors, helperLines, bound } = createMesh(gl, points, style)
     // console.log(indices, positions, normals, colors, helperLines, bound)
 
     super({

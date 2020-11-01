@@ -16,10 +16,9 @@ import { HelperLine } from './HelperLine.js'
 export default class ShaperCreator {
   constructor(params) {
     const { canvas, showSvg, type, shape, style, showNormal = false } = params
-    const points = shapeSolver({ type, shape })
+    this.points = shapeSolver({ type, shape })
+    this.style = style
 
-    this.canvas = canvas
-    this.geometry = new PathGeometry({ points, style })
     this.showNormal = showNormal // 是否显示几何图形的法线
     if (showSvg) console.log(polygonToSvgString(points))
 
@@ -49,8 +48,8 @@ export default class ShaperCreator {
     })
 
     this.gl = gl
-    gl.viewport(0, 0, 400, 400)
     this.canvas = canvas
+    this.geometry = new PathGeometry({ gl, points: this.points, style: this.style })
     this.initPipe(gl)
     return {}
   }

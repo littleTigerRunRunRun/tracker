@@ -3,8 +3,8 @@
     <svg version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid meet" class="block" viewBox="0 0 200 200">
       <defs>
         <linearGradient id="linear_gradient_1" x1="0.5" y1="0" x2="0.5" y2="1">
-          <stop offset="20%" stop-color="#f00" stop-opacity="0.8" />
-          <stop offset="80%" stop-color="#000" stop-opacity="0" />
+          <stop offset="00%" stop-color="#f00" stop-opacity="1" />
+          <stop offset="100%" stop-color="#fff" stop-opacity="1" />
         </linearGradient>
       </defs>
       <path
@@ -15,6 +15,8 @@
       />
     </svg>
     <canvas ref="c0" class="block" width="200" height="200" />
+    <canvas ref="c01" class="block" width="200" height="200" />
+    <canvas ref="c02" class="block" width="200" height="200" />
     <svg version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid meet" class="block" viewBox="0 0 200 200">
       <path
         d="M156.5685424949238,43.431457505076196 L156.5685424949238,156.5685424949238 L43.4314575050762,156.5685424949238 L43.43145750507618,43.43145750507621 Z"
@@ -74,6 +76,59 @@ export default {
         fill: new ColorDescriber([
           {
             type: 'linear',
+            interpolate: 1,
+            direction: 180,
+            limited: false, // 有限的，也就是说不往周边扩展
+            stops: [
+              { color: 'rgba(255, 0, 0, 0.8)', offset: 0.2 },
+              { colro: 'rgba(255, 255, 255, 1)', offset: 1 }
+            ]
+          }
+        ]),
+        stroke: 'rgba(0, 60, 120, 0.8)',
+        strokeWidth: 8
+      }
+    })
+
+    this.sc01 = new ShapeCreator({
+      canvas: this.$refs.c01,
+      type: 'regularPolygon',
+      shape: {
+        side: 3,
+        radius: 80,
+        center: [100, 100]
+      },
+      style: {
+        fill: new ColorDescriber([
+          {
+            type: 'linear',
+            interpolate: 0,
+            direction: 180,
+            limited: false, // 有限的，也就是说不往周边扩展
+            stops: [
+              { color: 'rgba(255, 0, 0, 0.8)', offset: 0.2 },
+              { colro: 'rgba(255, 255, 255, 1)', offset: 1 }
+            ]
+          }
+        ]),
+        stroke: 'rgba(0, 60, 120, 0.8)',
+        strokeWidth: 8
+      }
+    })
+
+    this.sc02 = new ShapeCreator({
+      canvas: this.$refs.c02,
+      type: 'regularPolygon',
+      shape: {
+        side: 3,
+        radius: 80,
+        center: [100, 100]
+      },
+      style: {
+        fill: new ColorDescriber([
+          {
+            type: 'linear',
+            interpolate: 2,
             direction: 180,
             limited: false, // 有限的，也就是说不往周边扩展
             stops: [

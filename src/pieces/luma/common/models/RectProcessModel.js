@@ -1,7 +1,8 @@
 import { Model, Buffer, PlaneGeometry } from '@luma.gl/engine'
+import { constantValue } from '@/pieces/luma/common/modules/constant'
 
 export class RectProcessModel extends Model {
-  constructor(gl, { fs, modules = [], defines = {}, is2 = false }) {
+  constructor(gl, { fs, modules = [], defines = {}, uniforms = {}, is2 = false }) {
     super(gl, {
       vs: is2 ? `#version 300 es
         layout (location = 0) in vec3 positions;
@@ -28,10 +29,10 @@ export class RectProcessModel extends Model {
       `,
       fs,
       defines,
-      uniforms: {
+      uniforms: Object.assign({
         u_resolution: [1, 1]
-      },
-      modules,
+      }, uniforms),
+      modules: [constantValue].concat(modules),
       geometry: new PlaneGeometry({ xlen: 2, ylen: 2 })
     })
   }
