@@ -4,19 +4,21 @@
       <defs>
         <linearGradient id="linear_gradient_1" x1="0.5" y1="0" x2="0.5" y2="1">
           <stop offset="00%" stop-color="#f00" stop-opacity="1" />
-          <stop offset="100%" stop-color="#fff" stop-opacity="1" />
+          <stop offset="100%" stop-color="#00f" stop-opacity="1" />
+        </linearGradient>
+        <linearGradient id="linear_gradient_2" x1="0" y1="0.5" x2="1" y2="0.5">
+          <stop offset="00%" stop-color="#f00" stop-opacity="1" />
+          <stop offset="100%" stop-color="#00f" stop-opacity="1" />
         </linearGradient>
       </defs>
       <path
         d="M100,20 L169.2820323027551,140 L30.717967697244916,140.00000000000003 Z"
         fill="url('#linear_gradient_1')"
-        stroke="rgba(0, 60, 120, 0.8)"
+        stroke="url('#linear_gradient_2')"
         stroke-width="8"
       />
     </svg>
-    <canvas ref="c0" class="block" width="200" height="200" />
-    <canvas ref="c01" class="block" width="200" height="200" />
-    <canvas ref="c02" class="block" width="200" height="200" />
+    <canvas ref="c0" class="block" style="height: 200px;" width="200" height="200" />
     <svg version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid meet" class="block" viewBox="0 0 200 200">
       <path
         d="M156.5685424949238,43.431457505076196 L156.5685424949238,156.5685424949238 L43.4314575050762,156.5685424949238 L43.43145750507618,43.43145750507621 Z"
@@ -76,117 +78,90 @@ export default {
         fill: new ColorDescriber([
           {
             type: 'linear',
-            interpolate: 1,
-            direction: 180,
-            limited: false, // 有限的，也就是说不往周边扩展
-            stops: [
-              { color: 'rgba(255, 0, 0, 0.8)', offset: 0.2 },
-              { colro: 'rgba(255, 255, 255, 1)', offset: 1 }
-            ]
+            limited: false,
+            start: { point: [69, 0], color: [1, 0, 0, 1] },
+            end: { point: [69, 120], color: [0, 0, 1, 1] }
           }
-        ]),
-        stroke: 'rgba(0, 60, 120, 0.8)',
-        strokeWidth: 8
-      }
-    })
-
-    this.sc01 = new ShapeCreator({
-      canvas: this.$refs.c01,
-      type: 'regularPolygon',
-      shape: {
-        side: 3,
-        radius: 80,
-        center: [100, 100]
-      },
-      style: {
-        fill: new ColorDescriber([
+          // {
+          //   type: 'radius',
+          //   limited: false,
+          //   center: [100, 100], // center point
+          //   inner: { color: [0.15, 0.5, 0.85, 0.1], radius: 0 }, // 内圈
+          //   outer: { color: [0.92, 0.4, 0.1, 0.1], radius: 80 } // 外圈
+          // },
+          // {
+          //   type: 'linear',
+          //   limited: false,
+          //   start: { point: [120, 80], color: [0.15, 0.5, 0.85, 0.6] },
+          //   end: { point: [0, 160], color: [0.92, 0.4, 0.1, 0.5] }
+          // },
+          // {
+          //   type: 'conic',
+          //   limited: false,
+          //   center: [100, 100],
+          //   start: { angle: 0, color: [0.15, 0.5, 0.85, 0.6] },
+          //   end: { angle: 6.28, color: [0.92, 0.4, 0.1, 0.5] }
+          // }
+        ], {
+          linearInterpolate: 1
+        }),
+        stroke: new ColorDescriber([
           {
             type: 'linear',
-            interpolate: 0,
-            direction: 180,
-            limited: false, // 有限的，也就是说不往周边扩展
-            stops: [
-              { color: 'rgba(255, 0, 0, 0.8)', offset: 0.2 },
-              { colro: 'rgba(255, 255, 255, 1)', offset: 1 }
-            ]
+            limited: false,
+            start: { point: [0, 60], color: [1, 0, 0, 1] },
+            end: { point: [138.5, 60], color: [0, 0, 1, 1] }
           }
         ]),
-        stroke: 'rgba(0, 60, 120, 0.8)',
         strokeWidth: 8
       }
     })
 
-    this.sc02 = new ShapeCreator({
-      canvas: this.$refs.c02,
-      type: 'regularPolygon',
-      shape: {
-        side: 3,
-        radius: 80,
-        center: [100, 100]
-      },
-      style: {
-        fill: new ColorDescriber([
-          {
-            type: 'linear',
-            interpolate: 2,
-            direction: 180,
-            limited: false, // 有限的，也就是说不往周边扩展
-            stops: [
-              { color: 'rgba(255, 0, 0, 0.8)', offset: 0.2 },
-              { colro: 'rgba(255, 255, 255, 1)', offset: 1 }
-            ]
-          }
-        ]),
-        stroke: 'rgba(0, 60, 120, 0.8)',
-        strokeWidth: 8
-      }
-    })
+    // this.sc1 = new ShapeCreator({
+    //   canvas: this.$refs.c1,
+    //   type: 'regularPolygon',
+    //   shape: {
+    //     side: 4,
+    //     radius: 80,
+    //     center: [100, 100],
+    //     start: Math.PI / 4
+    //   },
+    //   style: {
+    //     fill: new ColorDescriber([], { base: 'rgba(255, 0, 0, 0.2)' }),
+    //     stroke: 'rgba(0, 60, 120, 0.8)',
+    //     strokeWidth: 8
+    //   }
+    // })
 
-    this.sc1 = new ShapeCreator({
-      canvas: this.$refs.c1,
-      type: 'regularPolygon',
-      shape: {
-        side: 4,
-        radius: 80,
-        center: [100, 100],
-        start: Math.PI / 4
-      },
-      style: {
-        fill: 'rgba(255, 0, 0, 0.2)',
-        stroke: 'rgba(0, 60, 120, 0.8)',
-        strokeWidth: 8
-      }
-    })
+    // this.sc2 = new ShapeCreator({
+    //   canvas: this.$refs.c2,
+    //   type: 'regularPolygon',
+    //   shape: {
+    //     side: 5,
+    //     radius: 80,
+    //     center: [100, 100]
+    //   },
+    //   style: {
+    //     fill: new ColorDescriber([], { base: 'rgba(40, 80, 255, 0.5)' }),
+    //     stroke: 'rgba(255, 0, 0, 1)',
+    //     strokeWidth: 2
+    //   }
+    // })
 
-    this.sc2 = new ShapeCreator({
-      canvas: this.$refs.c2,
-      type: 'regularPolygon',
-      shape: {
-        side: 5,
-        radius: 80,
-        center: [100, 100]
-      },
-      style: {
-        fill: 'rgba(40, 80, 255, 0.5)',
-        stroke: 'rgba(255, 0, 0, 1)',
-        strokeWidth: 2
-      }
-    })
-
-    this.sc3 = new ShapeCreator({
-      canvas: this.$refs.c3,
-      type: 'circle',
-      // showSvg: true,
-      shape: {
-        accuracy: 4, // 曲线细分程度
-        radius: 55,
-        center: [100, 100]
-      },
-      style: {
-        stroke: '#000',
-        strokeWidth: 1
-      }
-    })
+    // this.sc3 = new ShapeCreator({
+    //   canvas: this.$refs.c3,
+    //   type: 'circle',
+    //   // showSvg: true,
+    //   shape: {
+    //     accuracy: 4, // 曲线细分程度
+    //     radius: 55,
+    //     center: [100, 100]
+    //   },
+    //   style: {
+    //     stroke: '#000',
+    //     strokeWidth: 1
+    //   }
+    // })
   },
   beforeDestroy() {
     if (this.sc1) {

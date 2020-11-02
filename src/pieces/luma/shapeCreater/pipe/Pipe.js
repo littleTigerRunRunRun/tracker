@@ -45,7 +45,7 @@ export class Pipe {
 
   // 运行
   render({ time }) {
-    this.assetsReady = false
+    // this.assetsReady = false
     if (this.needUpdate && this.assetsReady) {
       if (!this.autoUpdate) this.needUpdate = false
       for (const stage of this.stages) {

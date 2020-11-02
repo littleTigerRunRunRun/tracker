@@ -44,6 +44,7 @@ export default class ShaperCreator {
 
   onInitialize = ({ gl, canvas }) => {
     setParameters(gl, {
+      // blend: true,
       blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE]
     })
 
@@ -60,40 +61,48 @@ export default class ShaperCreator {
 
   // 初始化本例需要使用的逻辑管道
   initPipe() {
-    const { buffer, blit } = createHandyBuffer(this.gl, 8)
+    // const { buffer, blit } = createHandyBuffer(this.gl, 8)
     this.geometryPass = new Pass({
       pointers: {
-        geometry: this.geometry,
-        blit
+        geometry: this.geometry
+        // blit
       },
       onInitialize: ({ gl, geometry }) => {
         const helper = new HelperLine(gl, { lines: geometry.helperLines }) //
+        // console.log(geometry.textures[0])
 
         const shapeModel = new Model(gl, {
           uniforms: {
-            u_resolution: [100, 100]
+            u_resolution: [100, 100],
+            'u_colorTextures[0]': geometry.textures[0]
+          },
+          defines: {
           },
           vs: `#version 300 es
             layout (location = 0) in vec2 positions;
-            layout (location = 1) in vec4 color;
+            layout (location = 1) in vec3 texture;
     
             uniform vec2 u_resolution;
 
-            out vec4 v_color;
+            out vec3 v_texture;
     
             void main() {
-              v_color = color;
+              v_texture = texture;
               gl_Position = vec4(positions / u_resolution * f2 * -1.0 + vec2(f1), f0, f1);
             }
           `,
           fs: `#version 300 es
     
-            in vec4 v_color;
+            uniform sampler2D u_colorTextures[2];
+
+            in vec3 v_texture;
 
             layout (location = 0) out vec4 colorValue;
     
             void main() {
-              colorValue = v_color;
+              if (v_texture.x == f0) {
+                colorValue = texture2D(u_colorTextures[0], vec2(v_texture.y, f1 - v_texture.z));
+              }
             }
           `,
           modules: [constantValue],
@@ -107,82 +116,27 @@ export default class ShaperCreator {
           blend: true
         })
         shapeModel.uniforms.u_resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight]
-        shapeModel.draw({ framebuffer: target })
+        shapeModel.draw()
+        // shapeModel.draw({ framebuffer: target })
 
         if (this.showNormal) {
           helper.uniforms.u_resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight]
-          helper.draw({ framebuffer: target })
+          helper.draw()
+          // helper.draw({ framebuffer: target })
         }
       },
       onDestroy: ({ shapeModel }) => {
         shapeModel.delete()
       },
-      onOutput: ({ blit }) => {
-        const color = blit({ attachment: GL.COLOR_ATTACHMENT0 })
+      // onOutput: ({ blit }) => {
+      //   const color = blit({ attachment: GL.COLOR_ATTACHMENT0 })
 
-        return {
-          t_geo: color
-        }
-      },
+      //   return {
+      //     t_geo: color
+      //   }
+      // },
       clear: { color: [1, 1, 1, 1] },
-      target: buffer
-    })
-
-    this.blurPass = new ShaderPass({
-      fs: `#version 300 es
-      
-        uniform sampler2D t_geo;
-        uniform vec2 u_resolution;
-
-        in vec2 v_uv;
-
-        out vec4 fragColor;
-
-        const float inverse_sqrt_2p = 0.39894228;
-        const float sigma = 2.0;
-        const int kernelRadius = 2;
-
-        // 生成一个x位置的一维正态分布值
-        float oneDimensionalGaussian (in float x) {
-          return inverse_sqrt_2p / sigma * exp((-x * x) / (f2 * sigma * sigma));
-        }
-
-        vec4 gaussianBlur(sampler2D tImage, vec2 uv) {
-          vec2 direction = vec2(0.0, 1.0);
-          vec2 unitSize = f1 / u_resolution;
-          float weightSum = oneDimensionalGaussian(f0);
-          vec3 diffuseSum = texture2D(tImage, uv).rgb * weightSum;
-    
-          // 这里其实是从-(kernelRadius - 1) kernelRadius - 1
-          for (int i = 1; i < kernelRadius; i++ ) {
-            float x = float(i);
-            float w = oneDimensionalGaussian(x);
-            vec2 offset = direction * x * unitSize;
-            vec3 sampler1 = texture2D(tImage, uv + offset).rgb;
-            vec3 sampler2 = texture2D(tImage, uv - offset).rgb;
-            diffuseSum += (sampler1 + sampler2) * w;
-            weightSum += w * f2;
-          }
-    
-          return vec4(diffuseSum / weightSum, 1.0);
-        }
-
-        void main() {
-          // fragColor = fxaa_sampleColor(t_geo, u_resolution, v_uv);
-          fragColor = texture2D(t_geo, v_uv); // gaussianBlur(t_geo, v_uv);
-        }
-      `,
-      render({ gl, time, extraUniforms, model }) {
-        setParameters(gl, {
-          blend: false
-        })
-        // const fragment = model.program.fs.handle
-        // console.log(gl.getShaderSource(fragment))
-
-        model.uniforms.u_resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight]
-        model.draw()
-      },
-      target: null
+      target: null // buffer
     })
 
     this.pipe = new Pipe({
@@ -193,10 +147,7 @@ export default class ShaperCreator {
       // },
       stages: [
         [
-          { pass: this.geometryPass, output: ['t_geo'] }
-        ],
-        [
-          { pass: this.blurPass, input: ['t_geo'] }
+          { pass: this.geometryPass }
         ]
       ]
     })

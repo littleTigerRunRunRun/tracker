@@ -4,7 +4,7 @@ import Color from '@/lib/color.js'
 import { ColorDescriber } from '../ColorDescriber'
 
 // 产生本体的三角形属性
-function splitTriangle({ gl, positions, indices, normals, colors, bound, style, points, helperLines }) {
+function splitTriangle({ gl, positions, indices, normals, colors, bound, style, points, helperLines, textures }) {
   const ps = points.map((item, index) => {
     positions.push(...item)
 
@@ -37,18 +37,15 @@ function splitTriangle({ gl, positions, indices, normals, colors, bound, style, 
 
   // drop color
   if (style.fill instanceof ColorDescriber) {
-    console.log(bound, positions)
+    // console.log(bound, positions)
     for (let i = 0; i < positions.length; i += 2) {
       // 我们约定了fill的textureIndex为0
       colors.push(...[0, (positions[i] - bound.x) / bound.width, (positions[i + 1] - bound.y) / bound.height])
     }
     // 手动处理一下线性渐变
-    style.fill.render(gl)
+    textures[0] = style.fill.render(gl, bound)
   } else {
-    const fill = new Color(style.fill || 'rgba(0, 0, 0, 0)').normalize4
-    ps.map(() => {
-      colors.push(...fill)
-    })
+    colors.push(...[0, 0])
   }
 
   for (let i = 0; ps.length > 2; i++) {
@@ -78,9 +75,8 @@ function splitTriangle({ gl, positions, indices, normals, colors, bound, style, 
 // 产生本体描边的三角形属性
 function splitStroke({ gl, positions, indices, normals, colors, bound, style, points, helperLines }) {
   // stroke 部分
-  const { stroke = 'rgba(0, 0, 0, 0)', strokeWidth = 1 } = style
-  const strokeNormal = new Color(stroke).normalize4
-  if (stroke && strokeNormal[3] > 0 && strokeWidth) {
+  const { stroke, strokeWidth = 1 } = style
+  if (stroke && strokeWidth) {
     // 测试一下法向量的正确性
     const strokePositions = []
     const strokeIndices = []
@@ -96,6 +92,15 @@ function splitStroke({ gl, positions, indices, normals, colors, bound, style, po
       strokePositions.push(point[0] + normal[0] * length, point[1] + normal[1] * length)
       strokeColors.push(...strokeNormal)
       strokeColors.push(...strokeNormal)
+
+      bound.maxx = Math.max(bound.maxx, point[0])
+      bound.minx = Math.min(bound.minx, point[0])
+      bound.maxy = Math.max(bound.maxy, point[1])
+      bound.miny = Math.min(bound.miny, point[1])
+      bound.maxx = Math.max(bound.maxx, point[0] + normal[0] * length)
+      bound.minx = Math.min(bound.minx, point[0] + normal[0] * length)
+      bound.maxy = Math.max(bound.maxy, point[1] + normal[1] * length)
+      bound.miny = Math.min(bound.miny, point[1] + normal[1] * length)
     })
     const length = points.length * 2
     for (let i = 0; i < length; i++) {
@@ -108,8 +113,18 @@ function splitStroke({ gl, positions, indices, normals, colors, bound, style, po
       strokeIndices.push(...[i2, i4, i3])
     }
 
+    if (stroke instanceof ColorDescriber) {
+      // console.log(bound, positions)
+      for (let i = 0; i < strokePositions.length; i += 2) {
+        // 我们约定了fill的textureIndex为0
+        colors.push(...[0, (strokePositions[i] - bound.x) / bound.width, (strokePositions[i + 1] - bound.y) / bound.height])
+      }
+      // 手动处理一下线性渐变
+      textures[0] = style.fill.render(gl, bound)
+    } else {
+      colors.push(...[0, 0])
+    }
     positions.push(...strokePositions)
-    colors.push(...strokeColors)
     indices.push(...strokeIndices)
   }
 }
@@ -129,10 +144,11 @@ function createMesh(gl, points, style = {}) {
     maxx: -10000,
     maxy: -10000
   }
+  const textures = []
   const helperLines = []
 
-  splitTriangle({ gl, positions, indices, normals, colors, bound, style, points, helperLines })
-  splitStroke({ gl, positions, indices, normals, colors, bound, style, points, helperLines })
+  splitTriangle({ gl, positions, indices, normals, colors, bound, style, points, helperLines, textures })
+  splitStroke({ gl, positions, indices, normals, colors, bound, style, points, helperLines, textures })
 
   return {
     indices,
@@ -140,25 +156,27 @@ function createMesh(gl, points, style = {}) {
     normals,
     colors,
     helperLines,
-    bound
+    bound,
+    textures
   }
 }
 
 export class PathGeometry extends Geometry {
   constructor({ gl, points, style }) {
-    const { indices, positions, normals, colors, helperLines, bound } = createMesh(gl, points, style)
-    // console.log(indices, positions, normals, colors, helperLines, bound)
+    const { indices, positions, normals, colors, helperLines, bound, textures } = createMesh(gl, points, style)
+    // console.log(colors, positions)
 
     super({
       indices: { size: 1, value: new Uint16Array(indices) },
       attributes: {
         POSITION: { size: 2, value: new Float32Array(positions) },
         NORMAL: { size: 3, value: new Float32Array(normals) },
-        color: { size: 4, value: new Float32Array(colors) }
+        texture: { size: 3, value: new Float32Array(colors) }
       }
     })
 
     this.helperLines = helperLines
     this.bound = bound
+    this.textures = textures
   }
 }
