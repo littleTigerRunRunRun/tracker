@@ -106,32 +106,46 @@ export default {
           linearInterpolate: 1
         }),
         stroke: new ColorDescriber([
+          // {
+          //   type: 'linear',
+          //   limited: false,
+          //   start: { point: [34, 30], color: [1, 0, 0, 1] },
+          //   end: { point: [138.5, 60], color: [0, 0, 1, 1] }
+          // }
           {
-            type: 'linear',
-            limited: false,
-            start: { point: [0, 60], color: [1, 0, 0, 1] },
-            end: { point: [138.5, 60], color: [0, 0, 1, 1] }
+            type: 'conic',
+            limited: true,
+            center: [69, 60],
+            start: { angle: 0, color: [1, 0, 0, 1] },
+            end: { angle: 4.19, color: [0, 0, 1, 1] }
+          },
+          {
+            type: 'conic',
+            limited: true,
+            center: [69, 60],
+            start: { angle: 4.19, color: [0, 0, 1, 1] },
+            end: { angle: 6.28, color: [1, 0, 0, 1] }
           }
         ]),
         strokeWidth: 8
       }
     })
 
-    // this.sc1 = new ShapeCreator({
-    //   canvas: this.$refs.c1,
-    //   type: 'regularPolygon',
-    //   shape: {
-    //     side: 4,
-    //     radius: 80,
-    //     center: [100, 100],
-    //     start: Math.PI / 4
-    //   },
-    //   style: {
-    //     fill: new ColorDescriber([], { base: 'rgba(255, 0, 0, 0.2)' }),
-    //     stroke: 'rgba(0, 60, 120, 0.8)',
-    //     strokeWidth: 8
-    //   }
-    // })
+    this.sc1 = new ShapeCreator({
+      canvas: this.$refs.c1,
+      type: 'regularPolygon',
+      shape: {
+        side: 4,
+        radius: 80,
+        center: [100, 100],
+        start: Math.PI / 4
+      },
+      style: {
+        fill: new ColorDescriber([], { base: [1, 0, 0, 0.2] }),
+        stroke: new ColorDescriber([], { base: [0.15, 0.5, 0.85, 0.6] }),
+        strokeWidth: 4
+      }
+    })
 
     // this.sc2 = new ShapeCreator({
     //   canvas: this.$refs.c2,

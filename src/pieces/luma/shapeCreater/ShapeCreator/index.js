@@ -13,6 +13,11 @@ import { PathGeometry } from './PathGeometry.js'
 import { shapeSolver, polygonToSvgString } from './shapeSolver'
 import { HelperLine } from './HelperLine.js'
 
+// let publicLoop
+// function initLoop() {
+
+// }
+
 export default class ShaperCreator {
   constructor(params) {
     const { canvas, showSvg, type, shape, style, showNormal = false } = params
@@ -74,7 +79,8 @@ export default class ShaperCreator {
         const shapeModel = new Model(gl, {
           uniforms: {
             u_resolution: [100, 100],
-            'u_colorTextures[0]': geometry.textures[0]
+            'u_colorTextures[0]': geometry.textures[0],
+            'u_colorTextures[1]': geometry.textures[1]
           },
           defines: {
           },
@@ -101,7 +107,9 @@ export default class ShaperCreator {
     
             void main() {
               if (v_texture.x == f0) {
-                colorValue = texture2D(u_colorTextures[0], vec2(v_texture.y, f1 - v_texture.z));
+                colorValue = texture2D(u_colorTextures[0], vec2(f1) - v_texture.yz);
+              } else {
+                colorValue = texture2D(u_colorTextures[1], vec2(f1) - v_texture.yz);
               }
             }
           `,

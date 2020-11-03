@@ -14,7 +14,8 @@ export class ColorDescriber {
     this.compileLayers()
     this.params = Object.assign({
       linearInterpolate: 1,
-      radiusInterpolate: 0
+      radiusInterpolate: 0,
+      base: [0, 0, 0, 0]
     }, params)
   }
 
@@ -67,9 +68,9 @@ export class ColorDescriber {
   }
 
   render(gl, { x, y, width, height }) {
-    if (!this.buffer) this.buffer = createColorBuffer(gl, { width, height })
+    const buffer = createColorBuffer(gl, { width, height })
 
-    this.model = new RectProcessModel(gl, {
+    const model = new RectProcessModel(gl, {
       is2: true,
       fs: `#version 300 es
         in vec2 v_uv;
@@ -100,6 +101,7 @@ export class ColorDescriber {
           float limited;
         };
 
+        uniform vec4 u_baseColor;
         uniform vec2 u_resolution;
         #if (LINEAR_USE == 1) // 具备线性渐变
           uniform LinearGradient[${this.linearIndex}] ${LINEAR_UNIFORMS_NAME};
@@ -125,7 +127,7 @@ export class ColorDescriber {
         
         void main() {
           vec2 uv = vec2(v_uv.x, f1 - v_uv.y);
-          fragColor = vec4(f0);
+          fragColor = u_baseColor;
 
           #if (LINEAR_USE == 1) // 具备线性渐变
             for (int i = i0; i < ${this.linearIndex}; i += i1) {
@@ -199,18 +201,20 @@ export class ColorDescriber {
         RADIUS_USE: this.radiusIndex > 0 ? 1 : 0,
         CONIC_USE: this.conicIndex > 0 ? 1 : 0 // 圆锥渐变不提供插值变化
       },
-      uniforms: Object.assign({}, this.linearGradientsUniforms, this.radiusGradientsUniforms, this.conicGradientsUniforms)
+      uniforms: Object.assign({
+        u_baseColor: this.params.base
+      }, this.linearGradientsUniforms, this.radiusGradientsUniforms, this.conicGradientsUniforms)
     })
 
-    clear(gl, { color: [0, 0, 0, 0], depth: false, stencil: false, framebuffer: this.buffer })
+    clear(gl, { color: [0, 0, 0, 0], depth: false, stencil: false, framebuffer: buffer })
     gl.viewport(0, 0, width, height)
-    // clear(gl, { color: [0, 0, 0, 0], depth: false, stencil: false })
-    this.model.uniforms.u_resolution = [width, height]
-    this.model.draw({ framebuffer: this.buffer })
-    // this.model.draw()
+    model.uniforms.u_resolution = [width, height]
+    model.draw({ framebuffer: buffer })
+    const result = buffer.color
 
-    console.log(x, y, width, height)
+    model.delete()
+    buffer.delete()
 
-    return this.buffer.color
+    return result
   }
 }

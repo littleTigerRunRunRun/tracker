@@ -29,7 +29,7 @@ export class Pass {
   render({ gl, extraUniforms, time }) {
     const { depth = true, stencil = false, color = [0, 0, 0, 0] } = this.clear
     clear(gl, { color, depth, stencil, framebuffer: this.target })
-    console.log('clear')
+    // console.log('clear')
 
     this.onRender(Object.assign({ extraUniforms, gl, time, target: this.target }, this.initThings, this.pointers))
 

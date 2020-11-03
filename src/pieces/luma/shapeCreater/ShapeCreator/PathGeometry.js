@@ -73,7 +73,7 @@ function splitTriangle({ gl, positions, indices, normals, colors, bound, style, 
 }
 
 // 产生本体描边的三角形属性
-function splitStroke({ gl, positions, indices, normals, colors, bound, style, points, helperLines }) {
+function splitStroke({ gl, positions, indices, normals, colors, bound, style, points, helperLines, textures }) {
   // stroke 部分
   const { stroke, strokeWidth = 1 } = style
   if (stroke && strokeWidth) {
@@ -90,8 +90,6 @@ function splitStroke({ gl, positions, indices, normals, colors, bound, style, po
       // console.log(length)
       strokePositions.push(point[0], point[1])
       strokePositions.push(point[0] + normal[0] * length, point[1] + normal[1] * length)
-      strokeColors.push(...strokeNormal)
-      strokeColors.push(...strokeNormal)
 
       bound.maxx = Math.max(bound.maxx, point[0])
       bound.minx = Math.min(bound.minx, point[0])
@@ -102,6 +100,7 @@ function splitStroke({ gl, positions, indices, normals, colors, bound, style, po
       bound.maxy = Math.max(bound.maxy, point[1] + normal[1] * length)
       bound.miny = Math.min(bound.miny, point[1] + normal[1] * length)
     })
+
     const length = points.length * 2
     for (let i = 0; i < length; i++) {
       if (Math.floor(i / 2) !== i / 2) continue
@@ -117,13 +116,15 @@ function splitStroke({ gl, positions, indices, normals, colors, bound, style, po
       // console.log(bound, positions)
       for (let i = 0; i < strokePositions.length; i += 2) {
         // 我们约定了fill的textureIndex为0
-        colors.push(...[0, (strokePositions[i] - bound.x) / bound.width, (strokePositions[i + 1] - bound.y) / bound.height])
+        colors.push(...[1, (strokePositions[i] - bound.x) / bound.width, (strokePositions[i + 1] - bound.y) / bound.height])
       }
       // 手动处理一下线性渐变
-      textures[0] = style.fill.render(gl, bound)
+      textures[1] = style.stroke.render(gl, bound)
     } else {
-      colors.push(...[0, 0])
+      strokeColors.push(...[0, 0])
     }
+
+    colors.push(...strokeColors)
     positions.push(...strokePositions)
     indices.push(...strokeIndices)
   }
@@ -178,5 +179,14 @@ export class PathGeometry extends Geometry {
     this.helperLines = helperLines
     this.bound = bound
     this.textures = textures
+    console.log(textures)
+  }
+
+  delete() {
+    for (const texture of this.textures) texture.delete()
+    this.textures.splice(0, this.textures.length)
+    this.textures = []
+
+    if (super.delete) super.delete()
   }
 }
