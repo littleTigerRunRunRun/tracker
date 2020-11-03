@@ -5,11 +5,11 @@ import { Texture2D, loadImage } from '@luma.gl/webgl'
   可以将pipeline作为一个pass来看待，然后用pass组成一个应用层面上的管道，这里为了和Pipeline区分，命名为pipe
   */
 export class Pipe {
-  constructor({ gl, stages, textures, autoUpdate }) {
+  constructor({ gl, stages, textures, autoUpdate = false }) {
     this.stages = stages
     this.gl = gl
     this.autoUpdate = autoUpdate
-    this.needUpdate = true
+    this.needUpdate = this.autoUpdate
     this.init()
     this.createTextures(textures)
   }
@@ -45,7 +45,6 @@ export class Pipe {
 
   // 运行
   render({ time }) {
-    // this.assetsReady = false
     if (this.needUpdate && this.assetsReady) {
       if (!this.autoUpdate) this.needUpdate = false
       for (const stage of this.stages) {
@@ -56,8 +55,8 @@ export class Pipe {
               extraUniforms[name] = this.pools[name]
             }
           }
-          pass.pass.render({ gl: this.gl, extraUniforms, time })
-          if (pass.output) Object.assign(this.pools, pass.pass.output)
+          pass.pass.render(Object.assign({}, this.pools, { gl: this.gl, extraUniforms, time }))
+          if (pass.output) Object.assign({}, this.pools, pass.pass.output)
         }
       }
     }

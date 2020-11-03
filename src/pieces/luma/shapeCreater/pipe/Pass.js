@@ -26,14 +26,15 @@ export class Pass {
     this.initThings = this.onInitialize(Object.assign({ gl }, this.pointers))
   }
 
-  render({ gl, extraUniforms, time }) {
+  render(params) {
+    const { gl } = params
     const { depth = true, stencil = false, color = [0, 0, 0, 0] } = this.clear
     clear(gl, { color, depth, stencil, framebuffer: this.target })
     // console.log('clear')
 
-    this.onRender(Object.assign({ extraUniforms, gl, time, target: this.target }, this.initThings, this.pointers))
+    this.onRender(Object.assign({ target: this.target }, params, this.initThings, this.pointers))
 
-    this.output = this.onOutput(Object.assign({ gl, target: this.target }, this.initThings, this.pointers)) || {}
+    this.output = this.onOutput(Object.assign({ target: this.target }, params, this.initThings, this.pointers)) || {}
   }
 
   destroy() {

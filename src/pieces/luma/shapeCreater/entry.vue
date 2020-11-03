@@ -79,8 +79,8 @@ export default {
           {
             type: 'linear',
             limited: false,
-            start: { point: [69, 0], color: [1, 0, 0, 1] },
-            end: { point: [69, 120], color: [0, 0, 1, 1] }
+            start: { point: [69, 120], color: [1, 0, 0, 1] },
+            end: { point: [69, 0], color: [0, 0, 1, 1] }
           }
           // {
           //   type: 'radius',
@@ -117,13 +117,13 @@ export default {
             limited: true,
             center: [69, 60],
             start: { angle: 0, color: [1, 0, 0, 1] },
-            end: { angle: 4.19, color: [0, 0, 1, 1] }
+            end: { angle: 3.14, color: [0, 0, 1, 1] }
           },
           {
             type: 'conic',
             limited: true,
             center: [69, 60],
-            start: { angle: 4.19, color: [0, 0, 1, 1] },
+            start: { angle: 3.14, color: [0, 0, 1, 1] },
             end: { angle: 6.28, color: [1, 0, 0, 1] }
           }
         ]),
