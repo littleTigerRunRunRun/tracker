@@ -179,7 +179,7 @@ export class PathGeometry extends Geometry {
     this.helperLines = helperLines
     this.bound = bound
     this.textures = textures
-    console.log(textures)
+    // console.log(textures)
   }
 
   delete() {

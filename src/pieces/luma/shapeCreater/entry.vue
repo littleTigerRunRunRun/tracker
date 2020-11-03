@@ -131,21 +131,21 @@ export default {
       }
     })
 
-    this.sc1 = new ShapeCreator({
-      canvas: this.$refs.c1,
-      type: 'regularPolygon',
-      shape: {
-        side: 4,
-        radius: 80,
-        center: [100, 100],
-        start: Math.PI / 4
-      },
-      style: {
-        fill: new ColorDescriber([], { base: [1, 0, 0, 0.2] }),
-        stroke: new ColorDescriber([], { base: [0.15, 0.5, 0.85, 0.6] }),
-        strokeWidth: 4
-      }
-    })
+    // this.sc1 = new ShapeCreator({
+    //   canvas: this.$refs.c1,
+    //   type: 'regularPolygon',
+    //   shape: {
+    //     side: 4,
+    //     radius: 80,
+    //     center: [100, 100],
+    //     start: Math.PI / 4
+    //   },
+    //   style: {
+    //     fill: new ColorDescriber([], { base: [1, 0, 0, 0.2] }),
+    //     stroke: new ColorDescriber([], { base: [0.15, 0.5, 0.85, 0.6] }),
+    //     strokeWidth: 4
+    //   }
+    // })
 
     // this.sc2 = new ShapeCreator({
     //   canvas: this.$refs.c2,

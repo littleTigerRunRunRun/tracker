@@ -1,5 +1,7 @@
 import { Pass } from '../pipe/index.js'
 import { constantValue } from '@/pieces/luma/common/modules/constant'
+import { Model } from '@luma.gl/engine'
+import { setParameters } from '@luma.gl/gltools'
 // import { HelperLine } from './HelperLine.js'
 
 export const GeometryPass = new Pass({
@@ -39,14 +41,16 @@ export const GeometryPass = new Pass({
 
     return { fs, vs, gl }
   },
-  onRender: ({ gl, vs, fs, geometry }) => {
+  onRender: ({ gl, vs, fs, geometry, geometrySize }) => {
     setParameters(gl, {
       blend: true
     })
 
+    console.log('render geometry')
+    gl.viewport(0, 0, geometrySize.width, geometrySize.height)
     const shapeModel = new Model(gl, {
       uniforms: {
-        u_resolution: [gl.drawingBufferWidth, gl.drawingBufferHeight],
+        u_resolution: [geometrySize.width, geometrySize.height],
         'u_colorTextures[0]': geometry.textures[0],
         'u_colorTextures[1]': geometry.textures[1]
       },
@@ -64,10 +68,12 @@ export const GeometryPass = new Pass({
     //   helper.draw()
     //   // helper.draw({ framebuffer: target })
     // }
+
+    return { shapeModel }
   },
-  // onDestroy: ({ shapeModel }) => {
-  //   shapeModel.delete()
-  // },
+  onClear: ({ shapeModel }) => {
+    shapeModel.delete()
+  },
   // onOutput: ({ blit }) => {
   //   const color = blit({ attachment: GL.COLOR_ATTACHMENT0 })
 
@@ -75,6 +81,6 @@ export const GeometryPass = new Pass({
   //     t_geo: color
   //   }
   // },
-  clear: { color: [1, 1, 1, 1] },
+  clearSettings: { color: [1, 1, 1, 1] },
   target: null // buffer
 })

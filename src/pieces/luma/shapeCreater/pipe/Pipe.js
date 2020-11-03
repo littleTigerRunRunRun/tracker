@@ -43,6 +43,11 @@ export class Pipe {
       })
   }
 
+  next(params) {
+    this.needUpdate = true
+    this.render(params)
+  }
+
   // 运行
   render({ time }) {
     if (this.needUpdate && this.assetsReady) {
@@ -58,6 +63,14 @@ export class Pipe {
           pass.pass.render(Object.assign({}, this.pools, { gl: this.gl, extraUniforms, time }))
           if (pass.output) Object.assign({}, this.pools, pass.pass.output)
         }
+      }
+    }
+  }
+
+  clear() {
+    for (const stage of this.stages) {
+      for (const pass of stage) {
+        pass.pass.clear(this.pools)
       }
     }
   }
