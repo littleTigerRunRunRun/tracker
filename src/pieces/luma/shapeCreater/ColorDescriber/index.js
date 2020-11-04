@@ -6,16 +6,45 @@ const LINEAR_UNIFORMS_NAME = 'u_linearGradients'
 const RADIUS_UNIFORMS_NAME = 'u_radiusGradients'
 const CONIC_UNIFORMS_NAME = 'u_conicGradients'
 
+function colorNormalize({ color, normalized = false }) {
+  if (normalized) return color
+  else {
+    return color.map((v, i) => {
+      if (i < 3) return v / 255
+      else return v
+    })
+  }
+}
+
+function pointRelative({ point, fixed }) {
+  if (fixed) return point
+  else {
+    return (width, height) => {
+      return [width * point[0], height * point[1]]
+    }
+  }
+}
+
+function radiusRelative({ radius, fixed }) {
+  if (fixed) return radius
+  else {
+    return (width, height) => {
+      return radius * Math.hypot(width, height)
+    }
+  }
+}
+
 // 对一个[width / height]的区域，提供着色方程和混合方式的参数，width / height来自
 export class ColorDescriber {
-  constructor(layers, params) {
+  constructor(layers, params = {}) {
     this.layers = layers
+
+    params.base = colorNormalize({ color: params.base || [0, 0, 0, 0] })
 
     this.compileLayers()
     this.params = Object.assign({
       linearInterpolate: 1,
-      radiusInterpolate: 0,
-      base: [0, 0, 0, 0]
+      radiusInterpolate: 0
     }, params)
   }
 
@@ -32,30 +61,30 @@ export class ColorDescriber {
     this.layers.map((layer) => {
       switch (layer.type) {
         case 'linear': {
-          this.linearGradientsUniforms[`${LINEAR_UNIFORMS_NAME}[${this.linearIndex}].startPoint`] = layer.start.point || [0, 0]
-          this.linearGradientsUniforms[`${LINEAR_UNIFORMS_NAME}[${this.linearIndex}].endPoint`] = layer.end.point || [1, 1]
-          this.linearGradientsUniforms[`${LINEAR_UNIFORMS_NAME}[${this.linearIndex}].startColor`] = layer.start.color || [0, 0, 0, 1]
-          this.linearGradientsUniforms[`${LINEAR_UNIFORMS_NAME}[${this.linearIndex}].endColor`] = layer.end.color || [1, 1, 1, 1]
+          this.linearGradientsUniforms[`${LINEAR_UNIFORMS_NAME}[${this.linearIndex}].startPoint`] = pointRelative(layer.start) || [0, 0]
+          this.linearGradientsUniforms[`${LINEAR_UNIFORMS_NAME}[${this.linearIndex}].endPoint`] = pointRelative(layer.end) || [1, 1]
+          this.linearGradientsUniforms[`${LINEAR_UNIFORMS_NAME}[${this.linearIndex}].startColor`] = colorNormalize(layer.start) || [0, 0, 0, 1]
+          this.linearGradientsUniforms[`${LINEAR_UNIFORMS_NAME}[${this.linearIndex}].endColor`] = colorNormalize(layer.end) || [1, 1, 1, 1]
           this.linearGradientsUniforms[`${LINEAR_UNIFORMS_NAME}[${this.linearIndex}].limited`] = layer.limited ? 1 : 0
           this.linearIndex++
           break
         }
         case 'radius': {
-          this.radiusGradientsUniforms[`${RADIUS_UNIFORMS_NAME}[${this.radiusIndex}].center`] = layer.center || [0.5, 0.5]
-          this.radiusGradientsUniforms[`${RADIUS_UNIFORMS_NAME}[${this.radiusIndex}].innerRadius`] = layer.inner.radius || 0
-          this.radiusGradientsUniforms[`${RADIUS_UNIFORMS_NAME}[${this.radiusIndex}].innerColor`] = layer.inner.color || [1, 1, 1, 1]
-          this.radiusGradientsUniforms[`${RADIUS_UNIFORMS_NAME}[${this.radiusIndex}].outerRadius`] = layer.outer.radius || 0.7072
-          this.radiusGradientsUniforms[`${RADIUS_UNIFORMS_NAME}[${this.radiusIndex}].outerColor`] = layer.outer.color || [0, 0, 0, 0]
+          this.radiusGradientsUniforms[`${RADIUS_UNIFORMS_NAME}[${this.radiusIndex}].center`] = pointRelative(layer.center) || [0.5, 0.5]
+          this.radiusGradientsUniforms[`${RADIUS_UNIFORMS_NAME}[${this.radiusIndex}].innerRadius`] = radiusRelative(layer.inner) || 0
+          this.radiusGradientsUniforms[`${RADIUS_UNIFORMS_NAME}[${this.radiusIndex}].innerColor`] = colorNormalize(layer.inner) || [1, 1, 1, 1]
+          this.radiusGradientsUniforms[`${RADIUS_UNIFORMS_NAME}[${this.radiusIndex}].outerRadius`] = radiusRelative(layer.outer) || 0.7072
+          this.radiusGradientsUniforms[`${RADIUS_UNIFORMS_NAME}[${this.radiusIndex}].outerColor`] = colorNormalize(layer.outer) || [0, 0, 0, 0]
           this.radiusGradientsUniforms[`${RADIUS_UNIFORMS_NAME}[${this.radiusIndex}].limited`] = layer.limited ? 1 : 0
           this.radiusIndex++
           break
         }
         case 'conic': {
-          this.conicGradientsUniforms[`${CONIC_UNIFORMS_NAME}[${this.conicIndex}].center`] = layer.center || [0.5, 0.5]
-          this.conicGradientsUniforms[`${CONIC_UNIFORMS_NAME}[${this.conicIndex}].startAngle`] = layer.start.angle || 0
-          this.conicGradientsUniforms[`${CONIC_UNIFORMS_NAME}[${this.conicIndex}].startColor`] = layer.start.color || [1, 1, 1, 1]
-          this.conicGradientsUniforms[`${CONIC_UNIFORMS_NAME}[${this.conicIndex}].endAngle`] = layer.end.angle || Math.PI * 2
-          this.conicGradientsUniforms[`${CONIC_UNIFORMS_NAME}[${this.conicIndex}].endColor`] = layer.end.color || [0, 0, 0, 0]
+          this.conicGradientsUniforms[`${CONIC_UNIFORMS_NAME}[${this.conicIndex}].center`] = pointRelative(layer.center) || [0.5, 0.5]
+          this.conicGradientsUniforms[`${CONIC_UNIFORMS_NAME}[${this.conicIndex}].startAngle`] = (layer.start.angle / 180 * Math.PI) || 0
+          this.conicGradientsUniforms[`${CONIC_UNIFORMS_NAME}[${this.conicIndex}].startColor`] = colorNormalize(layer.start) || [1, 1, 1, 1]
+          this.conicGradientsUniforms[`${CONIC_UNIFORMS_NAME}[${this.conicIndex}].endAngle`] = (layer.end.angle / 180 * Math.PI) || Math.PI * 2
+          this.conicGradientsUniforms[`${CONIC_UNIFORMS_NAME}[${this.conicIndex}].endColor`] = colorNormalize(layer.end) || [0, 0, 0, 0]
           this.conicGradientsUniforms[`${CONIC_UNIFORMS_NAME}[${this.conicIndex}].limited`] = layer.limited ? 1 : 0
           this.conicIndex++
           break
@@ -67,8 +96,18 @@ export class ColorDescriber {
     // console.log(this.conicGradientsUniforms)
   }
 
-  render(gl, { x, y, width, height }) {
+  render(gl, { width, height }) {
     const buffer = createColorBuffer(gl, { width, height })
+
+    for (const key in this.linearGradientsUniforms) {
+      if (typeof this.linearGradientsUniforms[key] === 'function') this.linearGradientsUniforms[key] = this.linearGradientsUniforms[key](width, height)
+    }
+    for (const key in this.radiusGradientsUniforms) {
+      if (typeof this.radiusGradientsUniforms[key] === 'function') this.radiusGradientsUniforms[key] = this.radiusGradientsUniforms[key](width, height)
+    }
+    for (const key in this.conicGradientsUniforms) {
+      if (typeof this.conicGradientsUniforms[key] === 'function') this.conicGradientsUniforms[key] = this.conicGradientsUniforms[key](width, height)
+    }
 
     const model = new RectProcessModel(gl, {
       is2: true,

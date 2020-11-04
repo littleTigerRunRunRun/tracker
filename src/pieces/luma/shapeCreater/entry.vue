@@ -36,7 +36,7 @@
         stroke-width="2"
       />
     </svg>
-    <canvas ref="c2" class="block" />
+    <canvas ref="c2" class="block" width="200" height="200" />
     <svg version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid meet" class="block" viewBox="0 0 200 200">
       <circle
         cx="100"
@@ -47,7 +47,7 @@
         stroke-width="1"
       />
     </svg>
-    <canvas ref="c3" class="block" />
+    <canvas ref="c3" class="block" width="200" height="200" />
   </div>
 </template>
 
@@ -69,39 +69,41 @@ export default {
     this.sc0 = new ShapeCreator({
       canvas: this.$refs.c0,
       type: 'regularPolygon',
+      transform: {
+        translate: [0, 0]
+      },
       shape: {
         side: 3,
-        radius: 80,
-        center: [100, 100]
+        radius: 80
       },
       style: {
         fill: new ColorDescriber([
-          {
-            type: 'linear',
-            limited: false,
-            start: { point: [69, 120], color: [1, 0, 0, 1] },
-            end: { point: [69, 0], color: [0, 0, 1, 1] }
-          }
           // {
-          //   type: 'radius',
+          //   type: 'linear',
           //   limited: false,
-          //   center: [100, 100], // center point
-          //   inner: { color: [0.15, 0.5, 0.85, 0.1], radius: 0 }, // 内圈
-          //   outer: { color: [0.92, 0.4, 0.1, 0.1], radius: 80 } // 外圈
+          //   start: { point: [0.5, 0], color: [255, 0, 0, 1] }, // fixed表示位置是绝对定位
+          //   end: { point: [0.5, 1], color: [0, 0, 255, 1] }
           // },
+          {
+            type: 'radius',
+            limited: false,
+            center: { point: [0.5, 0.1], fixed: false }, // center point
+            inner: { color: [192, 14, 207, 1], radius: 0 }, // 内圈
+            outer: { color: [214, 64, 7, 1], radius: 0.4 } // 外圈
+          },
           // {
           //   type: 'linear',
           //   limited: false,
           //   start: { point: [120, 80], color: [0.15, 0.5, 0.85, 0.6] },
           //   end: { point: [0, 160], color: [0.92, 0.4, 0.1, 0.5] }
           // },
-          // {
-          //   type: 'conic',
-          //   limited: false,
-          //   center: [100, 100],
-          //   start: { angle: 0, color: [0.15, 0.5, 0.85, 0.6] },
-          //   end: { angle: 6.28, color: [0.92, 0.4, 0.1, 0.5] }
-          // }
+          {
+            type: 'conic',
+            limited: false,
+            center: { point: [0.5, 0.65], fixed: false },
+            start: { angle: 0, color: [22, 121, 221, 0.6] },
+            end: { angle: 360, color: [241, 100, 25, 0.5] }
+          }
         ], {
           linearInterpolate: 1
         }),
@@ -115,16 +117,16 @@ export default {
           {
             type: 'conic',
             limited: true,
-            center: [69, 60],
-            start: { angle: 0, color: [1, 0, 0, 1] },
-            end: { angle: 3.14, color: [0, 0, 1, 1] }
+            center: { point: [69, 60], fixed: true },
+            start: { angle: 0, color: [255, 0, 0, 1] },
+            end: { angle: 180, color: [0, 0, 255, 1] }
           },
           {
             type: 'conic',
             limited: true,
-            center: [69, 60],
-            start: { angle: 3.14, color: [0, 0, 1, 1] },
-            end: { angle: 6.28, color: [1, 0, 0, 1] }
+            center: { point: [69, 60], fixed: true },
+            start: { angle: 180, color: [0, 0, 255, 1] },
+            end: { angle: 360, color: [255, 0, 0, 1] }
           }
         ]),
         strokeWidth: 8
@@ -134,53 +136,56 @@ export default {
     this.sc1 = new ShapeCreator({
       canvas: this.$refs.c1,
       type: 'regularPolygon',
+      transform: {
+        translate: [0, 0]
+      },
       shape: {
         side: 4,
         radius: 80,
-        center: [100, 100],
         start: Math.PI / 4
       },
       style: {
-        fill: new ColorDescriber([], { base: [1, 0, 0, 0.2] }),
-        stroke: new ColorDescriber([], { base: [0.15, 0.5, 0.85, 0.6] }),
+        fill: new ColorDescriber([], { base: [255, 0, 0, 0.2] }),
+        stroke: new ColorDescriber([], { base: [26, 128, 210, 0.6] }),
         strokeWidth: 4
       }
     })
 
-    // this.sc2 = new ShapeCreator({
-    //   canvas: this.$refs.c2,
-    //   type: 'regularPolygon',
-    //   shape: {
-    //     side: 5,
-    //     radius: 80,
-    //     center: [100, 100]
-    //   },
-    //   style: {
-    //     fill: new ColorDescriber([], { base: 'rgba(40, 80, 255, 0.5)' }),
-    //     stroke: 'rgba(255, 0, 0, 1)',
-    //     strokeWidth: 2
-    //   }
-    // })
+    this.sc2 = new ShapeCreator({
+      canvas: this.$refs.c2,
+      type: 'regularPolygon',
+      transform: {
+        translate: [0, 0]
+      },
+      shape: {
+        side: 5,
+        radius: 80
+      },
+      style: {
+        fill: new ColorDescriber([], { base: [40, 80, 255, 0.5] }),
+        stroke: new ColorDescriber([], { base: [255, 0, 0, 1] }),
+        strokeWidth: 2
+      }
+    })
 
-    // this.sc3 = new ShapeCreator({
-    //   canvas: this.$refs.c3,
-    //   type: 'circle',
-    //   // showSvg: true,
-    //   shape: {
-    //     accuracy: 4, // 曲线细分程度
-    //     radius: 55,
-    //     center: [100, 100]
-    //   },
-    //   style: {
-    //     stroke: '#000',
-    //     strokeWidth: 1
-    //   }
-    // })
+    this.sc3 = new ShapeCreator({
+      canvas: this.$refs.c3,
+      type: 'circle',
+      // showSvg: true,
+      shape: {
+        accuracy: 4, // 曲线细分程度
+        radius: 55
+      },
+      style: {
+        stroke: new ColorDescriber([], { base: [0, 0, 0, 1] }),
+        strokeWidth: 1
+      }
+    })
   },
   beforeDestroy() {
     if (this.sc1) {
-      this.sc0.destroy()
-      this.sc0 = null
+      // this.sc0.destroy()
+      // this.sc0 = null
       // this.sc1.destroy()
       // this.sc1 = null
       // this.sc2.destroy()

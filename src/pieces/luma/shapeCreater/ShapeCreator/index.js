@@ -58,13 +58,14 @@ function initLoop() {
       return {}
     },
     onRender: ({ gl, time }) => {
-      for (const task of publicRenderer.renderTasks) {
+      const tasks = [].concat(publicRenderer.renderTasks)
+      publicRenderer.renderTasks.splice(0, publicRenderer.renderTasks.length)
+      for (const task of tasks) {
         task.before({ gl, pipe: publicRenderer.pipe })
         publicRenderer.pipe.next({ time })
         task.after({ gl, pipe: publicRenderer.pipe })
         publicRenderer.pipe.clear()
       }
-      publicRenderer.renderTasks.splice(0, publicRenderer.renderTasks.length)
     },
     autoResizeViewport: false
     // useDevicePixels: true
@@ -83,13 +84,17 @@ initLoop()
 
 export default class ShaperCreator {
   constructor(params) {
-    const { canvas, showSvg, type, shape, style, showNormal = false, dynamic = false } = params
-    this.points = shapeSolver({ type, shape })
+    const { canvas, showSvg, type, shape, style, showNormal = false, dynamic = false, transform = {}} = params
     this.style = style
     this.canvas = canvas
     this.ctx = this.canvas.getContext('2d')
     this.dynamic = dynamic // shaper的颜色需要贴图来渲染，在不作动态使用时，我们认为这是一个单次绘制后就会去除贴图的类型，下次绘制时贴图会重新初始化
 
+    this.transform = transform
+
+    const { points, size } = shapeSolver({ type, shape })
+    this.points = points
+    this.originSize = size // 跟外部的形变作一个区分
     this.showNormal = showNormal // 是否显示几何图形的法线
     if (showSvg) console.log(polygonToSvgString(points))
 
@@ -102,12 +107,24 @@ export default class ShaperCreator {
   }
 
   initGeometry = (gl) => {
-    this.geometry = new PathGeometry({ gl, points: this.points, style: this.style })
+    this.geometry = new PathGeometry({ gl, points: this.points, size: this.originSize, style: this.style })
+  }
+
+  get translate() { return [].concat(this.transform.translate) }
+  set translate(translate) {
+    if (translate.length) this.transform.translate.splice(0, this.transform.translate.length, ...translate)
+    else if (translate.x !== undefined) this.transform.translate.splice(0, this.transform.translate.length, translate.x, translate.y)
+    console.log(this.transform.translate)
+    this.refresh()
   }
 
   render = {
     before: ({ gl, pipe }) => {
       pipe.pools.geometry = this.geometry
+      pipe.pools.geometryUniforms = {
+        u_geometry_size: this.originSize,
+        u_translate: this.transform.translate || [0, 0]
+      }
       pipe.pools.geometrySize = { width: this.canvas.width, height: this.canvas.height }
     },
     after: ({ gl, pipe }) => {
@@ -116,6 +133,7 @@ export default class ShaperCreator {
   }
 
   refresh() {
+    if (publicRenderer.renderTasks.indexOf(this.render) > -1) return
     publicRenderer.renderTasks.push(this.render)
   }
 

@@ -3,21 +3,31 @@ const solvers = {
     return shape.points || []
   },
   regularPolygon(shape) {
-    const { side = 4, radius = 0.5, center = [0, 0], start = 0 } = shape
+    const { radius, side = 4, start = 0 } = shape
+    const center = [0, 0]
+    const radiusStatic = 1
     const ps = []
     for (let i = 0; i < side; i++) {
-      ps.push([center[0] + radius * Math.sin((Math.PI * 2 * i) / side + start), center[0] - radius * Math.cos((Math.PI * 2 * i) / side + start)])
+      ps.push([center[0] + radiusStatic * Math.sin((Math.PI * 2 * i) / side + start), center[0] - radiusStatic * Math.cos((Math.PI * 2 * i) / side + start)])
     }
-    return ps
+    return {
+      points: ps,
+      size: radius
+    }
   },
   circle(shape) {
-    const { radius, center = [0, 0], accuracy = 1 } = shape
+    const { radius, accuracy = 1 } = shape
+    const center = [0, 0]
+    const radiusStatic = 1
     const side = Math.max(Math.floor(5 * accuracy * Math.sqrt(radius)), 4)
     const ps = []
     for (let i = 0; i < side; i++) {
-      ps.push([center[0] + radius * Math.sin((Math.PI * 2 * i) / side), center[0] - radius * Math.cos((Math.PI * 2 * i) / side)])
+      ps.push([center[0] + radiusStatic * Math.sin((Math.PI * 2 * i) / side), center[0] - radiusStatic * Math.cos((Math.PI * 2 * i) / side)])
     }
-    return ps
+    return {
+      points: ps,
+      size: radius
+    }
   }
 }
 

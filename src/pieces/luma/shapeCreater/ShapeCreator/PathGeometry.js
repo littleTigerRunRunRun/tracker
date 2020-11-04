@@ -1,10 +1,9 @@
 /* eslint-disable no-this-before-super */
 import { Geometry } from '@luma.gl/engine'
-import Color from '@/lib/color.js'
 import { ColorDescriber } from '../ColorDescriber'
 
 // 产生本体的三角形属性
-function splitTriangle({ gl, positions, indices, normals, colors, bound, style, points, helperLines, textures }) {
+function splitTriangle({ gl, positions, indices, normals, colors, bound, style, points, helperLines, textures, size }) {
   const ps = points.map((item, index) => {
     positions.push(...item)
 
@@ -36,16 +35,22 @@ function splitTriangle({ gl, positions, indices, normals, colors, bound, style, 
   bound.height = bound.maxy - bound.miny
 
   // drop color
-  if (style.fill instanceof ColorDescriber) {
+  if ((style.fill instanceof ColorDescriber)) {
     // console.log(bound, positions)
     for (let i = 0; i < positions.length; i += 2) {
       // 我们约定了fill的textureIndex为0
       colors.push(...[0, (positions[i] - bound.x) / bound.width, (positions[i + 1] - bound.y) / bound.height])
     }
     // 手动处理一下线性渐变
-    textures[0] = style.fill.render(gl, bound)
+    textures[0] = style.fill.render(gl, {
+      height: bound.height * size,
+      width: bound.width * size
+    })
   } else {
-    colors.push(...[0, 0])
+    for (let i = 0; i < positions.length; i += 2) {
+      // 我们约定了fill的textureIndex为0
+      colors.push(...[2, 0, 0])
+    }
   }
 
   for (let i = 0; ps.length > 2; i++) {
@@ -73,9 +78,10 @@ function splitTriangle({ gl, positions, indices, normals, colors, bound, style, 
 }
 
 // 产生本体描边的三角形属性
-function splitStroke({ gl, positions, indices, normals, colors, bound, style, points, helperLines, textures }) {
+function splitStroke({ gl, positions, indices, normals, colors, bound, style, points, helperLines, textures, size }) {
   // stroke 部分
-  const { stroke, strokeWidth = 1 } = style
+  const stroke = style.stroke
+  const strokeWidth = (style.strokeWidth || 1) / size
   if (stroke && strokeWidth) {
     // 测试一下法向量的正确性
     const strokePositions = []
@@ -119,9 +125,15 @@ function splitStroke({ gl, positions, indices, normals, colors, bound, style, po
         colors.push(...[1, (strokePositions[i] - bound.x) / bound.width, (strokePositions[i + 1] - bound.y) / bound.height])
       }
       // 手动处理一下线性渐变
-      textures[1] = style.stroke.render(gl, bound)
+      textures[1] = style.stroke.render(gl, {
+        height: bound.height * size,
+        width: bound.width * size
+      })
     } else {
-      strokeColors.push(...[0, 0])
+      for (let i = 0; i < strokePositions.length; i += 2) {
+        // 我们约定了fill的textureIndex为0
+        colors.push(...[2, 0, 0])
+      }
     }
 
     colors.push(...strokeColors)
@@ -131,7 +143,7 @@ function splitStroke({ gl, positions, indices, normals, colors, bound, style, po
 }
 
 // 产生形状绘制所用的网格
-function createMesh(gl, points, style = {}) {
+function createMesh(gl, points, size, style = {}) {
   const triangles = []
   if (points.length < 3) return triangles
 
@@ -148,8 +160,8 @@ function createMesh(gl, points, style = {}) {
   const textures = []
   const helperLines = []
 
-  splitTriangle({ gl, positions, indices, normals, colors, bound, style, points, helperLines, textures })
-  splitStroke({ gl, positions, indices, normals, colors, bound, style, points, helperLines, textures })
+  splitTriangle({ gl, positions, indices, normals, colors, bound, style, points, helperLines, textures, size })
+  splitStroke({ gl, positions, indices, normals, colors, bound, style, points, helperLines, textures, size })
 
   return {
     indices,
@@ -163,9 +175,9 @@ function createMesh(gl, points, style = {}) {
 }
 
 export class PathGeometry extends Geometry {
-  constructor({ gl, points, style }) {
-    const { indices, positions, normals, colors, helperLines, bound, textures } = createMesh(gl, points, style)
-    // console.log(colors, positions)
+  constructor({ gl, points, style, size }) {
+    const { indices, positions, normals, colors, helperLines, bound, textures } = createMesh(gl, points, size, style)
+    // console.log(colors)
 
     super({
       indices: { size: 1, value: new Uint16Array(indices) },
