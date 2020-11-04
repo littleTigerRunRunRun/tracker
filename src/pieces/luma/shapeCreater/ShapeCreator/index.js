@@ -14,13 +14,13 @@ import { PathGeometry } from './PathGeometry.js'
 import { GeometryPass } from './GeometryPass'
 
 const canvas = document.createElement('canvas')
-canvas.style.width = '200px'
-canvas.style.height = '300px'
-canvas.style.top = 0
-canvas.style.left = 0
-canvas.style.position = 'fixed'
-canvas.style.zIndex = 1000000
-document.body.appendChild(canvas)
+// canvas.style.width = '300px'
+// canvas.style.height = '300px'
+// canvas.style.top = 0
+// canvas.style.left = '200px'
+// canvas.style.position = 'fixed'
+// canvas.style.zIndex = 1000000
+// document.body.appendChild(canvas)
 // 一个离屏绘制的渲染循环，用于绘制形状
 const publicRenderer = {
   loop: null,
@@ -51,6 +51,7 @@ function initLoop() {
           [{ pass: GeometryPass }]
         ]
       })
+      publicRenderer.pipe.pools.canvas = publicRenderer.canvas
 
       for (const task of publicRenderer.initTasks) task(gl)
 
@@ -58,12 +59,14 @@ function initLoop() {
     },
     onRender: ({ gl, time }) => {
       for (const task of publicRenderer.renderTasks) {
-        task({ gl, pipe: publicRenderer.pipe })
+        task.before({ gl, pipe: publicRenderer.pipe })
         publicRenderer.pipe.next({ time })
+        task.after({ gl, pipe: publicRenderer.pipe })
         publicRenderer.pipe.clear()
       }
       publicRenderer.renderTasks.splice(0, publicRenderer.renderTasks.length)
-    }
+    },
+    autoResizeViewport: false
     // useDevicePixels: true
   })
   publicRenderer.loop.start({
@@ -80,10 +83,12 @@ initLoop()
 
 export default class ShaperCreator {
   constructor(params) {
-    const { canvas, showSvg, type, shape, style, showNormal = false } = params
+    const { canvas, showSvg, type, shape, style, showNormal = false, dynamic = false } = params
     this.points = shapeSolver({ type, shape })
     this.style = style
     this.canvas = canvas
+    this.ctx = this.canvas.getContext('2d')
+    this.dynamic = dynamic // shaper的颜色需要贴图来渲染，在不作动态使用时，我们认为这是一个单次绘制后就会去除贴图的类型，下次绘制时贴图会重新初始化
 
     this.showNormal = showNormal // 是否显示几何图形的法线
     if (showSvg) console.log(polygonToSvgString(points))
@@ -100,9 +105,14 @@ export default class ShaperCreator {
     this.geometry = new PathGeometry({ gl, points: this.points, style: this.style })
   }
 
-  render = ({ gl, pipe }) => {
-    pipe.pools.geometry = this.geometry
-    pipe.pools.geometrySize = [this.canvas.width, this.canvas.height]
+  render = {
+    before: ({ gl, pipe }) => {
+      pipe.pools.geometry = this.geometry
+      pipe.pools.geometrySize = { width: this.canvas.width, height: this.canvas.height }
+    },
+    after: ({ gl, pipe }) => {
+      this.ctx.drawImage(pipe.pools.canvas, 0, 0, this.canvas.width, this.canvas.height)
+    }
   }
 
   refresh() {
