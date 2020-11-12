@@ -1,22 +1,35 @@
 /* eslint-disable no-this-before-super */
 import { Geometry } from '@luma.gl/engine'
-import { ColorDescriber } from '../ColorDescriber'
+import { ColorDescriber } from '../utils'
+
+function normalize(vec) {
+  const hypot = Math.hypot(...vec)
+  for (let i = 0; i < vec.length; i++) {
+    vec[i] = vec[i] / hypot
+  }
+}
 
 // 产生本体的三角形属性
-function splitTriangle({ gl, positions, indices, normals, colors, bound, style, points, helperLines, textures, size }) {
+function splitTriangle({ gl, positions, indices, normals = [], colors, bound, style, points, helperLines, textures, size, strokeOffset }) {
   const ps = points.map((item, index) => {
-    positions.push(...item)
-
     // 求点的法向量
-    const threePoints = [points[index - 1 < 0 ? points.length - 1 : index - 1], points[index], points[index + 1 > points.length - 1 ? 0 : index + 1]]
-    let normalPow2 = 0
-    const normal = threePoints[1].map((point, index) => {
-      const val = point - threePoints[0][index] * 0.5 - threePoints[2][index] * 0.5
-      normalPow2 += val * val
-      return val
-    })
-    normal.push(0)
-    normals.push(normal.map((val) => val / Math.sqrt(normalPow2)))
+    let normal
+    if (normals.length - 1 < index) {
+      const threePoints = [points[index - 1 < 0 ? points.length - 1 : index - 1], points[index], points[index + 1 > points.length - 1 ? 0 : index + 1]]
+      const vec1 = [threePoints[1][0] - threePoints[0][0], threePoints[1][1] - threePoints[0][1]]
+      const vec2 = [threePoints[1][0] - threePoints[2][0], threePoints[1][1] - threePoints[2][1]]
+      normalize(vec1)
+      normalize(vec2)
+      normal = [vec1[0] * 0.5 + vec2[0] * 0.5, vec1[1] * 0.5 + vec2[1] * 0.5]
+      normal.push(0)
+      normalize(normal)
+      normals.push(normal)
+    } else normal = normals[index]
+    // console.log(normals, 1, index, normal)
+
+    item[0] -= strokeOffset * normal[0] * (style.strokeWidth || 1) / size
+    item[1] -= strokeOffset * normal[1] * (style.strokeWidth || 1) / size
+    positions.push(...item)
 
     // 几何内容总包围盒更新
     bound.maxx = Math.max(bound.maxx, item[0])
@@ -81,7 +94,7 @@ function splitTriangle({ gl, positions, indices, normals, colors, bound, style, 
 function splitStroke({ gl, positions, indices, normals, colors, bound, style, points, helperLines, textures, size }) {
   // stroke 部分
   const stroke = style.stroke
-  const strokeWidth = (style.strokeWidth || 1) / size
+  const strokeWidth = (style.strokeWidth === undefined ? 1 : style.strokeWidth) / size
   if (stroke && strokeWidth) {
     // 测试一下法向量的正确性
     const strokePositions = []
@@ -94,17 +107,20 @@ function splitStroke({ gl, positions, indices, normals, colors, bound, style, po
       const normal = normals[index]
       const length = strokeWidth / Math.sqrt(1 - Math.pow(Math.abs(vec[0] * normal[0] + vec[1] * normal[1]) / Math.hypot(vec[0], vec[1]) / Math.hypot(normal[0], normal[1]), 2))
       // console.log(length)
-      strokePositions.push(point[0], point[1])
-      strokePositions.push(point[0] + normal[0] * length, point[1] + normal[1] * length)
+      const p1 = [point[0], point[1]]
+      const p2 = [point[0] + normal[0] * length, point[1] + normal[1] * length]
+      strokePositions.push(...p1)
+      strokePositions.push(...p2)
+      // console.log(...p1, ...p2)
 
-      bound.maxx = Math.max(bound.maxx, point[0])
-      bound.minx = Math.min(bound.minx, point[0])
-      bound.maxy = Math.max(bound.maxy, point[1])
-      bound.miny = Math.min(bound.miny, point[1])
-      bound.maxx = Math.max(bound.maxx, point[0] + normal[0] * length)
-      bound.minx = Math.min(bound.minx, point[0] + normal[0] * length)
-      bound.maxy = Math.max(bound.maxy, point[1] + normal[1] * length)
-      bound.miny = Math.min(bound.miny, point[1] + normal[1] * length)
+      bound.maxx = Math.max(bound.maxx, p1[0])
+      bound.minx = Math.min(bound.minx, p1[0])
+      bound.maxy = Math.max(bound.maxy, p1[1])
+      bound.miny = Math.min(bound.miny, p1[1])
+      bound.maxx = Math.max(bound.maxx, p2[0])
+      bound.minx = Math.min(bound.minx, p2[0])
+      bound.maxy = Math.max(bound.maxy, p2[1])
+      bound.miny = Math.min(bound.miny, p2[1])
     })
 
     const length = points.length * 2
@@ -143,13 +159,12 @@ function splitStroke({ gl, positions, indices, normals, colors, bound, style, po
 }
 
 // 产生形状绘制所用的网格
-function createMesh(gl, points, size, style = {}) {
+function createMesh(gl, points, normals = [], size, style = {}, strokeOffset = 1) {
   const triangles = []
   if (points.length < 3) return triangles
 
   const positions = []
   const indices = []
-  const normals = []
   const colors = []
   const bound = {
     minx: 10000,
@@ -160,13 +175,12 @@ function createMesh(gl, points, size, style = {}) {
   const textures = []
   const helperLines = []
 
-  splitTriangle({ gl, positions, indices, normals, colors, bound, style, points, helperLines, textures, size })
-  splitStroke({ gl, positions, indices, normals, colors, bound, style, points, helperLines, textures, size })
+  splitTriangle({ gl, positions, indices, normals, colors, bound, style, points, helperLines, textures, size, strokeOffset })
+  splitStroke({ gl, positions, indices, normals, colors, bound, style, points, helperLines, textures, size, strokeOffset })
 
   return {
     indices,
     positions,
-    normals,
     colors,
     helperLines,
     bound,
@@ -175,15 +189,15 @@ function createMesh(gl, points, size, style = {}) {
 }
 
 export class PathGeometry extends Geometry {
-  constructor({ gl, points, style, size }) {
-    const { indices, positions, normals, colors, helperLines, bound, textures } = createMesh(gl, points, size, style)
-    // console.log(colors)
+  constructor({ gl, points, normals = [], style, size }) {
+    const { indices, positions, colors, helperLines, bound, textures } = createMesh(gl, points, normals, size, style)
+    // console.log(indices)
 
     super({
       indices: { size: 1, value: new Uint16Array(indices) },
       attributes: {
         POSITION: { size: 2, value: new Float32Array(positions) },
-        NORMAL: { size: 3, value: new Float32Array(normals) },
+        NORMAL: { size: 3, value: new Float32Array([].concat(normals)) },
         texture: { size: 3, value: new Float32Array(colors) }
       }
     })
@@ -191,11 +205,28 @@ export class PathGeometry extends Geometry {
     this.helperLines = helperLines
     this.bound = bound
     this.textures = textures
+    this.gl = gl
+    // this.style = style
     // console.log(textures)
   }
 
+  rebuild({ size, points, style, normals = [] }) {
+    // console.log(points)
+    const { indices, positions, colors, textures } = createMesh(this.gl, points, normals, size, style)
+    this.textures.splice(0, this.textures.length, ...textures)
+    this._setAttributes(
+      {
+        POSITION: { size: 2, value: new Float32Array(positions) },
+        NORMAL: { size: 3, value: new Float32Array([].concat(normals)) },
+        texture: { size: 3, value: new Float32Array(colors) }
+      },
+      { size: 1, value: new Uint16Array(indices) }
+    )
+    this.vertexCount = indices.length // positions.length / 2
+  }
+
   delete() {
-    for (const texture of this.textures) texture.delete()
+    // for (const texture of this.textures) texture.delete()
     this.textures.splice(0, this.textures.length)
     this.textures = []
 

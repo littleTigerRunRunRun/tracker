@@ -1,13 +1,11 @@
-import { Pass } from '../pipe/index.js'
-import { constantValue } from '@/pieces/luma/common/modules/constant'
 import { Model } from '@luma.gl/engine'
 import { setParameters, resizeGLContext } from '@luma.gl/gltools'
-// import { HelperLine } from './HelperLine.js'
+// import { HelperLine } from '../geometry'
+import { Pass } from '../pass'
+import { constantValue } from '../utils' // , RectProcessModel
 
 export const GeometryPass = new Pass({
   onInitialize: ({ gl }) => {
-    // const helper = new HelperLine(gl, { lines: geometry.helperLines })
-
     const vs = `#version 300 es
 
       layout (location = 0) in vec2 positions;
@@ -21,9 +19,16 @@ export const GeometryPass = new Pass({
 
       void main() {
         v_texture = texture;
-        // vec2(f1) -  * f2
-        // (positions * u_geometry_size + u_translate) / u_resolution
-        vec2 pos = (positions * u_geometry_size + u_translate) / u_resolution * f2;
+        vec2 resize = vec2(f1);
+        #if (AUTO_RESIZE_MODE == 0) // not resize
+          // do nothing
+        #elif (AUTO_RESIZE_MODE == 1) // resize but remain ratio
+          resize = u_resolution;
+        #elif (AUTO_RESIZE_MODE == 2) // to edge
+          resize = vec2(min(u_resolution.x, u_resolution.y));
+        #endif
+
+        vec2 pos = (positions * u_geometry_size + u_translate) / resize * f2;
         gl_Position = vec4(pos.x, -pos.y, f0, f1);
       }
     `
@@ -37,16 +42,16 @@ export const GeometryPass = new Pass({
 
       void main() {
         if (v_texture.x == f0) {
-          colorValue = texture2D(u_colorTextures[0], vec2(f1) - v_texture.yz);
+          colorValue = texture2D(u_colorTextures[0], vec2(v_texture.y, f1 - v_texture.z));
         } else if (v_texture.x == f1) {
-          colorValue = texture2D(u_colorTextures[1], vec2(f1) - v_texture.yz);
+          colorValue = texture2D(u_colorTextures[1], vec2(v_texture.y, f1 - v_texture.z));
         } else colorValue = vec4(f0, f0, f0, f1);
       }
     `
 
     return { fs, vs, gl }
   },
-  onRender: ({ gl, vs, fs, geometry, geometryUniforms, geometrySize, canvas }) => {
+  onRender: ({ gl, vs, fs, geometry, geometryUniforms, geometryDefines = {}, geometrySize, canvas }) => {
     setParameters(gl, {
       blend: true
     })
@@ -65,12 +70,35 @@ export const GeometryPass = new Pass({
         'u_colorTextures[0]': geometry.textures[0],
         'u_colorTextures[1]': geometry.textures[1]
       },
-      defines: {},
+      defines: geometryDefines,
       vs,
       fs,
       modules: [constantValue],
       geometry
     })
+
+    // // 用于测试贴图是否正确绘制的测试model
+    // const shapeModel = new RectProcessModel(gl, {
+    //   uniforms: {
+    //     'u_colorTextures[0]': geometry.textures[0],
+    //     'u_colorTextures[1]': geometry.textures[1]
+    //   },
+    //   // defines: geometryDefines,
+    //   modules: [constantValue],
+    //   is2: true,
+    //   fs: `#version 300 es
+
+    //     uniform sampler2D u_colorTextures[2];
+
+    //     in vec2 v_uv;
+
+    //     layout (location = 0) out vec4 colorValue;
+
+    //     void main() {
+    //       colorValue = texture2D(u_colorTextures[0], v_uv); // vec4(f0, f0, f0, f1);
+    //     }
+    //   `
+    // })
 
     for (const key in geometryUniforms) shapeModel.uniforms[key] = geometryUniforms[key]
     // console.log(shapeModel.uniforms)
@@ -78,15 +106,16 @@ export const GeometryPass = new Pass({
     // console.log(shapeModel)
     // shapeModel.draw({ framebuffer: target })
 
-    // if (this.showNormal) {
-    //   helper.uniforms.u_resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight]
-    //   helper.draw()
-    //   // helper.draw({ framebuffer: target })
-    // }
+    // const helper = new HelperLine(gl, { lines: geometry.helperLines, size: geometryUniforms.u_geometry_size })
+    // for (const key in geometryUniforms) helper.uniforms[key] = geometryUniforms[key]
+    // helper.uniforms.u_resolution = [width, height]
+    // helper.draw()
 
-    return { shapeModel }
+    shapeModel.delete()
+
+    return {}
   },
-  onClear: ({ shapeModel }) => {
+  onClear: () => {
     // shapeModel.delete()
   },
   // onOutput: ({ blit }) => {
@@ -96,6 +125,6 @@ export const GeometryPass = new Pass({
   //     t_geo: color
   //   }
   // },
-  clearSettings: { color: [1, 1, 1, 1] },
+  clearSettings: { color: [0, 0, 0, 0] },
   target: null // buffer
 })

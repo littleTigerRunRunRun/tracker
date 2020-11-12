@@ -7,7 +7,7 @@
       'straight-path': straightPath.length > 0
     }"
   >
-    <div class="background" :style="{ backgroundImage: `url(${piece && piece.data && piece.data.capture || 'http://127.0.0.1:7001/public/img/capture/default.jpg'})` }" />
+    <div class="background" :style="{ backgroundImage: `url(${piece && piece.data && piece.data.capture})` }" />
     <div ref="comp" class="piece-main">
       <component
         :is="comp"

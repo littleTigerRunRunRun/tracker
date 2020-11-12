@@ -1,4 +1,5 @@
 import { clear } from '@luma.gl/webgl'
+// import { setParameters } from '@luma.gl/gltools'
 
 export class Pass {
   constructor({
@@ -33,7 +34,6 @@ export class Pass {
     const { gl } = params
     const { depth = true, stencil = false, color = [0, 0, 0, 0] } = this.clearSettings
     clear(gl, { color, depth, stencil, framebuffer: this.target })
-    // console.log('clear')
 
     this.renderThings = this.onRender(Object.assign({ target: this.target }, params, this.initThings, this.pointers))
 

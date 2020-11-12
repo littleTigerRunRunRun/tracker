@@ -1,6 +1,6 @@
-import { RectProcessModel } from '@/pieces/luma/common/models/RectProcessModel'
-import createColorBuffer from '@/pieces/moveMountain/prefab/buffer/ColorBuffer'
 import { clear } from '@luma.gl/webgl'
+import { setParameters } from '@luma.gl/gltools'
+import { RectProcessModel, createColorBuffer } from '../utils'
 
 const LINEAR_UNIFORMS_NAME = 'u_linearGradients'
 const RADIUS_UNIFORMS_NAME = 'u_radiusGradients'
@@ -16,34 +16,63 @@ function colorNormalize({ color, normalized = false }) {
   }
 }
 
+// 延时计算
+class DeferredCompute {
+  constructor({ originData, defer }) {
+    this.originData = originData
+    this.defer = defer
+  }
+
+  compute(width, height) {
+    // console.log(width, height)
+    return this.defer.apply(this, arguments)
+  }
+}
+
 function pointRelative({ point, fixed }) {
   if (fixed) return point
-  else {
-    return (width, height) => {
-      return [width * point[0], height * point[1]]
+  return new DeferredCompute({
+    originData: point,
+    defer: function(width, height) {
+      // console.log(width, height, this.originData)
+      return [width * this.originData[0], height * this.originData[1]]
     }
-  }
+  })
 }
 
 function radiusRelative({ radius, fixed }) {
   if (fixed) return radius
-  else {
-    return (width, height) => {
-      return radius * Math.hypot(width, height)
+  return new DeferredCompute({
+    originData: radius,
+    defer: function(width, height) {
+      return this.originData * Math.hypot(width, height)
     }
-  }
+  })
 }
 
 // 对一个[width / height]的区域，提供着色方程和混合方式的参数，width / height来自
 export class ColorDescriber {
   constructor(layers, params = {}) {
     this.layers = layers
+    this.compileLayers()
 
     params.base = colorNormalize({ color: params.base || [0, 0, 0, 0] })
-
-    this.compileLayers()
     this.params = Object.assign({
       linearInterpolate: 1,
+      radiusInterpolate: 0
+    }, params)
+    // console.log(this.params)
+
+    // console.log(this)
+  }
+
+  refresh(layers, params = {}) {
+    this.layers = layers
+    this.compileLayers()
+
+    params.base = colorNormalize({ color: params.base || [0, 0, 0, 0] })
+    this.params = Object.assign({
+      linearInterpolate: 0,
       radiusInterpolate: 0
     }, params)
   }
@@ -65,7 +94,8 @@ export class ColorDescriber {
           this.linearGradientsUniforms[`${LINEAR_UNIFORMS_NAME}[${this.linearIndex}].endPoint`] = pointRelative(layer.end) || [1, 1]
           this.linearGradientsUniforms[`${LINEAR_UNIFORMS_NAME}[${this.linearIndex}].startColor`] = colorNormalize(layer.start) || [0, 0, 0, 1]
           this.linearGradientsUniforms[`${LINEAR_UNIFORMS_NAME}[${this.linearIndex}].endColor`] = colorNormalize(layer.end) || [1, 1, 1, 1]
-          this.linearGradientsUniforms[`${LINEAR_UNIFORMS_NAME}[${this.linearIndex}].limited`] = layer.limited ? 1 : 0
+          this.linearGradientsUniforms[`${LINEAR_UNIFORMS_NAME}[${this.linearIndex}].limited0`] = layer.limited0 ? 1 : 0
+          this.linearGradientsUniforms[`${LINEAR_UNIFORMS_NAME}[${this.linearIndex}].limited1`] = layer.limited1 ? 1 : 0
           this.linearIndex++
           break
         }
@@ -75,7 +105,8 @@ export class ColorDescriber {
           this.radiusGradientsUniforms[`${RADIUS_UNIFORMS_NAME}[${this.radiusIndex}].innerColor`] = colorNormalize(layer.inner) || [1, 1, 1, 1]
           this.radiusGradientsUniforms[`${RADIUS_UNIFORMS_NAME}[${this.radiusIndex}].outerRadius`] = radiusRelative(layer.outer) || 0.7072
           this.radiusGradientsUniforms[`${RADIUS_UNIFORMS_NAME}[${this.radiusIndex}].outerColor`] = colorNormalize(layer.outer) || [0, 0, 0, 0]
-          this.radiusGradientsUniforms[`${RADIUS_UNIFORMS_NAME}[${this.radiusIndex}].limited`] = layer.limited ? 1 : 0
+          this.radiusGradientsUniforms[`${RADIUS_UNIFORMS_NAME}[${this.radiusIndex}].limited0`] = layer.limited0 ? 1 : 0
+          this.radiusGradientsUniforms[`${RADIUS_UNIFORMS_NAME}[${this.radiusIndex}].limited1`] = layer.limited1 ? 1 : 0
           this.radiusIndex++
           break
         }
@@ -97,18 +128,27 @@ export class ColorDescriber {
   }
 
   render(gl, { width, height }) {
+    setParameters(gl, {
+      blend: false
+    })
+
+    const linear = Object.assign({}, this.linearGradientsUniforms)
+    for (const key in linear) {
+      if (linear[key] instanceof DeferredCompute) linear[key] = linear[key].compute(width, height)
+    }
+    const radius = Object.assign({}, this.radiusGradientsUniforms)
+    for (const key in radius) {
+      // console.log(width, height)
+      if (radius[key] instanceof DeferredCompute) radius[key] = radius[key].compute(width, height)
+    }
+    const conic = Object.assign({}, this.conicGradientsUniforms)
+    for (const key in conic) {
+      if (conic[key] instanceof DeferredCompute) conic[key] = conic[key].compute(width, height)
+    }
+    // console.log(width, height, this.radiusGradientsUniforms)
+
+    // debugger
     const buffer = createColorBuffer(gl, { width, height })
-
-    for (const key in this.linearGradientsUniforms) {
-      if (typeof this.linearGradientsUniforms[key] === 'function') this.linearGradientsUniforms[key] = this.linearGradientsUniforms[key](width, height)
-    }
-    for (const key in this.radiusGradientsUniforms) {
-      if (typeof this.radiusGradientsUniforms[key] === 'function') this.radiusGradientsUniforms[key] = this.radiusGradientsUniforms[key](width, height)
-    }
-    for (const key in this.conicGradientsUniforms) {
-      if (typeof this.conicGradientsUniforms[key] === 'function') this.conicGradientsUniforms[key] = this.conicGradientsUniforms[key](width, height)
-    }
-
     const model = new RectProcessModel(gl, {
       is2: true,
       fs: `#version 300 es
@@ -119,7 +159,8 @@ export class ColorDescriber {
           vec2 endPoint;
           vec4 startColor;
           vec4 endColor;
-          float limited;
+          float limited0;
+          float limited1;
         };
 
         struct RadiusGradient {
@@ -128,9 +169,10 @@ export class ColorDescriber {
           vec4 innerColor;
           float outerRadius;
           vec4 outerColor;
-          float limited;
+          float limited0;
+          float limited1;
         };
-        
+
         struct ConicGradient {
           vec2 center;
           float startAngle;
@@ -163,7 +205,7 @@ export class ColorDescriber {
         vec4 testBlend(vec4 baseColor, vec4 blendColor) {
           return vec4(mix(baseColor.xyz, blendColor.xyz, f1 - baseColor.w / (baseColor.w + blendColor.w)), f1 - (f1 - baseColor.w) * (f1 - blendColor.w));
         }
-        
+
         void main() {
           vec2 uv = vec2(v_uv.x, f1 - v_uv.y);
           fragColor = u_baseColor;
@@ -174,7 +216,7 @@ export class ColorDescriber {
               vec2 vecse = linear.endPoint - linear.startPoint;
               float v = dot((uv * u_resolution - linear.startPoint), vecse) / pow(length(vecse), f2);
 
-              if ((v > f0 && v < f1) || linear.limited == f0) {
+              if (!((v < f0 && linear.limited0 == f1) || (v > f1 && linear.limited1 == f1))) {
                 float t = clamp(v, f0, f1);
                 #if (LINEAR_INTERPOLATE_TYPE == 0) // 0 means linear
                   // do nothing
@@ -199,7 +241,8 @@ export class ColorDescriber {
               float len = length(uv * u_resolution - radius.center);
               float v = (len - radius.innerRadius) / (radius.outerRadius - radius.innerRadius);
 
-              if ((v > f0 && v < f1) || radius.limited == f0) {
+              // if ((v > f0 && v < f1) || radius.limited == f0) {
+              if (!((v < f0 && radius.limited0 == f1) || (v > f1 && radius.limited1 == f1))) {
                 float t = clamp(v, f0, f1);
                 #if (RADIUS_INTERPOLATE_TYPE == 0) // 0 means linear
                   // do nothing
@@ -215,7 +258,7 @@ export class ColorDescriber {
               }
             }
           #endif
-          
+
           #if (CONIC_USE == 1) // 具备圆锥渐变
             for (int i = i0; i < ${this.conicIndex}; i += i1) {
               ConicGradient conic = ${CONIC_UNIFORMS_NAME}[i];
@@ -242,9 +285,8 @@ export class ColorDescriber {
       },
       uniforms: Object.assign({
         u_baseColor: this.params.base
-      }, this.linearGradientsUniforms, this.radiusGradientsUniforms, this.conicGradientsUniforms)
+      }, linear, radius, conic)
     })
-
     clear(gl, { color: [0, 0, 0, 0], depth: false, stencil: false, framebuffer: buffer })
     gl.viewport(0, 0, width, height)
     model.uniforms.u_resolution = [width, height]
@@ -255,5 +297,9 @@ export class ColorDescriber {
     buffer.delete()
 
     return result
+  }
+
+  delete() {
+
   }
 }

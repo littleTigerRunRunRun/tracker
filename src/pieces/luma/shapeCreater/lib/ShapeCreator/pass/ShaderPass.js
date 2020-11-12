@@ -1,5 +1,5 @@
+import { RectProcessModel } from '../utils'
 import { Pass } from './Pass'
-import { RectProcessModel } from '@/pieces/luma/common/models/RectProcessModel'
 
 export class ShaderPass extends Pass {
   constructor({ fs, modules = [], defines = {}, render = () => {}, onOutput, target, clear }) {

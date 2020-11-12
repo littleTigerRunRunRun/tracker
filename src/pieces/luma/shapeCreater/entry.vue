@@ -53,8 +53,7 @@
 
 <script>
 import props from './config'
-import ShapeCreator from './ShapeCreator/index.js'
-import { ColorDescriber } from './ColorDescriber'
+import { ShapeCreator, ColorDescriber } from './lib/ShapeCreator'
 
 export default {
   name: 'ShapeCreater',

@@ -1,6 +1,6 @@
 import { Model } from '@luma.gl/engine'
 import { Buffer } from '@luma.gl/webgl'
-import { constantValue } from '@/pieces/luma/common/modules/constant'
+import { constantValue } from '../utils'
 // import GL from '@luma.gl/constants'
 // console.log(GL)
 
@@ -17,7 +17,7 @@ function getVector2Vertical(x, y) {
 }
 
 export class HelperLine extends Model {
-  constructor(gl, { lines, modules = [], width = 2, length = 10, startcolor = [0.5, 0, 0, 0], endcolor = [0, 1, 0, 1] }) {
+  constructor(gl, { lines, size = 1, modules = [], width = 2, length = 40, startcolor = [0.5, 0, 0, 0], endcolor = [0, 1, 0, 1] }) {
     const positions = []
     // const indices = []
     const colors = []
@@ -28,10 +28,10 @@ export class HelperLine extends Model {
       const normal = line[1]
       const vvs = getVector2Vertical(normal[0], normal[1])
       const points = [
-        point[0] + vvs.ac[0] * width * 0.5, point[1] + vvs.ac[1] * width * 0.5,
-        point[0] + normal[0] * length + vvs.ac[0] * width * 0.5, point[1] + normal[1] * length + vvs.ac[1] * width * 0.5,
-        point[0] + normal[0] * length + vvs.c[0] * width * 0.5, point[1] + normal[1] * length + vvs.c[1] * width * 0.5,
-        point[0] + vvs.c[0] * width * 0.5, point[1] + vvs.c[1] * width * 0.5
+        point[0] + vvs.ac[0] * width / size * 0.5, point[1] + vvs.ac[1] * width / size * 0.5,
+        point[0] + normal[0] * length / size + vvs.ac[0] * width / size * 0.5, point[1] + normal[1] * length / size + vvs.ac[1] * width / size * 0.5,
+        point[0] + normal[0] * length / size + vvs.c[0] * width / size * 0.5, point[1] + normal[1] * length / size + vvs.c[1] * width / size * 0.5,
+        point[0] + vvs.c[0] * width / size * 0.5, point[1] + vvs.c[1] * width / size * 0.5
       ]
 
       positions.push(...[points[0], points[1]])
@@ -57,12 +57,13 @@ export class HelperLine extends Model {
         attribute vec4 color;
 
         uniform vec2 u_resolution;
+        uniform float u_geometry_size;
 
         varying vec4 v_color;
 
         void main() {
           v_color = color;
-          gl_Position = vec4(position / u_resolution * f2 * -1.0 + vec2(f1), f0, f1);
+          gl_Position = vec4(position * u_geometry_size / u_resolution * f1, f0, f1);
         }
       `,
       fs: `

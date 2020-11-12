@@ -5,9 +5,7 @@
       test2模板测试2
     </div>
     <div ref="content" class="tracker-piece-container">
-      <div class="start">
-        
-      </div>
+      <div class="start" />
     </div>
   </div>
 </template>

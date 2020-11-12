@@ -1,17 +1,12 @@
-import { AnimationLoop, Model } from '@luma.gl/engine'
+import { AnimationLoop } from '@luma.gl/engine' // , Model
 import { setParameters } from '@luma.gl/gltools'
-import GL from '@luma.gl/constants'
-// import { brightnessContrast } from '@luma.gl/shadertools'
-// console.log(brightnessContrast)
+// import GL from '@luma.gl/constants'
 
-import { constantValue } from '@/pieces/luma/common/modules/constant'
-import createHandyBuffer from '@/pieces/moveMountain/prefab/buffer/HandyBuffer'
+import { Pipe, GeometryPass } from './pass' // Pass, ShaderPass,
+import { shapeSolver, polygonToSvgString } from './utils'
+import { PathGeometry } from './geometry'
 
-import { Pipe, Pass, ShaderPass } from '../pipe/index.js'
-
-import { shapeSolver, polygonToSvgString } from './shapeSolver'
-import { PathGeometry } from './PathGeometry.js'
-import { GeometryPass } from './GeometryPass'
+export { ColorDescriber } from './utils'
 
 const canvas = document.createElement('canvas')
 // canvas.style.width = '300px'
@@ -22,7 +17,7 @@ const canvas = document.createElement('canvas')
 // canvas.style.zIndex = 1000000
 // document.body.appendChild(canvas)
 // 一个离屏绘制的渲染循环，用于绘制形状
-const publicRenderer = {
+export const publicRenderer = {
   loop: null,
   pipe: null,
   initTasks: [], // 需要init结束后协助初始化的任务
@@ -82,9 +77,9 @@ function initLoop() {
 }
 initLoop()
 
-export default class ShaperCreator {
+export class ShapeCreator {
   constructor(params) {
-    const { canvas, showSvg, type, shape, style, showNormal = false, dynamic = false, transform = {}} = params
+    const { canvas, type, shape, style, showNormal = false, dynamic = false, transform = {}} = params
     this.style = style
     this.canvas = canvas
     this.ctx = this.canvas.getContext('2d')
@@ -92,11 +87,12 @@ export default class ShaperCreator {
 
     this.transform = transform
 
-    const { points, size } = shapeSolver({ type, shape })
+    const { points, size, autoResizeMode, normals } = shapeSolver({ type, shape })
     this.points = points
+    this.normals = normals
     this.originSize = size // 跟外部的形变作一个区分
+    this.autoResizeMode = autoResizeMode
     this.showNormal = showNormal // 是否显示几何图形的法线
-    if (showSvg) console.log(polygonToSvgString(points))
 
     // 初始化geometry
     if (publicRenderer.gl) {
@@ -107,15 +103,41 @@ export default class ShaperCreator {
   }
 
   initGeometry = (gl) => {
-    this.geometry = new PathGeometry({ gl, points: this.points, size: this.originSize, style: this.style })
+    this.geometry = new PathGeometry({ gl, points: this.points, size: this.originSize, style: this.style, normals: this.normals })
   }
 
   get translate() { return [].concat(this.transform.translate) }
   set translate(translate) {
     if (translate.length) this.transform.translate.splice(0, this.transform.translate.length, ...translate)
     else if (translate.x !== undefined) this.transform.translate.splice(0, this.transform.translate.length, translate.x, translate.y)
-    console.log(this.transform.translate)
     this.refresh()
+  }
+
+  refreshGeometryShape({ type, shape, style }) {
+    const { points, size, normals } = shapeSolver({ type, shape })
+    this.points = points
+    this.originSize = size
+    this.geometry.rebuild({ points, size, style, normals })
+
+    this.refresh()
+  }
+
+  bake(params = {}) {
+    const { pathForClipPath = false } = params
+    return {
+      image: this.canvas.toDataURL('image/png'),
+      path: this.getPath({ pathForClipPath })
+    }
+  }
+
+  getPath(params) {
+    return polygonToSvgString({
+      points: this.points,
+      size: this.originSize,
+      width: this.canvas.width,
+      height: this.canvas.height,
+      params
+    })
   }
 
   render = {
@@ -125,9 +147,14 @@ export default class ShaperCreator {
         u_geometry_size: this.originSize,
         u_translate: this.transform.translate || [0, 0]
       }
+      pipe.pools.geometryDefines = {
+        AUTO_RESIZE_MODE: this.autoResizeMode
+      }
       pipe.pools.geometrySize = { width: this.canvas.width, height: this.canvas.height }
     },
     after: ({ gl, pipe }) => {
+      // console.log(pipe.pools.canvas, this.canvas, 'drawImage')
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
       this.ctx.drawImage(pipe.pools.canvas, 0, 0, this.canvas.width, this.canvas.height)
     }
   }
