@@ -14,16 +14,22 @@
 </template>
 
 <script>
+import stateBus from './state'
 import props from './config'
-import director from './director.js'
 import panelMain from './panels/main'
 import panelAdaptation from './panels/adaptation'
 import panelTool from './panels/tool'
 import panelStatus from './panels/status'
 import panelDetail from './panels/detail'
+console.log(stateBus)
 
 export default {
   name: 'Startrails',
+  provide() {
+    return {
+      state: stateBus
+    }
+  },
   components: {
     panelMain,
     panelAdaptation,
@@ -47,11 +53,6 @@ export default {
   methods: {
     onEnterEnd() {},
     directorPosition() {
-      director('main', this.$refs.main.$el)
-      director('adaptation', this.$refs.adaptation.$el)
-      director('tool', this.$refs.tool.$el)
-      director('status', this.$refs.status.$el)
-      director('detail', this.$refs.detail.$el)
     }
   }
 }
@@ -62,7 +63,7 @@ export default {
     position: relative;
     width: 100%;
     height: 100%;
-    background-color: #222;
+    background: radial-gradient(farthest-side at 50% 30%, rgba(255, 255, 255, 1), rgba(100, 100, 100, 0.3));
     opacity: 0;
     &.anime{
       animation: fadeOut ease-out 0.6s;
