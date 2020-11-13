@@ -87,8 +87,9 @@ export class ShapeCreator {
 
     this.transform = transform
 
-    const { points, size, autoResizeMode, normals } = shapeSolver({ type, shape })
+    const { points, size, autoResizeMode, normals, length } = shapeSolver({ type, shape })
     this.points = points
+    this.length = length
     this.normals = normals
     this.originSize = size // 跟外部的形变作一个区分
     this.autoResizeMode = autoResizeMode
@@ -103,7 +104,7 @@ export class ShapeCreator {
   }
 
   initGeometry = (gl) => {
-    this.geometry = new PathGeometry({ gl, points: this.points, size: this.originSize, style: this.style, normals: this.normals })
+    this.geometry = new PathGeometry({ gl, points: this.points, size: this.originSize, length: this.length, style: this.style, normals: this.normals })
   }
 
   get translate() { return [].concat(this.transform.translate) }
@@ -114,10 +115,11 @@ export class ShapeCreator {
   }
 
   refreshGeometryShape({ type, shape, style }) {
-    const { points, size, normals } = shapeSolver({ type, shape })
+    const { points, size, normals, length } = shapeSolver({ type, shape })
+    this.length = length
     this.points = points
     this.originSize = size
-    this.geometry.rebuild({ points, size, style, normals })
+    this.geometry.rebuild({ points, size, style, length, normals })
 
     this.refresh()
   }

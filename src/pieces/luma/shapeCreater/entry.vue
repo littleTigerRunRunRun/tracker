@@ -177,7 +177,7 @@ export default {
       },
       style: {
         stroke: new ColorDescriber([], { base: [0, 0, 0, 1] }),
-        strokeWidth: 1
+        strokeWidth: 3
       }
     })
   },

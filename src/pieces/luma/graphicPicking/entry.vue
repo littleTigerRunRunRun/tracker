@@ -9,15 +9,19 @@ import props from './config'
 import setCanvas from './main.js'
 
 export default {
-  name: '<% upperName %>',
+  name: 'GraphicPicking',
   props,
   data() {
     return {
+      show: false
     }
   },
   mounted() {
     this.$emit('config', props)
     this.loop = setCanvas(this.$refs.canvas)
+    setTimeout(() => {
+      this.show = true
+    }, 200)
   },
   beforeDestroy() {
     if (this.loop) this.loop.destroy()

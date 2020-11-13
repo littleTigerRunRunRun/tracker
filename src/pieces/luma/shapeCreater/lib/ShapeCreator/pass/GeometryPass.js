@@ -8,7 +8,7 @@ export const GeometryPass = new Pass({
   onInitialize: ({ gl }) => {
     const vs = `#version 300 es
 
-      layout (location = 0) in vec2 positions;
+      layout (location = 0) in vec3 positions;
       layout (location = 1) in vec3 texture;
 
       uniform vec2 u_resolution;
@@ -16,9 +16,11 @@ export const GeometryPass = new Pass({
       uniform vec2 u_translate;
 
       out vec3 v_texture;
+      out float v_length;
 
       void main() {
         v_texture = texture;
+        v_length = positions[2];
         vec2 resize = vec2(f1);
         #if (AUTO_RESIZE_MODE == 0) // not resize
           // do nothing
@@ -28,7 +30,7 @@ export const GeometryPass = new Pass({
           resize = vec2(min(u_resolution.x, u_resolution.y));
         #endif
 
-        vec2 pos = (positions * u_geometry_size + u_translate) / resize * f2;
+        vec2 pos = (positions.xy * u_geometry_size + u_translate) / resize * f2;
         gl_Position = vec4(pos.x, -pos.y, f0, f1);
       }
     `
@@ -37,6 +39,7 @@ export const GeometryPass = new Pass({
       uniform sampler2D u_colorTextures[2];
 
       in vec3 v_texture;
+      in float v_length;
 
       layout (location = 0) out vec4 colorValue;
 
@@ -45,6 +48,7 @@ export const GeometryPass = new Pass({
           colorValue = texture2D(u_colorTextures[0], vec2(v_texture.y, f1 - v_texture.z));
         } else if (v_texture.x == f1) {
           colorValue = texture2D(u_colorTextures[1], vec2(v_texture.y, f1 - v_texture.z));
+          // colorValue = vec4(vec3(v_length), f1);
         } else colorValue = vec4(f0, f0, f0, f1);
       }
     `
