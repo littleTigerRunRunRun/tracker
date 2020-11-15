@@ -1,6 +1,6 @@
 <template>
   <div class="tracker-piece-entry">
-    <canvas ref="canvas" />
+    <canvas ref="canvas" @mousemove="handleMouseMove" />
   </div>
 </template>
 
@@ -29,6 +29,10 @@ export default {
   methods: {
     onEnterEnd() {
       // 完全进入且动画结束的钩子
+    },
+    handleMouseMove(e) {
+      // 此处简化了问题为一个全屏图像
+      if (this.loop) this.loop.setCursor({ x: e.offsetX / window.innerWidth, y: e.offsetY / window.innerHeight })
     }
   }
 }

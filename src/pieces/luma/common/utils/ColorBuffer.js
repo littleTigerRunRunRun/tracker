@@ -1,7 +1,8 @@
 import { Framebuffer, Texture2D } from '@luma.gl/webgl'
 import GL from '@luma.gl/constants'
 
-export function createColorBuffer(gl, { width, height }) {
+export function createColorBuffer(gl, params = {}) {
+  const { width = gl.drawingBufferWidth, height = gl.drawingBufferHeight } = params
   const buffer = new Framebuffer(gl, {
     width,
     height,

@@ -26,7 +26,8 @@ export class Pass {
   pointers = {}
   initThings = {}
   renderThings = {}
-  init(gl) {
+  init({ gl }) {
+    if (typeof this.target === 'function') this.target = this.target(gl)
     this.initThings = this.onInitialize(Object.assign({ gl }, this.pointers))
   }
 

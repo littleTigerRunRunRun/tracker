@@ -20,7 +20,7 @@ export class Pipe {
   init() {
     for (const stage of this.stages) {
       for (const pass of stage) {
-        pass.pass.init(this.gl)
+        pass.pass.init({ gl: this.gl })
       }
     }
   }
