@@ -61,6 +61,7 @@ export default new Pass({
   },
   onRender: ({ model, gl, pos, target }) => {
     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
+    target.resize({ width: gl.drawingBufferWidth, height: gl.drawingBufferHeight })
 
     // if (pos) model.uniforms.u_pos = [pos.x, pos.y]
     model.draw({ framebuffer: target })
@@ -69,7 +70,8 @@ export default new Pass({
     gl.readBuffer(GL.COLOR_ATTACHMENT0)
     if (pos) {
       const pixels = new Uint16Array(1)
-      // UNSIGNED_SHORT
+      // 兼容性考虑可以使用GL.RGBA8I
+      // console.log(gl.drawingBufferWidth, gl.drawingBufferHeight, pos)
       gl.readPixels(pos.x * gl.drawingBufferWidth, (1 - pos.y) * gl.drawingBufferHeight, 1, 1, GL.RED_INTEGER, GL.UNSIGNED_SHORT, pixels)
       return { index: pixels[0] }
     }
@@ -77,6 +79,6 @@ export default new Pass({
   onClear: ({ pools, index }) => {
     pools.selectingIndex = index || 0
   },
-  clearSettings: { color: [0, 0, 0, 1] },
+  clearSettings: { value: new Uint32Array([0, 0, 0, 0]) },
   target: (gl) => { return createHandyBuffer(gl) }
 })

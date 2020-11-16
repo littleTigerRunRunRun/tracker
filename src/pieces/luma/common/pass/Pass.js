@@ -1,4 +1,4 @@
-import { clear } from '@luma.gl/webgl'
+import { clear, clearBuffer } from '@luma.gl/webgl'
 // import { setParameters } from '@luma.gl/gltools'
 
 export class Pass {
@@ -33,8 +33,10 @@ export class Pass {
 
   render(params) {
     const { gl } = params
-    const { depth = true, stencil = false, color = [0, 0, 0, 0] } = this.clearSettings
-    clear(gl, { color, depth, stencil, framebuffer: this.target })
+    const { depth = true, stencil = false, color = [0, 0, 0, 0], value = [0, 0, 0, 0] } = this.clearSettings
+    if (this.target) {
+      clearBuffer(gl, { framebuffer: this.target, value })
+    } else clear(gl, { color, depth, stencil, framebuffer: this.target })
 
     this.renderThings = this.onRender(Object.assign({ target: this.target }, params, this.initThings, this.pointers))
 
