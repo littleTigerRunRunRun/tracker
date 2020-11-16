@@ -1,12 +1,12 @@
 <template>
   <div class="panel-status">
     <md-field class="width-input">
-      <label for="first-name">宽度</label>
-      <md-input id="first-name" v-model="state.size.width" name="first-name" autocomplete="given-name" />
+      <label for="width">宽度</label>
+      <md-input id="width" v-model="state.size.width" name="width" />
     </md-field>
     <md-field class="height-input">
-      <label for="first-name">高度</label>
-      <md-input id="first-name" v-model="state.size.height" name="first-name" autocomplete="given-name" />
+      <label for="height">高度</label>
+      <md-input id="height" v-model="state.size.height" name="height" />
     </md-field>
   </div>
 </template>
