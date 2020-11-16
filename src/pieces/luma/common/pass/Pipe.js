@@ -70,7 +70,7 @@ export class Pipe {
   clear() {
     for (const stage of this.stages) {
       for (const pass of stage) {
-        pass.pass.clear(this.pools)
+        pass.pass.clear({ pools: this.pools })
       }
     }
   }

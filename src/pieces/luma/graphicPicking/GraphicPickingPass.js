@@ -71,8 +71,11 @@ export default new Pass({
       const pixels = new Uint16Array(1)
       // UNSIGNED_SHORT
       gl.readPixels(pos.x * gl.drawingBufferWidth, (1 - pos.y) * gl.drawingBufferHeight, 1, 1, GL.RED_INTEGER, GL.UNSIGNED_SHORT, pixels)
-      console.log(pixels)
+      return { index: pixels[0] }
     }
+  },
+  onClear: ({ pools, index }) => {
+    pools.selectingIndex = index || 0
   },
   clearSettings: { color: [0, 0, 0, 1] },
   target: (gl) => { return createHandyBuffer(gl) }
