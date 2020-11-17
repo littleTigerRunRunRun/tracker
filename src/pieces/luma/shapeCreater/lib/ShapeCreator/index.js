@@ -79,9 +79,12 @@ initLoop()
 
 export class ShapeCreator {
   constructor(params) {
-    const { canvas, type, shape, style, showNormal = false, dynamic = false, transform = {}} = params
+    const { canvas, type, shape, style, showSvg = false, showNormal = false, dynamic = false, transform = {}} = params
     this.style = style
     this.canvas = canvas
+    const { width, height } = canvas.getBoundingClientRect()
+    this.canvas.width = width
+    this.canvas.height = height
     this.ctx = this.canvas.getContext('2d')
     this.dynamic = dynamic // shaper的颜色需要贴图来渲染，在不作动态使用时，我们认为这是一个单次绘制后就会去除贴图的类型，下次绘制时贴图会重新初始化
 
@@ -94,6 +97,7 @@ export class ShapeCreator {
     this.originSize = size // 跟外部的形变作一个区分
     this.autoResizeMode = autoResizeMode
     this.showNormal = showNormal // 是否显示几何图形的法线
+    if (showSvg) console.log(polygonToSvgString({ points: this.points, size: this.originSize }))
 
     // 初始化geometry
     if (publicRenderer.gl) {
@@ -160,6 +164,8 @@ export class ShapeCreator {
       this.ctx.drawImage(pipe.pools.canvas, 0, 0, this.canvas.width, this.canvas.height)
     }
   }
+
+  resize() {}
 
   refresh() {
     if (publicRenderer.renderTasks.indexOf(this.render) > -1) return

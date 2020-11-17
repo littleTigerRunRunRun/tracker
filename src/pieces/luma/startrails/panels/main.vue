@@ -1,5 +1,13 @@
 <template>
-  <div class="panel-main">
+  <div
+    class="panel-main"
+    :style="{
+      width: `${state.main.bound.width}px`,
+      height: `${state.main.bound.height}px`,
+      left: `${state.main.bound.left}px`,
+      top: `${state.main.bound.top}px`,
+    }"
+  >
     <canvas ref="canvas" />
   </div>
 </template>
@@ -9,6 +17,7 @@ import { ShapeCreator, ColorDescriber } from '../../shapeCreater/lib/ShapeCreato
 
 export default {
   name: 'PanelMain',
+  inject: ['state'],
   data() {
     return {
       shape: null
@@ -21,19 +30,17 @@ export default {
     initPath() {
       this.shape = new ShapeCreator({
         canvas: this.$refs.canvas,
-        type: 'regularPolygon',
+        type: 'rect',
         transform: {
           translate: [0, 0]
         },
         shape: {
-          side: 4,
-          radius: 80,
-          start: Math.PI / 4
+          width: this.state.status.width,
+          height: this.state.status.height
         },
         style: {
-          fill: new ColorDescriber([], { base: [255, 0, 0, 0.2] }),
-          stroke: new ColorDescriber([], { base: [26, 128, 210, 0.6] }),
-          strokeWidth: 4
+          stroke: new ColorDescriber([], { base: [26, 128, 210, 0.2] }),
+          strokeWidth: this.state.status.thickness
         }
       })
     }
@@ -44,13 +51,13 @@ export default {
 <style lang="scss" scoped>
   .panel-main{
     position: absolute;
-    left: 100px;
-    top: 100px;
-    width: 1000px;
-    height: 600px;
     box-shadow:
       0px 0px 3px rgba(0, 0, 0, 0.2),
       0px 1px 3px rgba(0, 0, 0, 0.2),
       0px 0px 7px 1px rgba(0, 0, 0, 0.25);
+    canvas{
+      width: 100%;
+      height: 100%;
+    }
   }
 </style>

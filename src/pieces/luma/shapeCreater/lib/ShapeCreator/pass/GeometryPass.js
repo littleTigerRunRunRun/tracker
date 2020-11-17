@@ -2,7 +2,7 @@ import { Model } from '@luma.gl/engine'
 import { setParameters, resizeGLContext } from '@luma.gl/gltools'
 // import { HelperLine } from '../geometry'
 import { Pass } from '../pass'
-import { constantValue } from '../utils' // , RectProcessModel
+import { constantValue, RectProcessModel } from '../utils'
 
 export const GeometryPass = new Pass({
   onInitialize: ({ gl }) => {
@@ -45,11 +45,12 @@ export const GeometryPass = new Pass({
 
       void main() {
         if (v_texture.x == f0) {
+          // colorValue = vec4(f1, f0, f0, f1);
           colorValue = texture2D(u_colorTextures[0], vec2(v_texture.y, f1 - v_texture.z));
         } else if (v_texture.x == f1) {
           colorValue = texture2D(u_colorTextures[1], vec2(v_texture.y, f1 - v_texture.z));
           // colorValue = vec4(vec3(v_length), f1);
-        } else colorValue = vec4(f0, f0, f0, f1);
+        } else colorValue = vec4(f0, f0, f0, f0);
       }
     `
 
@@ -67,6 +68,8 @@ export const GeometryPass = new Pass({
     canvas.style.height = height + 'px'
     resizeGLContext(gl)
     gl.viewport(0, 0, width, height)
+
+    // console.log(geometry.textures)
 
     const shapeModel = new Model(gl, {
       uniforms: {
@@ -107,7 +110,6 @@ export const GeometryPass = new Pass({
     for (const key in geometryUniforms) shapeModel.uniforms[key] = geometryUniforms[key]
     // console.log(shapeModel.uniforms)
     shapeModel.draw()
-    // console.log(shapeModel)
     // shapeModel.draw({ framebuffer: target })
 
     // const helper = new HelperLine(gl, { lines: geometry.helperLines, size: geometryUniforms.u_geometry_size })

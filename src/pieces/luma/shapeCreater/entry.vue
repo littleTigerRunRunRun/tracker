@@ -21,9 +21,9 @@
     <canvas ref="c0" class="block" style="height: 200px;" width="200" height="200" />
     <svg version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid meet" class="block" viewBox="0 0 200 200">
       <path
-        d="M156.5685424949238,43.431457505076196 L156.5685424949238,156.5685424949238 L43.4314575050762,156.5685424949238 L43.43145750507618,43.43145750507621 Z"
+        d="M20,50 L180,50 L180,150 L20,150 Z"
         fill="rgba(255, 0, 0, 0.2)"
-        stroke="rgba(0, 60, 120, 0.8)"
+        stroke="rgba(26, 128, 210, 0.6)"
         stroke-width="8"
       />
     </svg>
@@ -134,19 +134,19 @@ export default {
 
     this.sc1 = new ShapeCreator({
       canvas: this.$refs.c1,
-      type: 'regularPolygon',
+      type: 'rect',
+      showSvg: true,
       transform: {
         translate: [0, 0]
       },
       shape: {
-        side: 4,
-        radius: 80,
-        start: Math.PI / 4
+        width: 160,
+        height: 100
       },
       style: {
         fill: new ColorDescriber([], { base: [255, 0, 0, 0.2] }),
         stroke: new ColorDescriber([], { base: [26, 128, 210, 0.6] }),
-        strokeWidth: 4
+        strokeWidth: 8
       }
     })
 
@@ -170,7 +170,6 @@ export default {
     this.sc3 = new ShapeCreator({
       canvas: this.$refs.c3,
       type: 'circle',
-      // showSvg: true,
       shape: {
         accuracy: 4, // 曲线细分程度
         radius: 55

@@ -66,12 +66,14 @@ const solvers = {
   rect(shape) {
     const { width, height } = shape
     const ps = []
-    ps.push([width * -0.5, height * -0.5])
-    ps.push([width * 0.5, height * -0.5])
-    ps.push([width * 0.5, height * 0.5])
-    ps.push([width * -0.5, height * 0.5])
+    ps.push([width * -0.5, height * -0.5, 0])
+    ps.push([width * 0.5, height * -0.5, width])
+    ps.push([width * 0.5, height * 0.5, width + height])
+    ps.push([width * -0.5, height * 0.5, width * 2 + height])
+    const length = width * 2 + height * 2
 
     return {
+      length,
       points: ps,
       size: 1,
       autoResizeMode: 1
@@ -83,7 +85,7 @@ export function shapeSolver({ type = 'custom', shape = {}}) {
   return solvers[type](shape)
 }
 
-export function polygonToSvgString({ points, size, width, height, params = {}}) {
+export function polygonToSvgString({ points, size = 1, width = 100, height = 100, params = {}}) {
   const { pathForClipPath } = params
   let str = ''
   // console.log(points)
@@ -94,8 +96,8 @@ export function polygonToSvgString({ points, size, width, height, params = {}}) 
     })
   } else {
     points.map((point, index) => {
-      if (index === 0) str += `M${point[0] * size},${point[1] * size} `
-      else str += `L${point[0] * size},${point[1] * size} `
+      if (index === 0) str += `M${point[0] * size + width},${point[1] * size + height} `
+      else str += `L${point[0] * size + width},${point[1] * size + height} `
     })
     str += 'Z'
   }
