@@ -2,6 +2,7 @@ import regularPolygon from './shapeDom/regularPolygon.vue'
 import rect from './shapeDom/rect'
 import circle from './shapeDom/circle'
 import gradient from './shapeDom/gradient'
+export { initLoop, ShapeCreator, ColorDescriber } from './ShapeCreator'
 
 regularPolygon.install = function(Vue) { Vue.component(regularPolygon.name, regularPolygon) }
 rect.install = function(Vue) { Vue.component(rect.name, rect) }

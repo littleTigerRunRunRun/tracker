@@ -32,9 +32,13 @@ export class Pass {
 
   render(params) {
     const { gl } = params
-    const { depth = true, stencil = false, color = [0, 0, 0, 0] } = this.clearSettings
-    clear(gl, { color, depth, stencil, framebuffer: this.target })
 
+    if (this.manualClear) {
+      this.manualClear({ gl, target: this.target })
+    } else {
+      const { depth = true, stencil = false, color = [0, 0, 0, 0] } = this.clearSettings
+      clear(gl, { color, depth, stencil, framebuffer: this.target })
+    }
     this.renderThings = this.onRender(Object.assign({ target: this.target }, params, this.initThings, this.pointers))
 
     this.output = this.onOutput(Object.assign({ target: this.target }, params, this.initThings, this.pointers)) || {}

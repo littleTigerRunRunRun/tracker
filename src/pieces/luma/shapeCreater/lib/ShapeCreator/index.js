@@ -1,10 +1,10 @@
 import { AnimationLoop } from '@luma.gl/engine' // , Model
 import { setParameters } from '@luma.gl/gltools'
-// import GL from '@luma.gl/constants'
+import GL from '@luma.gl/constants'
 
-import { Pipe, GeometryPass } from './pass' // Pass, ShaderPass,
-import { shapeSolver, polygonToSvgString } from './utils'
+import { Pipe, GeometryPass, ShaderPass } from './pass' // Pass, ShaderPass,
 import { PathGeometry } from './geometry'
+import { createHandyBuffer, shapeSolver, polygonToSvgString } from '@/pieces/luma/common/utils'
 
 export { ColorDescriber } from './utils'
 
@@ -25,11 +25,62 @@ export const publicRenderer = {
   gl: null,
   canvas
 }
-function initLoop() {
+export function initLoop(params = {}) {
+  const { fetchLength = false } = params
   // 启动loop
   publicRenderer.loop = new AnimationLoop({
     onInitialize: ({ gl }) => {
       publicRenderer.gl = gl
+      const stages = [
+        [{ pass: GeometryPass }]
+      ]
+
+      if (fetchLength) {
+        GeometryPass.pointers.fetchLength = true
+        const { buffer, blit, textures } = createHandyBuffer(gl, [
+          { output: true, type: 'renderbuffer', samples: 8 }, // 画面输出
+          { output: true, format: 'i16c1' } // length输出的texture
+        ])
+        GeometryPass.target = buffer
+        GeometryPass.manualClear = ({ gl }) => {
+          gl.clearBufferfv(gl.COLOR, 0, [0.0, 0.0, 0.0, 0.0])
+        }
+        GeometryPass.onOutput = ({ gl, target }) => {
+          // console.log(gl, target)
+          const color = blit({ attachment: GL.COLOR_ATTACHMENT0 })
+          return {
+            t_main: color
+          }
+        }
+        stages.push([
+          {
+            pass: new ShaderPass({
+              fs: `#version 300 es
+
+                uniform sampler2D t_main;
+
+                in vec2 v_uv;
+
+                out vec4 fragColor;
+
+                void main() {
+                  vec2 uv = v_uv;
+                  fragColor = texture2D(t_main, uv);
+                }
+              `,
+              render({ gl, t_main, extraUniforms, model }) {
+                setParameters(gl, {
+                  blend: false
+                })
+                // const fragment = model.program.fs.handle
+                // console.log(gl.getShaderSource(fragment))
+                model.uniforms.t_main = t_main
+                model.draw()
+              }
+            })
+          }
+        ])
+      }
 
       setParameters(gl, {
         // blend: true,
@@ -42,9 +93,7 @@ function initLoop() {
         // textures: {
         //   t_geo: '/public/t_circle.png'
         // },
-        stages: [
-          [{ pass: GeometryPass }]
-        ]
+        stages
       })
       publicRenderer.pipe.pools.canvas = publicRenderer.canvas
 
@@ -75,7 +124,6 @@ function initLoop() {
     preserveDrawingBuffer: true
   })
 }
-initLoop()
 
 export class ShapeCreator {
   constructor(params) {

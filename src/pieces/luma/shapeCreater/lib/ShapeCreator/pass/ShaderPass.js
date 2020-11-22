@@ -15,11 +15,12 @@ export class ShaderPass extends Pass {
         })
         return { model }
       },
-      onRender({ model, gl, time, extraUniforms }) {
+      onRender(params) {
+        const { model, gl, time, extraUniforms } = params
         for (const key in extraUniforms) {
           model.uniforms[key] = extraUniforms[key]
         }
-        render({ model, gl, time, extraUniforms })
+        render(params)
       },
       onDestroy({ model }) {
         model.delete()

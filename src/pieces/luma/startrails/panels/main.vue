@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { ShapeCreator, ColorDescriber } from '../../shapeCreater/lib/ShapeCreator/index.js'
+import { ShapeCreator, ColorDescriber, initLoop } from '../../shapeCreater/lib'
 
 export default {
   name: 'PanelMain',
@@ -22,6 +22,9 @@ export default {
     return {
       shape: null
     }
+  },
+  created() {
+    initLoop({ fetchLength: true })
   },
   mounted() {
     this.initPath()

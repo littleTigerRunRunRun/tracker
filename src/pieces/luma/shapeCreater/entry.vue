@@ -53,7 +53,7 @@
 
 <script>
 import props from './config'
-import { ShapeCreator, ColorDescriber } from './lib/ShapeCreator'
+import { ShapeCreator, ColorDescriber, initLoop } from './lib'
 
 export default {
   name: 'ShapeCreater',
@@ -61,6 +61,9 @@ export default {
   data() {
     return {
     }
+  },
+  created() {
+    initLoop()
   },
   mounted() {
     this.$emit('config', props)

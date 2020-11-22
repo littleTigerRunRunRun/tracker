@@ -42,21 +42,25 @@ export const GeometryPass = new Pass({
       in float v_length;
 
       layout (location = 0) out vec4 colorValue;
+      #ifdef FETCH_LENGTH
+      layout (location = 1) out uint lengthValue;
+      #endif
 
       void main() {
+        #ifdef FETCH_LENGTH
+        lengthValue = uint(v_length);
+        #endif
         if (v_texture.x == f0) {
-          // colorValue = vec4(f1, f0, f0, f1);
           colorValue = texture2D(u_colorTextures[0], vec2(v_texture.y, f1 - v_texture.z));
         } else if (v_texture.x == f1) {
           colorValue = texture2D(u_colorTextures[1], vec2(v_texture.y, f1 - v_texture.z));
-          // colorValue = vec4(vec3(v_length), f1);
         } else colorValue = vec4(f0, f0, f0, f0);
       }
     `
 
     return { fs, vs, gl }
   },
-  onRender: ({ gl, vs, fs, geometry, geometryUniforms, geometryDefines = {}, geometrySize, canvas }) => {
+  onRender: ({ gl, vs, fs, geometry, geometryUniforms, geometryDefines = {}, geometrySize, canvas, fetchLength, target }) => {
     setParameters(gl, {
       blend: true
     })
@@ -68,9 +72,9 @@ export const GeometryPass = new Pass({
     canvas.style.height = height + 'px'
     resizeGLContext(gl)
     gl.viewport(0, 0, width, height)
+    if (target) target.resize({ width, height })
 
-    // console.log(geometry.textures)
-
+    if (fetchLength) geometryDefines.FETCH_LENGTH = 1
     const shapeModel = new Model(gl, {
       uniforms: {
         u_resolution: [width, height],
@@ -109,8 +113,8 @@ export const GeometryPass = new Pass({
 
     for (const key in geometryUniforms) shapeModel.uniforms[key] = geometryUniforms[key]
     // console.log(shapeModel.uniforms)
-    shapeModel.draw()
-    // shapeModel.draw({ framebuffer: target })
+    if (target) shapeModel.draw({ framebuffer: target })
+    else shapeModel.draw()
 
     // const helper = new HelperLine(gl, { lines: geometry.helperLines, size: geometryUniforms.u_geometry_size })
     // for (const key in geometryUniforms) helper.uniforms[key] = geometryUniforms[key]
@@ -131,6 +135,5 @@ export const GeometryPass = new Pass({
   //     t_geo: color
   //   }
   // },
-  clearSettings: { color: [0, 0, 0, 0] },
   target: null // buffer
 })

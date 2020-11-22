@@ -61,7 +61,7 @@ export class Pipe {
             }
           }
           pass.pass.render(Object.assign({}, this.pools, { gl: this.gl, extraUniforms, time }))
-          if (pass.output) Object.assign({}, this.pools, pass.pass.output)
+          if (pass.pass.output) this.pools = Object.assign({}, this.pools, pass.pass.output)
         }
       }
     }

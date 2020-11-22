@@ -80,5 +80,8 @@ export default new Pass({
     pools.selectingIndex = index || 0
   },
   clearSettings: { value: new Uint32Array([0, 0, 0, 0]) },
-  target: (gl) => { return createHandyBuffer(gl) }
+  target: (gl) => {
+    const { buffer } = createHandyBuffer(gl, [{ format: 'i16c1' }])
+    return buffer
+  }
 })
