@@ -43,12 +43,12 @@ export const GeometryPass = new Pass({
 
       layout (location = 0) out vec4 colorValue;
       #ifdef FETCH_LENGTH
-      layout (location = 1) out uint lengthValue;
+      layout (location = 1) out vec2 lengthValue;
       #endif
 
       void main() {
         #ifdef FETCH_LENGTH
-        lengthValue = uint(v_length);
+        lengthValue = vec2(v_length);
         #endif
         if (v_texture.x == f0) {
           colorValue = texture2D(u_colorTextures[0], vec2(v_texture.y, f1 - v_texture.z));

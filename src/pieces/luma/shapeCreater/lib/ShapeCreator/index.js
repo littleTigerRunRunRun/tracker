@@ -39,15 +39,15 @@ export function initLoop(params = {}) {
         GeometryPass.pointers.fetchLength = true
         const { buffer, blit, textures } = createHandyBuffer(gl, [
           { output: true, type: 'renderbuffer', samples: 8 }, // 画面输出
-          { output: true, format: 'i16c1' } // length输出的texture
-        ])
+          { output: true, type: 'renderbuffer', samples: 8, format: 'f8c2' } // length输出的texture
+        ], { depth: false })
         GeometryPass.target = buffer
         GeometryPass.manualClear = ({ gl }) => {
           gl.clearBufferfv(gl.COLOR, 0, [0.0, 0.0, 0.0, 0.0])
         }
         GeometryPass.onOutput = ({ gl, target }) => {
           // console.log(gl, target)
-          const color = blit({ attachment: GL.COLOR_ATTACHMENT0 })
+          const color = blit({ gl, attachment: GL.COLOR_ATTACHMENT0 })
           return {
             t_main: color
           }

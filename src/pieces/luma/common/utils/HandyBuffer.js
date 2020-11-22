@@ -8,12 +8,23 @@ const formatMap = {
     dataFormat: 'RED_INTEGER',
     type: 'UNSIGNED_SHORT'
   },
+  'f8c2': {
+    format: 'RG8',
+    dataFormat: 'RG',
+    type: 'UNSIGNED_BYTE'
+  },
   'default': {
     format: 'RGBA8',
     dataFormat: 'RGBA',
     type: 'UNSIGNED_BYTE'
   }
 }
+// 36054 FRAMEBUFFER_INCOMPLETE_ATTACHMENT
+// 36055 FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT
+// 36057 FRAMEBUFFER_INCOMPLETE_DIMENSIONS
+// 36061 FRAMEBUFFER_UNSUPPORTED
+// 36182 FRAMEBUFFER_INCOMPLETE_MULTISAMPLE
+// 36011 RENDERBUFFER_SAMPLES
 
 export function createHandyBuffer(gl, attachs = [], params = {}) {
   const { width = gl.drawingBufferWidth, height = gl.drawingBufferHeight, depth = true } = params
@@ -21,7 +32,7 @@ export function createHandyBuffer(gl, attachs = [], params = {}) {
   // get the samplers value of an format
   // const canvas = document.createElement('canvas')
   // const glt = canvas.getContext('webgl2')
-  // console.log(glt.getInternalformatParameter(glt.RENDERBUFFER, glt.RGBA8, glt.SAMPLES))
+  // console.log(glt.getInternalformatParameter(glt.RENDERBUFFER, glt.RG8, glt.SAMPLES))
 
   const attachments = {}
   const textures = {}
@@ -31,7 +42,7 @@ export function createHandyBuffer(gl, attachs = [], params = {}) {
     const { output, type = 'texture', format = 'default', samples = 0 } = attach
     if (type === 'renderbuffer') {
       // console.log({ format: GL[formatMap[format].format], width, height, samples })
-      attachments[GL[`COLOR_ATTACHMENT${i}`]] = new Renderbuffer(gl, { format: GL[formatMap[format].format], width, height, samples: 8 })
+      attachments[GL[`COLOR_ATTACHMENT${i}`]] = new Renderbuffer(gl, { format: GL[formatMap[format].format], width, height, samples })
       textures[GL[`COLOR_ATTACHMENT${i}`]] = new Texture2D(gl, {
         format: GL[formatMap[format].format],
         dataFormat: GL[formatMap[format].dataFormat],
@@ -65,7 +76,7 @@ export function createHandyBuffer(gl, attachs = [], params = {}) {
       })
     }
 
-    if (output) drawBuffers.push([GL[`COLOR_ATTACHMENT${i}`]])
+    if (output) drawBuffers.push(GL[`COLOR_ATTACHMENT${i}`])
   }
 
   // 深度缓冲写入
@@ -89,6 +100,12 @@ export function createHandyBuffer(gl, attachs = [], params = {}) {
   // 假如drawBuffers为空，补充第一个作为默认
   if (drawBuffers.length === 0) drawBuffers.push(GL.COLOR_ATTACHMENT0)
 
+  // console.log({
+  //   width,
+  //   height,
+  //   attachments,
+  //   drawBuffers
+  // })
   const buffer = new Framebuffer(gl, {
     width,
     height,
@@ -97,7 +114,10 @@ export function createHandyBuffer(gl, attachs = [], params = {}) {
   })
 
   function blitBuffer(params = {}) {
-    const { attachment = GL.COLOR_ATTACHMENT0, color = true, depth = false, stencil = false } = params
+    const { gl, attachment = GL.COLOR_ATTACHMENT0, color = true, depth = false, stencil = false } = params
+    if (gl.drawingBufferWidth !== textures[attachment].width || gl.drawingBufferHeight !== textures[attachment].height) {
+      textures[attachment].resize({ width: gl.drawingBufferWidth, height: gl.drawingBufferHeight })
+    }
     blit(buffer.attachments[attachment], textures[attachment], {
       sourceAttachment: attachment,
       color,
