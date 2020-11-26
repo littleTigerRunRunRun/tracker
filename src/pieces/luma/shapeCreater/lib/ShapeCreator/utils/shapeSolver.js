@@ -71,7 +71,6 @@ const solvers = {
     ps.push([width * 0.5, height * 0.5, width + height])
     ps.push([width * -0.5, height * 0.5, width * 2 + height])
     const length = width * 2 + height * 2
-
     return {
       length,
       points: ps,

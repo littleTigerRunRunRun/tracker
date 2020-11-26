@@ -9,6 +9,8 @@ function normalize(vec) {
   }
 }
 
+const positionSize = 3
+
 // 产生本体的三角形属性
 function splitTriangle({ gl, positions, indices, normals = [], colors, bound, style, points, helperLines, textures, size, strokeOffset, borderLength }) {
   const ps = points.map((item, index) => {
@@ -32,6 +34,7 @@ function splitTriangle({ gl, positions, indices, normals = [], colors, bound, st
     positions.push(item[0])
     positions.push(item[1])
     positions.push(0)
+    // positions.push(0)
 
     // 几何内容总包围盒更新
     bound.maxx = Math.max(bound.maxx, item[0])
@@ -52,7 +55,7 @@ function splitTriangle({ gl, positions, indices, normals = [], colors, bound, st
   // drop color
   if ((style.fill instanceof ColorDescriber)) {
     // console.log(bound, positions)
-    for (let i = 0; i < positions.length; i += 3) {
+    for (let i = 0; i < positions.length; i += positionSize) {
       // 我们约定了fill的textureIndex为0
       colors.push(...[0, (positions[i] - bound.x) / bound.width, (positions[i + 1] - bound.y) / bound.height])
     }
@@ -62,7 +65,7 @@ function splitTriangle({ gl, positions, indices, normals = [], colors, bound, st
       width: bound.width * size
     })
   } else {
-    for (let i = 0; i < positions.length; i += 3) {
+    for (let i = 0; i < positions.length; i += positionSize) {
       // 我们约定了fill的textureIndex为0
       colors.push(...[2, 0, 0])
     }
@@ -102,7 +105,7 @@ function splitStroke({ gl, positions, indices, normals, colors, bound, style, po
     const strokePositions = []
     const strokeIndices = []
     const strokeColors = []
-    const positionsStart = positions.length / 3
+    const positionsStart = positions.length / positionSize
     points.map((point, index) => {
       const nextPoint = points[index + 1 > points.length - 1 ? 0 : index + 1]
       const vec = [nextPoint[0] - point[0], nextPoint[1] - point[1]]
@@ -111,9 +114,10 @@ function splitStroke({ gl, positions, indices, normals, colors, bound, style, po
       // console.log(length)
       const p1 = [point[0], point[1]]
       const p2 = [point[0] + normal[0] * length, point[1] + normal[1] * length]
-      strokePositions.push(...p1, point[2] / borderLength)
-      strokePositions.push(...p2, point[2] / borderLength)
-      // console.log(...p1, ...p2)
+      const pointLength = point[2] / borderLength
+      strokePositions.push(...p1, pointLength)
+      strokePositions.push(...p2, pointLength)
+      // console.log((Math.floor(pointLength / 256) * 256 + (pointLength % 256)) / borderLength, point[2] / borderLength)
 
       bound.maxx = Math.max(bound.maxx, p1[0])
       bound.minx = Math.min(bound.minx, p1[0])
@@ -124,9 +128,9 @@ function splitStroke({ gl, positions, indices, normals, colors, bound, style, po
       bound.maxy = Math.max(bound.maxy, p2[1])
       bound.miny = Math.min(bound.miny, p2[1])
     })
-    strokePositions.push(...(strokePositions.slice(0, 6)))
+    strokePositions.push(...(strokePositions.slice(0, positionSize * 2)))
     strokePositions[strokePositions.length - 1] = 1
-    strokePositions[strokePositions.length - 4] = 1
+    strokePositions[strokePositions.length - 1 - positionSize] = 1
 
     const length = points.length * 2
     for (let i = 0; i < length; i += 2) {
@@ -141,7 +145,7 @@ function splitStroke({ gl, positions, indices, normals, colors, bound, style, po
 
     if (stroke instanceof ColorDescriber) {
       // console.log(bound, positions)
-      for (let i = 0; i < strokePositions.length; i += 3) {
+      for (let i = 0; i < strokePositions.length; i += positionSize) {
         // 我们约定了fill的textureIndex为0
         colors.push(...[1, (strokePositions[i] - bound.x) / bound.width, (strokePositions[i + 1] - bound.y) / bound.height])
       }
@@ -151,7 +155,7 @@ function splitStroke({ gl, positions, indices, normals, colors, bound, style, po
         width: bound.width * size
       })
     } else {
-      for (let i = 0; i < strokePositions.length; i += 3) {
+      for (let i = 0; i < strokePositions.length; i += positionSize) {
         // 我们约定了fill的textureIndex为0
         colors.push(...[2, 0, 0])
       }
@@ -202,7 +206,7 @@ export class PathGeometry extends Geometry {
     super({
       indices: { size: 1, value: new Uint16Array(indices) },
       attributes: {
-        POSITION: { size: 3, value: new Float32Array(positions) },
+        POSITION: { size: positionSize, value: new Float32Array(positions) },
         NORMAL: { size: 3, value: new Float32Array([].concat(normals)) },
         texture: { size: 3, value: new Float32Array(colors) }
       }
@@ -222,7 +226,7 @@ export class PathGeometry extends Geometry {
     this.textures.splice(0, this.textures.length, ...textures)
     this._setAttributes(
       {
-        POSITION: { size: 3, value: new Float32Array(positions) },
+        POSITION: { size: positionSize, value: new Float32Array(positions) },
         NORMAL: { size: 3, value: new Float32Array([].concat(normals)) },
         texture: { size: 3, value: new Float32Array(colors) }
       },

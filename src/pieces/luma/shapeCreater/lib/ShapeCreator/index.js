@@ -39,8 +39,9 @@ export function initLoop(params = {}) {
         GeometryPass.pointers.fetchLength = true
         const { buffer, blit, textures } = createHandyBuffer(gl, [
           { output: true, type: 'renderbuffer', samples: 8 }, // 画面输出
-          { output: true, type: 'renderbuffer', samples: 8, format: 'f8c2' } // length输出的texture
+          { output: true, type: 'renderbuffer', samples: 8 } // length输出的texture // , format: 'f8c2'
         ], { depth: false })
+        // console.log(buffer)
         GeometryPass.target = buffer
         GeometryPass.manualClear = ({ gl }) => {
           gl.clearBufferfv(gl.COLOR, 0, [0.0, 0.0, 0.0, 0.0])
@@ -48,8 +49,11 @@ export function initLoop(params = {}) {
         GeometryPass.onOutput = ({ gl, target }) => {
           // console.log(gl, target)
           const color = blit({ gl, attachment: GL.COLOR_ATTACHMENT0 })
+          const length = blit({ gl, attachment: GL.COLOR_ATTACHMENT1 })
+          // console.log(length)
           return {
-            t_main: color
+            t_main: color,
+            t_length: length
           }
         }
         stages.push([
@@ -58,23 +62,25 @@ export function initLoop(params = {}) {
               fs: `#version 300 es
 
                 uniform sampler2D t_main;
+                uniform sampler2D t_length;
 
                 in vec2 v_uv;
 
                 out vec4 fragColor;
 
                 void main() {
-                  vec2 uv = v_uv;
-                  fragColor = texture2D(t_main, uv);
+                  vec4 length = texture2D(t_main, v_uv);
+                  fragColor = length;
                 }
               `,
-              render({ gl, t_main, extraUniforms, model }) {
+              render({ gl, t_main, t_length, extraUniforms, model }) {
                 setParameters(gl, {
                   blend: false
                 })
                 // const fragment = model.program.fs.handle
                 // console.log(gl.getShaderSource(fragment))
                 model.uniforms.t_main = t_main
+                model.uniforms.t_length = t_length
                 model.draw()
               }
             })
@@ -199,6 +205,7 @@ export class ShapeCreator {
       pipe.pools.geometry = this.geometry
       pipe.pools.geometryUniforms = {
         u_geometry_size: this.originSize,
+        u_geometry_length: this.length,
         u_translate: this.transform.translate || [0, 0]
       }
       pipe.pools.geometryDefines = {
