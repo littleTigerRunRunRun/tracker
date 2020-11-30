@@ -89,23 +89,23 @@ export default {
           {
             type: 'radius',
             limited: false,
-            center: { point: [0.5, 0.1], fixed: false }, // center point
-            inner: { color: [192, 14, 207, 1], radius: 0 }, // 内圈
-            outer: { color: [214, 64, 7, 1], radius: 0.4 } // 外圈
+            center: { point: [0.5, 0.3], fixed: false }, // center point
+            inner: { color: [255, 0, 0, 0], radius: 0 }, // 内圈
+            outer: { color: [255, 0, 0, 1], radius: 0.5 } // 外圈
           },
-          // {
-          //   type: 'linear',
-          //   limited: false,
-          //   start: { point: [120, 80], color: [0.15, 0.5, 0.85, 0.6] },
-          //   end: { point: [0, 160], color: [0.92, 0.4, 0.1, 0.5] }
-          // },
           {
-            type: 'conic',
+            type: 'linear',
             limited: false,
-            center: { point: [0.5, 0.65], fixed: false },
-            start: { angle: 0, color: [22, 121, 221, 0.6] },
-            end: { angle: 360, color: [241, 100, 25, 0.5] }
+            start: { point: [0, 1], color: [1, 1, 1, 1] },
+            end: { point: [1, 1], color: [0, 0, 0, 0] }
           }
+          // {
+          //   type: 'conic',
+          //   limited: false,
+          //   center: { point: [0.5, 0.65], fixed: false },
+          //   start: { angle: 0, color: [22, 121, 221, 0.6] },
+          //   end: { angle: 360, color: [241, 100, 25, 0.5] }
+          // }
         ], {
           linearInterpolate: 1
         }),
