@@ -34,7 +34,7 @@ const director = new Director({
       { name: 'toolsLeaveDuration', value: (index) => 300 - index * 30 },
       { name: 'toolsEnterDelay', value: (index) => index * 50 },
       { name: 'toolsLeaveDelay', value: (index) => 40 - index * 10 },
-      { name: 'toolsRight', value: (index) => { return { right: 152 - 48 * index } } },
+      { name: 'toolsRight', value: (index) => { return { right: 104 - 48 * index } } }, // 152
       { name: 'toolsStart', value: { opacity: 0, right: -44, rotate: 90 }},
       { name: 'rangesStartPosition', value: (index) => rangeStartMap[index] },
       { name: 'rangesEndPosition', value: (index) => rangeEndMap[index] },

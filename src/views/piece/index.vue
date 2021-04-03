@@ -65,7 +65,8 @@
         ref="tools"
         class="md-icon-button rect-button"
         :disabled="
-          (capture.activate && button.code === 'screenshot') ||
+          (configDisabled && button.code === 'config') ||
+            (capture.activate && button.code === 'screenshot') ||
             (markdown.activate && button.code === 'markdown')
         "
         @click.native="handleButtonClick(button.code)"
@@ -104,7 +105,7 @@ export default {
       buttons: [
         { code: 'screenshot', icon: 'photo_camera' },
         { code: 'config', icon: 'build' },
-        { code: 'markdown', icon: 'menu_book' },
+        // { code: 'markdown', icon: 'menu_book' },
         { code: 'close', icon: 'close' }
       ],
       toolMap: {
@@ -128,7 +129,8 @@ export default {
         right: -480,
         opacity: 0
       },
-      imageQuality: 0.8
+      imageQuality: 0.8,
+      configDisabled: false
     }
   },
   watch: {
@@ -292,6 +294,8 @@ export default {
     },
     // 注册配置表
     registerConfig(config) {
+      if (!config) this.configDisabled = true
+
       const values = {}
       const form = {}
       for (const key in config) {

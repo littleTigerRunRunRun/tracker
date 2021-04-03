@@ -2765,6 +2765,11 @@ dashdash@^1.12.0:
   dependencies:
     assert-plus "^1.0.0"
 
+dat.gui@^0.7.7:
+  version "0.7.7"
+  resolved "https://registry.npm.taobao.org/dat.gui/download/dat.gui-0.7.7.tgz#7f96dbd21621a76385203659aebfa264ee6ae89b"
+  integrity sha1-f5bb0hYhp2OFIDZZrr+iZO5q6Js=
+
 date-fns@^2.0.1:
   version "2.14.0"
   resolved "https://registry.npm.taobao.org/date-fns/download/date-fns-2.14.0.tgz?cache=0&sync_timestamp=1589822564187&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fdate-fns%2Fdownload%2Fdate-fns-2.14.0.tgz#359a87a265bb34ef2e38f93ecf63ac453f9bc7ba"
@@ -4044,7 +4049,7 @@ getpass@^0.1.1:
   dependencies:
     assert-plus "^1.0.0"
 
-gl-matrix@^3.0.0:
+gl-matrix@^3.0.0, gl-matrix@^3.3.0:
   version "3.3.0"
   resolved "https://registry.npm.taobao.org/gl-matrix/download/gl-matrix-3.3.0.tgz#232eef60b1c8b30a28cbbe75b2caf6c48fd6358b"
   integrity sha1-Iy7vYLHIswooy751ssr2xI/WNYs=
