@@ -2,9 +2,9 @@ import { Model, PlaneGeometry } from '@luma.gl/engine'
 import { constantValue } from './constant'
 
 export class RectProcessModel extends Model {
-  constructor(gl, { fs, modules = [], defines = {}, uniforms = {}, is2 = false }) {
+  constructor(gl, { fs, vs, modules = [], defines = {}, uniforms = {}, is2 = false }) {
     super(gl, {
-      vs: is2 ? `#version 300 es
+      vs: vs || (is2 ? `#version 300 es
         layout (location = 0) in vec3 positions;
 
         uniform vec2 u_resolution;
@@ -26,7 +26,7 @@ export class RectProcessModel extends Model {
           v_uv = positions.xy * fhalf + fhalf;
           gl_Position = vec4(positions, f1);
         }
-      `,
+      `),
       fs,
       defines,
       uniforms: Object.assign({

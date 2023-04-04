@@ -21,7 +21,7 @@ export default function() {
           uniform vec2 u_resolution;
 
           varying vec2 v_uv;
-        
+
           void main(void) {
             vec2 uv = v_uv * u_resolution / min(u_resolution.x, u_resolution.y);
 

@@ -8,12 +8,12 @@ const nullRenderTask = {
 }
 
 export class Loop {
-  constructor({ canvas, stages, autoUpdate = false }) {
+  constructor({ canvas, stages, autoUpdate = false, initTasks }) {
     this.drawer = canvas || document.createElement('canvas')
     // this.showDrawer()
     this.loop = null
     this.pipe = null
-    this.initTasks = []
+    this.initTasks = initTasks || []
     this.renderTasks = []
     this.gl = null
     this.autoUpdate = autoUpdate
@@ -49,7 +49,7 @@ export class Loop {
         })
         this.pipe.pools.canvas = this.drawer
 
-        for (const task of this.initTasks) task(gl)
+        for (const task of this.initTasks) task.call(this, gl)
 
         return {}
       },
